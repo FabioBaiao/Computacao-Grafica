@@ -5,7 +5,7 @@ using namespace std;
 
 bool validate_input(int, char**);
 void generate_sphere(char**);
-void generate_plane(char**);
+void generate_plane(float, float, float,char*);
 
 /*
  *	TODO:	1: Make a class for vertices so that its easier to 
@@ -53,16 +53,22 @@ int main(int argc, char* argv[])
 		return -1;
 	}
 
-	if(strcmp(argv[1], "plane") && argc == 4)
+	if(!strcmp(argv[1], "plane"))
 	{
-		/* At this point we know that the arguments are valid 
-		   and there is the right number of them in order to 
-		   generate a write it to a file */
-		/* pass only the part of the array that matters */
-		generate_plane(argv+2);
+		float info[3] = {-1.0f, -1.0f, -1.0f};
+		for(int i = 2; i < argc-1; i++)
+		{
+			if(!strcmp("-d", argv[i]))
+				info[2] = atof(argv[++i]);
+			else if(info[0] < 0)
+				info[0] = atof(argv[i]);
+			else
+				info[1] = atof(argv[i]);
+		}
+		generate_plane(info[0], info[1], info[2], argv[argc-1]);
 	}
 
-	if(strcmp(argv[1], "sphere") && argc == 6)
+	if(!strcmp(argv[1], "sphere") && argc == 6)
 	{
 		generate_sphere(argv+2);
 	}
@@ -78,6 +84,7 @@ bool validate_input(int argc, char* argv[])
 	 *	Should make this so that we always write to .3d files?
 	 */
 	regex nums("[0-9]*\\.?[0-9]+");
+	regex flag("-[a-zA-Z]");
 	regex file("[-_0-9a-zA-Z]+[.][0-9a-zA-Z]+");
 	regex graph_prim("[a-zA-Z]+");
 	bool numbers = true;
@@ -87,7 +94,8 @@ bool validate_input(int argc, char* argv[])
 	if(!gp) return false;
 
 	for(int i = 2; i < argc-1 && numbers; i++ )
-		numbers = regex_match(argv[i], nums);
+		if(regex_match(argv[i++], flag))
+			numbers = regex_match(argv[i], nums);
 	
 	if(!numbers)
 		return false;
@@ -125,7 +133,9 @@ void generate_sphere(char* argv[])
 
 }
 
-void generate_plane(char* argv[])
+void generate_plane(float x_len, float z_len, float n_divs ,char* file)
 {
-	cout << "Not implemented..." << endl;
+	cout << x_len << endl;
+	cout << z_len << endl;
+	cout << n_divs << endl;
 }
