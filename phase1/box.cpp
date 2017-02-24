@@ -85,3 +85,60 @@ void box (float x, float y, float z, FILE *f){
 	vertex F
 	*/
 }
+
+void box2 (float x, float y, float z, float nDiv){
+
+	/*
+		x, y, z and nDiv must be greater than 0.
+	*/
+
+	float deltaX = x / nDiv;
+	float deltaY = y / nDiv;
+	float deltaZ = z / nDiv;
+
+	float xi, yi, zi;
+
+	x = x/2;
+	y = y/2;
+	z = z/2;
+
+	/*
+		FRONT FACE
+
+		The xi, yi, zi are the initial value to print each rectangle (not each face).
+		Their starting value is the bottom right corner of the face to be printed.
+	*/
+	xi = x;
+	yi = -y;
+	zi = z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) zi; //(above vertex)
+				(xi-deltaX) (yi+deltaY) zi; //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				(xi-deltaX) (yi+deltaY) zi; //(left-up diagonal vertex)
+				(xi-deltaX) yi zi; //(left vertex)
+			*/
+			xi -= deltaX; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		xi += nDiv * deltaX;
+		yi += deltaY;
+	}
+	/*
+		To make the other faces the process is similar, but the coordinates to sum and subtract are different.
+
+		IF YOU AGREE WITH THIS ALGORITHM, I (Fabio Baiao) VOLUNTEER (as tribute :D) TO COMPLETE THE PSEUDOCODE OF THE OTHER FACES.
+	*/
+}
