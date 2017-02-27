@@ -136,9 +136,164 @@ void box2 (float x, float y, float z, float nDiv){
 		xi += nDiv * deltaX;
 		yi += deltaY;
 	}
-	/*
-		To make the other faces the process is similar, but the coordinates to sum and subtract are different.
 
-		IF YOU AGREE WITH THIS ALGORITHM, I (Fabio Baiao) VOLUNTEER (as tribute :D) TO COMPLETE THE PSEUDOCODE OF THE OTHER FACES.
+	/*
+		BACK FACE
 	*/
+	xi = -x;
+	yi = -y;
+	zi = -z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) zi; //(above vertex)
+				(xi+deltaX) (yi+deltaY) zi; //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				(xi+deltaX) (yi+deltaY) zi; //(left-up diagonal vertex)
+				(xi+deltaX) yi zi; //(left vertex)
+			*/
+			xi += deltaX; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		xi -= nDiv * deltaX;
+		yi += deltaY;
+	}
+
+	/*
+		UP FACE
+	*/
+	xi = x;
+	yi = y;
+	zi = z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi yi (zi-deltaZ); //(above vertex)
+				(xi-deltaX) yi (zi-deltaZ); //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				(xi-deltaX) yi (zi-deltaZ); //(left-up diagonal vertex)
+				(xi-deltaX) yi zi; //(left vertex)
+			*/
+			xi -= deltaX; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		xi += nDiv * deltaX;
+		zi -= deltaZ;
+	}
+
+	/*
+		DOWN FACE
+	*/
+	xi = x;
+	yi = -y;
+	zi = -z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi yi (zi+deltaZ); //(above vertex)
+				(xi-deltaX) yi (zi+deltaZ); //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				(xi-deltaX) yi (zi+deltaZ); //(left-up diagonal vertex)
+				(xi-deltaX) yi zi; //(left vertex)
+			*/
+			xi -= deltaX; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		xi += nDiv * deltaX;
+		zi += deltaZ;
+	}
+
+	/*
+		RIGHT FACE
+	*/
+	xi = x;
+	yi = -y;
+	zi = -z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) zi; //(above vertex)
+				xi (yi+deltaY) (zi+deltaZ); //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) (zi+deltaZ); //(left-up diagonal vertex)
+				xi yi (zi+deltaZ); //(left vertex)
+			*/
+			zi += deltaZ; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		zi -= nDiv * deltaZ;
+		yi += deltaY;
+	}
+
+	/*
+		RIGHT FACE
+	*/
+	xi = -x;
+	yi = -y;
+	zi = z;
+	/* 
+		The outer cycle iterates through each line of the face (down -> up).
+	*/
+	for (int i = 0; i < nDiv; i++){
+		/*
+			The inner cycle prints all rectangles of the same line in the face being print (from the rigth to the left).
+		*/
+		for (int j = 0; j < nDiv; j++){
+			/*
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) zi; //(above vertex)
+				xi (yi+deltaY) (zi-deltaZ); //(left-up diagonal vertex)
+
+				xi yi zi; //(starting vertex)
+				xi (yi+deltaY) (zi-deltaZ); //(left-up diagonal vertex)
+				xi yi (zi-deltaZ); //(left vertex)
+			*/
+			zi -= deltaZ; // the next iteration is at the left of the starting value.
+		}
+		/*
+			To start a new line, it's necessary to go back to the inital bottom right corner but one line up. 
+		*/
+		zi += nDiv * deltaZ;
+		yi += deltaY;
+	}
 }
