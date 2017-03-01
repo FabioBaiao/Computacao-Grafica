@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <regex>
 
 using namespace std;
@@ -7,6 +8,61 @@ bool validate_input(int, char**);
 void generate_sphere(char**);
 void generate_plane(float, float, float,char*);
 
+std::string drawSphere(float radius, float slices, int stacks) {
+
+	std:string ret = "";
+	int count = 0;
+	int half_stacks = (int) stacks / 2;
+	float b_step = M_PI / stacks;
+	float a_step = 2*M_PI / slices;
+		
+	for(float i = M_PI/2; i > -M_PI/2; i -= b_step)
+	{
+//		float beta = i * (M_PI) / stacks;
+		float delta_b = i - (M_PI) / stacks;
+		
+		for(int j = 0; j < slices; j++)
+		{
+			float alfa = j * (2*M_PI)/slices;
+			float delta_a = alfa + (2*M_PI)/slices;
+
+			ret += std::to_string(radius*cos(i)*sin(alfa)) + " " + 
+				   std::to_string(radius*sin(i)) + " " + 
+				   std::to_string(radius*cos(i)*cos(alfa)) + "\n";
+//			glVertex3f(radius*cos(i)*sin(alfa), radius*sin(i), radius*cos(i)*cos(alfa));
+			
+			ret += std::to_string(radius*cos(delta_a)*sin(alfa)) + " " + 
+				   std::to_string(radius*sin(delta_a)) + " " + 
+				   std::to_string(radius*cos(delta_a)*cos(alfa)) + "\n";
+//			glVertex3f(radius*cos(delta_b)*sin(alfa), radius*sin(delta_b), radius*cos(delta_b)*cos(alfa));
+			
+			ret += std::to_string(radius*cos(delta_a)*sin(delta_a)) + " " + 
+				   std::to_string(radius*sin(delta_b)) + " " + 
+				   std::to_string(radius*cos(delta_b)*cos(delta_a)) + "\n";
+//			glVertex3f(radius*cos(delta_b)*sin(delta_a), radius*sin(delta_b), radius*cos(delta_b)*cos(delta_a));
+			
+			ret += std::to_string(radius*cos(i)*sin(alfa)) + " " + 
+				   std::to_string(radius*sin(i)) + " " + 
+				   std::to_string(radius*cos(i)*cos(alfa)) + "\n";
+//			glVertex3f(radius*cos(i)*sin(alfa), radius*sin(i), radius*cos(i)*cos(alfa));
+			
+			ret += std::to_string(radius*cos(delta_b)*sin(delta_a)) + " " + 
+				   std::to_string(radius*sin(delta_b)) + " " + 
+				   std::to_string(radius*cos(delta_b)*cos(delta_a)) + "\n";
+//			glVertex3f(radius*cos(delta_b)*sin(delta_a), radius*sin(delta_b), radius*cos(delta_b)*cos(delta_a));
+			
+			ret += std::to_string(radius*cos(i)*sin(delta_a)) + " " + 
+				   std::to_string(radius*sin(i)) + " " + 
+				   std::to_string(radius*cos(i)*cos(delta_a)) + "\n";
+//			glVertex3f(radius*cos(i)*sin(delta_a), radius*sin(i), radius*cos(i)*cos(delta_a));
+	
+			count+=6;
+		}
+
+	}
+
+	return std::to_string(count) + "\n" + ret; 
+}
 /*
  *	TODO:	1: Make a class for vertices so that its easier to 
  *			   manipulate them (maybe not that necessary in 
@@ -70,7 +126,10 @@ int main(int argc, char* argv[])
 
 	if(!strcmp(argv[1], "sphere") && argc == 6)
 	{
-		generate_sphere(argv+2);
+		ofstream file;
+		file.open(argv[5]);
+		file << drawSphere(atof(argv[2]), atof(argv[3]), atof(argv[4]));
+		file.close();
 	}
 
 	return 0;
