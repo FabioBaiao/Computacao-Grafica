@@ -297,3 +297,74 @@ void box2 (float x, float y, float z, float nDiv){
 		yi += deltaY;
 	}
 }
+
+std:string box3 (float x, float y, float z, int nDiv){
+
+	std::string plane, line;
+	std::string ret = "";
+
+	std::istringstream iss;
+
+	/*
+	FRONT FACE
+	*/
+	plane = plane (x, z/2, y, nDiv);
+	iss (plane);
+	std::getline(iss, line);
+	while (std::getline(iss, line)){
+		ret += rotateX(line);
+	}
+
+	/*
+	BACK FACE
+	
+	It's not necessary to recalculate the vertices to the back face, as they are the same for the front face... rotated.
+
+	plane = plane (x, z/2, y, nDiv);
+	*/
+	iss(plane);
+	std::getline(iss, line);
+	while (std::getline(iss, line)){
+		ret += rotate3X(line);
+	}
+
+	/*
+	UP FACE
+	*/
+	plane = plane (x, y/2, z, nDiv);
+	ret += plane;
+
+	/*
+	DOWN FACE
+	
+	plane = plane (x, y/2, z, nDiv);
+	*/
+	iss(plane);
+	std::getline(iss, line);
+	while (std::getline(iss, line)){
+		ret += rotate2X (line);
+	}
+
+	/*
+	RIGHT FACE
+	*/
+	plane = plane (y, x/2, z, nDiv);
+	iss(plane);
+	std::getline(iss, line);
+	while (std::getline(iss, line)){
+		ret += rotate3Z (line);
+	}
+
+	/*
+	LEFT FACE
+
+	plane = plane (y, x/2, z, nDiv);
+	*/
+	iss(plane);
+	std::getline(iss, line);
+	while (std::getline(iss, line)){
+		ret += rotateZ (line);
+	}
+
+	return ret;
+}
