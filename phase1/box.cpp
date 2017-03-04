@@ -377,28 +377,52 @@ std:string box3 (float x, float y, float z, int nDiv){
 
 
 std::string drawBox (float x, float y, float z, int nDiv){
-	std::string ret;
-	std::string plane;
-	int count;
+	std::string ret = "", plane, line;
+	std::istringstream iss;
+	int vertices, count;
 
 	plane = drawPlaneXY(x, y, z/2, nDiv, 1);
-	count = //primeira linha do plane;
-	ret = //resto do plane;
-	plane = drawPlaneXY(x, y, z/2, nDiv, -1);
-	count += //primeira linha do plane;
-	ret += //resto do plane;
+	std::istringstream iss1 (plane);
+	std::getline(iss1, line);
+	count = stoi(line, nullptr, 10);
+	while (std::getline(iss1, line)){
+		ret += line + "\n";
+	}
+	plane = drawPlaneXY(x, y, -z/2, nDiv, -1);
+	std::istringstream iss2 (plane);
+	std::getline(iss2, line);
+	count += stoi(line, nullptr, 10);
+	while (std::getline(iss2, line)){
+		ret += line + "\n";
+	}
 	plane = drawPlaneXZ(x, y/2, z, nDiv, 1);
-	count += //primeira linha do plane;
-	ret += //resto do plane;
-	plane = drawPlaneXZ(x, y/2, z, nDiv, -1);
-	count += //primeira linha do plane;
-	ret += //resto do plane;
+	std::istringstream iss3 (plane);
+	std::getline(iss3, line);
+	count += stoi(line, nullptr, 10);
+	while (std::getline(iss3, line)){
+		ret += line + "\n";
+	}
+	plane = drawPlaneXZ(x, -y/2, z, nDiv, -1);
+	std::istringstream iss4 (plane);
+	std::getline(iss4, line);
+	count += stoi(line, nullptr, 10);
+	while (std::getline(iss4, line)){
+		ret += line + "\n";
+	}
 	plane = drawPlaneYZ(x/2, y, z, nDiv, 1);
-	count += //primeira linha do plane;
-	ret += //resto do plane;
-	plane = drawPlaneYZ(x/2, y, z, nDiv, -1);
-	count += //primeira linha do plane;
-	ret += //resto do plane;
+	std::istringstream iss5 (plane);
+	std::getline(iss5, line);
+	count += stoi(line, nullptr, 10);
+	while (std::getline(iss5, line)){
+		ret += line + "\n";
+	}
+	plane = drawPlaneYZ(-x/2, y, z, nDiv, -1);
+	std::istringstream iss6 (plane);
+	std::getline(iss6, line);
+	count += stoi(line, nullptr, 10);
+	while (std::getline(iss6, line)){
+		ret += line + "\n";
+	}
 
 	return std::to_string(count) + "\n" + ret;
 }
