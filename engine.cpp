@@ -124,8 +124,8 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
-	vector< vector<point> > figures1;
-	figures = figures1;
+	// vector< vector<point> > figures1;
+	// figures = figures1;
 
 	TiXmlHandle docHandle(&doc);
 	TiXmlElement* model = doc.FirstChild("scene")->FirstChild("model")->ToElement();
