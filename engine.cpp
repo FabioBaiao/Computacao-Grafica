@@ -19,6 +19,8 @@ float r = 10;
 float alpha;
 float beta;
 
+int mode;
+
 using namespace std;
 
 // Structure to save figures to draw
@@ -60,11 +62,13 @@ void renderScene(void) {
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
 
-	//loop aqui
 	for(auto figure:figures){
+        	int modes[] = {GL_FILL, GL_LINE, GL_POINT};
+        	glPolygonMode(GL_FRONT, modes[mode]);
+
 		glBegin(GL_TRIANGLES);
 		// change color randomly?
-		glColor3f(0,0,0);
+		glColor3f(1.0,1.0,1.0);
 		for(auto point:figure){
 			glVertex3f(point.x, point.y, point.z);
 		}
@@ -82,6 +86,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 			  break;
 		case 'L': r-=0.2;
 			  break;
+		case 'C': mode = (mode + 1)%3;
 	}
 	glutPostRedisplay();
 }
@@ -143,6 +148,7 @@ int main(int argc, char** argv){
 				file >> px;
 				file >> py;
 				file >> pz;
+				// cout << px << " " << py << " " << pz << "\n";
 				point p(px, py, px);
 				points.push_back(p);
 			}	
