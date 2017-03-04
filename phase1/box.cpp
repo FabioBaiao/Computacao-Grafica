@@ -1,6 +1,11 @@
 //AGAIN, SORRY FOR BAD ENGLISH
 
 /*
+	The final version is in the bottom
+	----------------------------------
+*/
+
+/*
 	This pseudocode is for the box without division numbers.
 	When adding the code for the case with division numbers, we can remove this one, and use the new with division number = 1
 */
@@ -367,4 +372,33 @@ std:string box3 (float x, float y, float z, int nDiv){
 	}
 
 	return ret;
+}
+
+
+
+std::string drawBox (float x, float y, float z, int nDiv){
+	std::string ret;
+	std::string plane;
+	int count;
+
+	plane = drawPlaneXY(x, y, z/2, nDiv, 1);
+	count = //primeira linha do plane;
+	ret = //resto do plane;
+	plane = drawPlaneXY(x, y, z/2, nDiv, -1);
+	count += //primeira linha do plane;
+	ret += //resto do plane;
+	plane = drawPlaneXZ(x, y/2, z, nDiv, 1);
+	count += //primeira linha do plane;
+	ret += //resto do plane;
+	plane = drawPlaneXZ(x, y/2, z, nDiv, -1);
+	count += //primeira linha do plane;
+	ret += //resto do plane;
+	plane = drawPlaneYZ(x/2, y, z, nDiv, 1);
+	count += //primeira linha do plane;
+	ret += //resto do plane;
+	plane = drawPlaneYZ(x/2, y, z, nDiv, -1);
+	count += //primeira linha do plane;
+	ret += //resto do plane;
+
+	return std::to_string(count) + "\n" + ret;
 }
