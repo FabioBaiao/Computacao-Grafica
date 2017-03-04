@@ -69,8 +69,8 @@ void renderScene(void) {
 		glBegin(GL_TRIANGLES);
 		// change color randomly?
 		glColor3f(1.0,1.0,1.0);
-		for(auto point:figure){
-			glVertex3f(point.x, point.y, point.z);
+		for(auto p:figure){
+			glVertex3f(p.x, p.y, p.z);
 		}
 		glEnd();
 	}
@@ -149,7 +149,7 @@ int main(int argc, char** argv){
 				file >> py;
 				file >> pz;
 				// cout << px << " " << py << " " << pz << "\n";
-				point p(px, py, px);
+				point p(px, py, pz);
 				points.push_back(p);
 			}	
 			file.close();
