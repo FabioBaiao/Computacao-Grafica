@@ -1,6 +1,7 @@
 #define TIXML_USE_STL 
 #include "tinyxml/tinyxml.h"
 #include "point.h"
+#include "triangle.h"
 #include <vector>
 #include <fstream>
 #include <string>
@@ -13,6 +14,8 @@
 #include <GL/glut.h>
 #endif
 
+using namespace std;
+
 // Camera control
 float r = 10;
 float alpha;
@@ -20,10 +23,10 @@ float beta;
 
 int mode;
 
-using namespace std;
+typedef std::vector<triangle> figure;
 
 // Structure to save figures to draw
-vector< vector<point> > figures;
+vector< figure > figures;
 
 float randFloat() {
 	 return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -54,6 +57,13 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
+void drawTriangle(triangle t){
+	glColor3f(t.color_r, t.color_g, t.color_b);
+	glVertex3f(t.p1.x, t.p1.y, t.p1.z);
+	glVertex3f(t.p2.x, t.p2.y, t.p2.z);
+	glVertex3f(t.p3.x, t.p3.y, t.p3.z);
+}
+
 void renderScene(void) {
 
 	// clear buffers
@@ -65,18 +75,13 @@ void renderScene(void) {
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
 
-	for(auto figure:figures){
+	for(auto fig:figures){
         	int modes[] = {GL_FILL, GL_LINE, GL_POINT};
         	glPolygonMode(GL_FRONT, modes[mode]);
 
 		glBegin(GL_TRIANGLES);
-		// change color randomly
-		for(int i = 0; i < figure.size(); i+=3){
-			glColor3f(randFloat(), randFloat(), randFloat());
-			for(int j = 0; j < 3; j++){
-				point p = figure[i+j];
-				glVertex3f(p.x, p.y, p.z);
-			}
+		for(int i = 0; i < fig.size(); i++){
+			drawTriangle(fig[i]);
 		}
 		glEnd();
 	}
@@ -120,7 +125,6 @@ void processSpecialKeys(int key, int xx, int yy) {
 }
 
 
-
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char** argv){
 	if(argc != 2){
@@ -147,17 +151,29 @@ int main(int argc, char** argv){
 				cout << "The file \"" << filename << "\" was not found.\n";
 			}
 			file >> n_vertex; // reads the number of vertices in a file
-			std::vector<point> points;
-			for(int i = 0; i < n_vertex; i++){
-				float px, py, pz; 
-				file >> px;
-				file >> py;
-				file >> pz;
-				point p(px, py, pz);
-				points.push_back(p);
+			int n_triangles = n_vertex/3;
+			figure triangles;
+			for(int i = 0; i < n_triangles; i++){
+				float color_r, color_g, color_b;
+				point ps[3];
+				for(int j = 0; j < 3; j++){
+					float px, py, pz;
+					file >> px;
+					file >> py;
+					file >> pz;
+					point p(px, py, pz);
+					ps[j] = p;
+				}
+
+				color_r = randFloat();
+				color_g = randFloat();
+				color_b = randFloat();
+
+				triangle t(ps[0], ps[1], ps[2], color_r, color_g, color_b);
+				triangles.push_back(t);
 			}	
 			file.close();
-			figures.push_back(points);
+			figures.push_back(triangles);
 		}
 	}
 
