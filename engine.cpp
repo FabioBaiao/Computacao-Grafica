@@ -19,8 +19,10 @@ float r = 10;
 float alpha;
 float beta;
 
+using namespace std;
+
 // Structure to save figures to draw
-std::vector<std::vector<point>> figures;
+vector< vector<point> > figures;
 
 void changeSize(int w, int h) {
 
@@ -60,8 +62,9 @@ void renderScene(void) {
 
 	//loop aqui
 	for(auto figure:figures){
-		// change color randomly?
 		glBegin(GL_TRIANGLES);
+		// change color randomly?
+		glColor3f(0,0,0);
 		for(auto point:figure){
 			glVertex3f(point.x, point.y, point.z);
 		}
@@ -106,7 +109,6 @@ void processSpecialKeys(int key, int xx, int yy) {
 
 }
 
-using namespace std;
 
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char** argv){
@@ -122,7 +124,9 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
-	//vector<point> ps{};
+	vector< vector<point> > figures1;
+	figures = figures1;
+
 	TiXmlHandle docHandle(&doc);
 	TiXmlElement* model = doc.FirstChild("scene")->FirstChild("model")->ToElement();
 	for(; model; model=model->NextSiblingElement()){
@@ -133,7 +137,7 @@ int main(int argc, char** argv){
 			ifstream file;
 			file.open(filename);
 			file >> n_vertex; // reads the number of vertices in a file
-			std::vector<point> points(n_vertex);
+			std::vector<point> points;
 			for(int i = 0; i < n_vertex; i++){
 				float px, py, pz; 
 				file >> px;
