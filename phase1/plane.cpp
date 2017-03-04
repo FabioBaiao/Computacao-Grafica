@@ -111,7 +111,7 @@ std::string drawPlaneXY (float x, float y, float z, int nDiv, int orient){
 			if (orient == 1)
 				ret += std::to_string(xi) + " " + std::to_string(yi+deltaY) + " " + std::to_string(z) + "\n";
 			else if (orient == -1)
-				ret += std::to_string(xi+deltaX) + " " + std::to_string(yi) + " " + std::to_string(z) + "\n";
+				ret += std::to_string(xi-deltaX) + " " + std::to_string(yi) + " " + std::to_string(z) + "\n";
 
 			ret += std::to_string(xi-deltaX) + " " + std::to_string(yi+deltaY) + " " + std::to_string(z) + "\n";
 
@@ -120,7 +120,7 @@ std::string drawPlaneXY (float x, float y, float z, int nDiv, int orient){
 			if (orient == 1)
 				ret += std::to_string(xi-deltaX) + " " + std::to_string(yi) + " " + std::to_string(z) + "\n";
 			else if (orient == -1)
-				ret += std::to_string(xi) + " " + std::to_string(yi-deltaY) + " " + std::to_string(z) + "\n";
+				ret += std::to_string(xi) + " " + std::to_string(yi+deltaY) + " " + std::to_string(z) + "\n";
 
 			count += 6;
 			xi = x - j * deltaX;
@@ -166,11 +166,11 @@ std::string drawPlaneYZ (float x, float y, float z, int nDiv, int orient){
 				ret += std::to_string(x) + " " + std::to_string(yi+deltaY) + " " + std::to_string(zi) + "\n";
 
 			count += 6;
-			zi = z + j * deltaZ;
+			zi = -z + j * deltaZ;
 		}
 
-		yi = y + i * deltaY;
-		zi = z;
+		yi = -y + i * deltaY;
+		zi = -z;
 	}
 	return std::to_string(count) + "\n" + ret;
 }
