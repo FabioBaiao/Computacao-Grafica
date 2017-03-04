@@ -1,3 +1,6 @@
+#include <string>
+#include <iostream>
+
 std::string drawSphere(float radius, float slices, int stacks) {
 
 	std:string ret = "";
