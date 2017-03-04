@@ -1,5 +1,4 @@
 #define TIXML_USE_STL 
-#define BUFF_SIZE 128
 #include "tinyxml/tinyxml.h"
 #include "point.h"
 #include <vector>
@@ -25,6 +24,10 @@ using namespace std;
 
 // Structure to save figures to draw
 vector< vector<point> > figures;
+
+float randFloat() {
+	 return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
+}
 
 void changeSize(int w, int h) {
 
@@ -67,10 +70,13 @@ void renderScene(void) {
         	glPolygonMode(GL_FRONT, modes[mode]);
 
 		glBegin(GL_TRIANGLES);
-		// change color randomly?
-		glColor3f(1.0,1.0,1.0);
-		for(auto p:figure){
-			glVertex3f(p.x, p.y, p.z);
+		// change color randomly
+		for(int i = 0; i < figure.size(); i+=3){
+			glColor3f(randFloat(), randFloat(), randFloat());
+			for(int j = 0; j < 3; j++){
+				point p = figure[i+j];
+				glVertex3f(p.x, p.y, p.z);
+			}
 		}
 		glEnd();
 	}
@@ -111,8 +117,8 @@ void processSpecialKeys(int key, int xx, int yy) {
 			break;
 	}
 	glutPostRedisplay();
-
 }
+
 
 
 //We assume that the .xml and .3d files passed are correct.
@@ -129,9 +135,6 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
-	// vector< vector<point> > figures1;
-	// figures = figures1;
-
 	TiXmlHandle docHandle(&doc);
 	TiXmlElement* model = doc.FirstChild("scene")->FirstChild("model")->ToElement();
 	for(; model; model=model->NextSiblingElement()){
@@ -139,8 +142,10 @@ int main(int argc, char** argv){
 		int r = model->QueryStringAttribute("file", &filename);
 		if(r == TIXML_SUCCESS){
 			int n_vertex;
-			ifstream file;
-			file.open(filename);
+			ifstream file(filename);
+			if(!file) {
+				cout << "The file \"" << filename << "\" was not found.\n";
+			}
 			file >> n_vertex; // reads the number of vertices in a file
 			std::vector<point> points;
 			for(int i = 0; i < n_vertex; i++){
@@ -148,7 +153,6 @@ int main(int argc, char** argv){
 				file >> px;
 				file >> py;
 				file >> pz;
-				// cout << px << " " << py << " " << pz << "\n";
 				point p(px, py, pz);
 				points.push_back(p);
 			}	
