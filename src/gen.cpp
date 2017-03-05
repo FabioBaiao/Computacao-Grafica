@@ -7,60 +7,72 @@
 
 using namespace std;
 
-std::string sphere(float radius, float slices, int stacks) {
+std::string annulus(float dist, float smj, float smn, int slices) {
 
-	std:string ret = "";
-	int count = 0;
-	int half_stacks = (int) stacks / 2;
+	float y = 0;
+	std::ostringstream os;
+	int lines = 0;
+		
+	for(int i = 0; i < slices; ++i)
+	{
+		float angle = i * (2*M_PI)/slices;
+		float delta = angle + (2*M_PI)/slices;
+		float deltal = delta + (2*M_PI)/slices;
+
+		os << smj*cos(angle) << " " << y << " " << smn*sin(angle) << std::endl;	
+//		glVertex3f(smj*cos(angle), y, smn*sin(angle));
+		os << (smj+dist)*cos(delta) << " " << y << " " << (smn+dist)*sin(delta) << std::endl;	
+//		glVertex3f((smj+dist)*cos(delta), y, (smn+dist)*sin(delta));
+		os << (smj+dist)*cos(angle) << " " << y << " " << (smn+dist)*sin(angle) << std::endl;	
+//		glVertex3f((smj+dist)*cos(angle), y, (smn+dist)*sin(angle));
+	
+		os << smj*cos(angle) << " " << y << " " << smn*sin(angle) << std::endl;	
+//		glVertex3f(smj*cos(angle), y, smn*sin(angle));
+		os << smj*cos(delta) << " " << y << " " << smn*sin(delta) << std::endl;	
+//		glVertex3f(smj*cos(delta), y, smn*sin(delta));
+		os << (smj+dist)*cos(delta) << " " << y << " " << (smn+dist)*sin(delta) << std::endl;	
+//		glVertex3f((smj+dist)*cos(delta), y, (smn+dist)*sin(delta));
+		lines += 6;
+	}
+	return std::to_string(lines) + "\n" + os.str() ;
+}
+
+std::string ellipsoid(float a, float b, float c, float stacks, int slices) {
+
 	float b_step = M_PI / stacks;
 	float a_step = 2*M_PI / slices;
+	std::ostringstream os;
+	int lines = 0;
 		
-	for(float i = M_PI/2; i > -M_PI/2; i -= b_step)
+	for(float i = 0; i < stacks; i++)
 	{
-//		float beta = i * (M_PI) / stacks;
-		float delta_b = i - (M_PI) / stacks;
-		
+		float beta = i * b_step;
+		float delta_b = beta + b_step;
+
 		for(int j = 0; j < slices; j++)
 		{
 			float alfa = j * (2*M_PI)/slices;
 			float delta_a = alfa + (2*M_PI)/slices;
 
-			ret += std::to_string(radius*cos(i)*sin(alfa)) + " " + 
-				   std::to_string(radius*sin(i)) + " " + 
-				   std::to_string(radius*cos(i)*cos(alfa)) + "\n";
-//			glVertex3f(radius*cos(i)*sin(alfa), radius*sin(i), radius*cos(i)*cos(alfa));
+			os << a*sin(beta)*sin(alfa)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(alfa) << std::endl;
+//			glVertex3f(a*sin(beta)*sin(alfa), b*cos(beta), c*sin(beta)*cos(alfa));
+			os << a*sin(delta_b)*sin(alfa)<<" " << b*cos(delta_b)<<" " << c*sin(delta_b)*cos(alfa) << std::endl;
+//			glVertex3f(a*sin(delta_b)*sin(alfa), b*cos(delta_b), c*sin(delta_b)*cos(alfa));
+			os << a*sin(delta_b)*sin(delta_a)<<" " << b*cos(delta_b)<<" " << c*sin(delta_b)*cos(delta_a) << std::endl;
+//			glVertex3f(a*sin(delta_b)*sin(delta_a), b*cos(delta_b), c*sin(delta_b)*cos(delta_a));
 			
-			ret += std::to_string(radius*cos(delta_a)*sin(alfa)) + " " + 
-				   std::to_string(radius*sin(delta_a)) + " " + 
-				   std::to_string(radius*cos(delta_a)*cos(alfa)) + "\n";
-//			glVertex3f(radius*cos(delta_b)*sin(alfa), radius*sin(delta_b), radius*cos(delta_b)*cos(alfa));
-			
-			ret += std::to_string(radius*cos(delta_a)*sin(delta_a)) + " " + 
-				   std::to_string(radius*sin(delta_b)) + " " + 
-				   std::to_string(radius*cos(delta_b)*cos(delta_a)) + "\n";
-//			glVertex3f(radius*cos(delta_b)*sin(delta_a), radius*sin(delta_b), radius*cos(delta_b)*cos(delta_a));
-			
-			ret += std::to_string(radius*cos(i)*sin(alfa)) + " " + 
-				   std::to_string(radius*sin(i)) + " " + 
-				   std::to_string(radius*cos(i)*cos(alfa)) + "\n";
-//			glVertex3f(radius*cos(i)*sin(alfa), radius*sin(i), radius*cos(i)*cos(alfa));
-			
-			ret += std::to_string(radius*cos(delta_b)*sin(delta_a)) + " " + 
-				   std::to_string(radius*sin(delta_b)) + " " + 
-				   std::to_string(radius*cos(delta_b)*cos(delta_a)) + "\n";
-//			glVertex3f(radius*cos(delta_b)*sin(delta_a), radius*sin(delta_b), radius*cos(delta_b)*cos(delta_a));
-			
-			ret += std::to_string(radius*cos(i)*sin(delta_a)) + " " + 
-				   std::to_string(radius*sin(i)) + " " + 
-				   std::to_string(radius*cos(i)*cos(delta_a)) + "\n";
-//			glVertex3f(radius*cos(i)*sin(delta_a), radius*sin(i), radius*cos(i)*cos(delta_a));
-	
-			count+=6;
+			os << a*sin(beta)*sin(alfa)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(alfa) << std::endl;
+//			glVertex3f(a*sin(beta)*sin(alfa), b*cos(beta), c*sin(beta)*cos(alfa));
+			os << a*sin(delta_b)*sin(delta_a)<<" " << b*cos(delta_b)<<" "<< c*sin(delta_b)*cos(delta_a) << std::endl;
+//			glVertex3f(a*sin(delta_b)*sin(delta_a), b*cos(delta_b), c*sin(delta_b)*cos(delta_a));
+			os << a*sin(beta)*sin(delta_a)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(delta_a) << std::endl;
+//			glVertex3f(a*sin(beta)*sin(delta_a), b*cos(beta), c*sin(beta)*cos(delta_a));
+
+			lines += 6;
 		}
 
 	}
-
-	return std::to_string(count) + "\n" + ret; 
+	return std::to_string(lines) + "\n" + os.str();
 }
 
 std::string frustum(float baseRadius, float topRadius, float height, int slices, int stacks) {
@@ -273,7 +285,32 @@ int ellipsoidGenerator(int argc, char *argv[]) {
 		perror("ofstream.open");
 		return 1;
 	}
-	// outfile << ellipsoid(xRadius, yRadius, zRadius, slices, stacks);
+	outfile << ellipsoid(xRadius, yRadius, zRadius, slices, stacks);
+	outfile.close();
+	return 0;
+}
+
+int annulusGenerator(int argc, char* argv[]){
+	float dist, smj, smn;
+	int slices;
+	
+	ofstream outfile;
+	dist = atof(argv[0]);
+	smj = atof(argv[1]);
+	smn = atof(argv[2]);
+	slices = atoi(argv[3]);
+
+	if(dist <= 0.0f || smj <= 0.0f || smn <= 0.0f || slices <= 0){
+		fputs("Error: All parameters of the cylinder must be positive numbers\n", stderr); // consider creating a macro for this kind of error message
+		return 1;
+	}
+
+	outfile.open(argv[4]);
+	if(!outfile.is_open()) {
+		perror("ofstream.open");
+		return 1;
+	}
+	outfile << annulus(dist, smj, smn, slices);
 	outfile.close();
 	return 0;
 }
@@ -348,7 +385,7 @@ int sphereGenerator(int argc, char *argv[]) {
 		perror("ofstream.open");
 		return 1;
 	}
-	outfile << sphere(radius, slices, stacks);
+	outfile << ellipsoid(radius, radius, radius, slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -391,6 +428,7 @@ void usage(const char *programName, FILE *stream) {
 		  "| plane       | xDim yDim [divisions]                     |\n"
 		  "| sphere      | radius slices stacks                      |\n"
 		  "| torus       | innerRadius outerRadius sides rings       |\n"
+		  "| annulus     | distance semimajor semiminor slices       |\n"
 		  "+-------------+-------------------------------------------+\n"
 		  , stream
 	);
@@ -429,6 +467,9 @@ int main(int argc, char *argv[]) {
 	}
 	else if(primitive == "torus" && argc == 7){
 		rval = torusGenerator(argc - 2, &argv[2]);
+	}
+	else if(primitive == "annulus" && argc == 7){
+		rval = annulusGenerator(argc - 2, &argv[2]);
 	}
 	else if(primitive == "--help") {
 		usage(argv[0], stdout);
