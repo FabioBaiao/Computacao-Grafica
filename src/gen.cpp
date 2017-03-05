@@ -322,7 +322,7 @@ int frustumGenerator(int argc, char *argv[]) {
 	slices = atoi(argv[3]);
 	stacks = atoi(argv[4]);
 	if(*endptr1 != '\0' || *endptr2 != '\0' || baseRadius < 0.0f || topRadius < 0.0f) {
-		fputs("Error: The base radius and the top radius of the frustum must both be non-negative numbers\n", stderr);
+		fputs("Error: The base radius and the top radius of the frustum must be non-negative numbers\n", stderr);
 		return 1;
 	}
 	if(height <= 0 || slices <= 0 || stacks <= 0) {
