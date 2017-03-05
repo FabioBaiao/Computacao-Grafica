@@ -21,12 +21,21 @@ float r = 10;
 float alpha;
 float beta;
 
+// Polygon Mode
 int mode;
 
-typedef std::vector<triangle> figure;
+// a figure is a set of triangles 
+typedef vector<triangle> figure;
 
 // Structure to save figures to draw
-vector< figure > figures;
+vector<figure> figures;
+
+
+string directory_of_file(const string& fname)
+{
+	size_t pos = fname.find_last_of("\\/");
+	return (string::npos == pos)? "" : fname.substr(0, pos+1);
+}
 
 float randFloat() {
 	 return static_cast <float> (rand()) / static_cast <float> (RAND_MAX);
@@ -65,16 +74,13 @@ void drawTriangle(triangle t){
 }
 
 void renderScene(void) {
-
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
 	// set the camera
 	glLoadIdentity();
 	gluLookAt(r*cos(beta)*cos(alpha), r*sin(beta), r*cos(beta)*sin(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-
 	for(auto fig:figures){
         	int modes[] = {GL_FILL, GL_LINE, GL_POINT};
         	glPolygonMode(GL_FRONT, modes[mode]);
@@ -139,6 +145,8 @@ int main(int argc, char** argv){
 		return -1;
 	}
 
+	string directory = directory_of_file(argv[1]);
+
 	TiXmlHandle docHandle(&doc);
 	TiXmlElement* model = doc.FirstChild("scene")->FirstChild("model")->ToElement();
 	for(; model; model=model->NextSiblingElement()){
@@ -146,7 +154,7 @@ int main(int argc, char** argv){
 		int r = model->QueryStringAttribute("file", &filename);
 		if(r == TIXML_SUCCESS){
 			int n_vertex;
-			ifstream file(filename);
+			ifstream file(directory + filename);
 			if(!file) {
 				cout << "The file \"" << filename << "\" was not found.\n";
 			}
