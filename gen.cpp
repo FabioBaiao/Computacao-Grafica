@@ -243,7 +243,7 @@ std::string frustum(float baseRadius, float topRadius, float height, int slices,
 		rHigh = rLow - dr;
 		yLow = i * dh;
 		yHigh = yLow + dh;
-		if(baseRadius > 0.0f) {
+		if(rHigh > 0.0f) {
 			for(j = 0; j < slices; ++j) {
 				os << (rLow * sinCache[j]) << ' ' << yLow << ' ' << (rLow * cosCache[j]) << '\n';
 				os << (rHigh * sinCache[j+1]) << ' ' << yHigh << ' ' << (rHigh * cosCache[j+1]) << '\n';
@@ -251,7 +251,7 @@ std::string frustum(float baseRadius, float topRadius, float height, int slices,
 				nPoints += 3;
 			}
 		}
-		if(topRadius > 0.0f) {
+		if(rLow > 0.0f) {
 			for(j = 0; j < slices; ++j) {
 				os << (rLow * sinCache[j]) << ' ' << yLow << ' ' << (rLow * cosCache[j]) << '\n';
 				os << (rLow * sinCache[j+1]) << ' ' << yLow << ' ' << (rLow * cosCache[j+1]) << '\n';
