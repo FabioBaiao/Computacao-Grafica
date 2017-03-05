@@ -4,8 +4,8 @@
 #include <stdlib.h>
 
 int boxGenerator(int argc, char *argv[]) {
-	int divisions;
 	float xDim, yDim, zDim;
+	int divisions;
 	ofstream outfile;
 
 	xDim = atof(argv[0]);
@@ -18,7 +18,7 @@ int boxGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	
-	(argc == 4) ? outfile.open(argv[3]) : outfile.open(argv[4]));
+	(argc == 5) ? outfile.open(argv[4]) : outfile.open(argv[3]));
 	if(!outfile.is_open()) {
 		perror("ofstream.open");
 		return 1;
@@ -140,7 +140,7 @@ int planeGenerator(int argc, char *argv[]) {
 		fputs("Error: All parameters of the plane must be positive numbers\n", stderr);
 		return 1;
 	}
-	(argc == 3) ? outfile.open(argv[2]) : outfile.open(argv[3]);
+	(argc == 4) ? outfile.open(argv[3]) : outfile.open(argv[2]);
 
 	if(!outfile.is_open()) {
 		perror("ofstream.open");
@@ -266,7 +266,7 @@ std::string frustum(float baseRadius, float topRadius, float height, int slices,
 }
 
 std::string cone(float radius, float height, int slices, int stacks) {
-	return frustum(radiusm, 0.0f, height, slices, stacks);
+	return frustum(radius, 0.0f, height, slices, stacks);
 }
 
 std::string cylinder(float radius, float height, int slices, int stacks) {
