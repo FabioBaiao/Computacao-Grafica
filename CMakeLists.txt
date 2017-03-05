@@ -27,5 +27,6 @@ add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml)
 add_definitions(-std=c++11)
 
 add_executable(engine engine.cpp)
+add_executable(gen gen.cpp)
 
 target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} tinyxml)
