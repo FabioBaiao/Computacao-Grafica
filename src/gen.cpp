@@ -8,71 +8,67 @@
 using namespace std;
 
 std::string annulus(float dist, float smj, float smn, int slices) {
-
-	float y = 0;
+	int nPoints = 0;
+	float y = 0.0f;
+	float alpha, nextAlpha, deltaAlpha;
 	std::ostringstream os;
-	int lines = 0;
-		
-	for(int i = 0; i < slices; ++i)
-	{
-		float angle = i * (2*M_PI)/slices;
-		float delta = angle + (2*M_PI)/slices;
-		float deltal = delta + (2*M_PI)/slices;
 
-		os << smj*cos(angle) << " " << y << " " << smn*sin(angle) << std::endl;	
-//		glVertex3f(smj*cos(angle), y, smn*sin(angle));
-		os << (smj+dist)*cos(delta) << " " << y << " " << (smn+dist)*sin(delta) << std::endl;	
-//		glVertex3f((smj+dist)*cos(delta), y, (smn+dist)*sin(delta));
-		os << (smj+dist)*cos(angle) << " " << y << " " << (smn+dist)*sin(angle) << std::endl;	
-//		glVertex3f((smj+dist)*cos(angle), y, (smn+dist)*sin(angle));
+	deltaAlpha = (2.0f * M_PI) / slices;
+	for(int i = 0; i < slices; ++i) {
+		float alpha = i * deltaAlpha;
+		float nextAlpha = alpha + deltaAlpha;
+
+		os << smj * cosf(alpha) << " " << y << " " << smn * sinf(alpha) << std::endl;	
+//		glVertex3f(smj*cosf(alpha), y, smn*sinf(alpha));
+		os << (smj+dist) * cosf(nextAlpha) << " " << y << " " << (smn+dist) * sinf(nextAlpha) << std::endl;	
+//		glVertex3f((smj+dist)*cosf(nextAlpha), y, (smn+dist)*sinf(nextAlpha));
+		os << (smj+dist) * cosf(alpha) << " " << y << " " << (smn+dist) * sinf(alpha) << std::endl;	
+//		glVertex3f((smj+dist)*cosf(alpha), y, (smn+dist)*sinf(alpha));
 	
-		os << smj*cos(angle) << " " << y << " " << smn*sin(angle) << std::endl;	
-//		glVertex3f(smj*cos(angle), y, smn*sin(angle));
-		os << smj*cos(delta) << " " << y << " " << smn*sin(delta) << std::endl;	
-//		glVertex3f(smj*cos(delta), y, smn*sin(delta));
-		os << (smj+dist)*cos(delta) << " " << y << " " << (smn+dist)*sin(delta) << std::endl;	
-//		glVertex3f((smj+dist)*cos(delta), y, (smn+dist)*sin(delta));
-		lines += 6;
+		os << smj * cosf(alpha) << " " << y << " " << smn * sinf(alpha) << std::endl;	
+//		glVertex3f(smj*cosf(alpha), y, smn*sinf(alpha));
+		os << smj * cosf(nextAlpha) << " " << y << " " << smn * sinf(nextAlpha) << std::endl;	
+//		glVertex3f(smj*cosf(nextAlpha), y, smn*sinf(nextAlpha));
+		os << (smj+dist) * cosf(nextAlpha) << " " << y << " " << (smn+dist) * sinf(nextAlpha) << std::endl;	
+//		glVertex3f((smj+dist)*cosf(nextAlpha), y, (smn+dist)*sinf(nextAlpha));
+		nPoints += 6;
 	}
-	return std::to_string(lines) + "\n" + os.str() ;
+	return (std::to_string(nPoints) + "\n" + os.str());
 }
 
 std::string ellipsoid(float a, float b, float c, float stacks, int slices) {
-
-	float b_step = M_PI / stacks;
-	float a_step = 2*M_PI / slices;
+	int nPoints = 0;
+	float deltaAlpha = 2.0f * M_PI / slices;
+	float deltaBeta = M_PI / stacks;
 	std::ostringstream os;
-	int lines = 0;
 		
-	for(float i = 0; i < stacks; i++)
-	{
-		float beta = i * b_step;
-		float delta_b = beta + b_step;
+	for(int i = 0; i < stacks; i++) {
+		float beta = i * deltaBeta;
+		float nextBeta = beta + deltaBeta;
 
-		for(int j = 0; j < slices; j++)
-		{
-			float alfa = j * (2*M_PI)/slices;
-			float delta_a = alfa + (2*M_PI)/slices;
+		for(int j = 0; j < slices; j++) {
+			float alpha = j * deltaAlpha;
+			float nextAlpha = alpha + deltaAlpha;
 
-			os << a*sin(beta)*sin(alfa)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(alfa) << std::endl;
-//			glVertex3f(a*sin(beta)*sin(alfa), b*cos(beta), c*sin(beta)*cos(alfa));
-			os << a*sin(delta_b)*sin(alfa)<<" " << b*cos(delta_b)<<" " << c*sin(delta_b)*cos(alfa) << std::endl;
-//			glVertex3f(a*sin(delta_b)*sin(alfa), b*cos(delta_b), c*sin(delta_b)*cos(alfa));
-			os << a*sin(delta_b)*sin(delta_a)<<" " << b*cos(delta_b)<<" " << c*sin(delta_b)*cos(delta_a) << std::endl;
-//			glVertex3f(a*sin(delta_b)*sin(delta_a), b*cos(delta_b), c*sin(delta_b)*cos(delta_a));
+			os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << std::endl;
+//			glVertex3f(a*sinf(beta)*sinf(alpha), b*cosf(beta), c*sinf(beta)*cosf(alpha));
+			os << a * sinf(nextBeta) * sinf(alpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(alpha) << std::endl;
+//			glVertex3f(a*sinf(nextBeta)*sinf(alpha), b*cosf(nextBeta), c*sinf(nextBeta)*cosf(alpha));
+			os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(nextAlpha) << std::endl;
+//			glVertex3f(a*sinf(nextBeta)*sinf(nextAlpha), b*cosf(nextBeta), c*sinf(nextBeta)*cosf(nextAlpha));
 			
-			os << a*sin(beta)*sin(alfa)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(alfa) << std::endl;
-//			glVertex3f(a*sin(beta)*sin(alfa), b*cos(beta), c*sin(beta)*cos(alfa));
-			os << a*sin(delta_b)*sin(delta_a)<<" " << b*cos(delta_b)<<" "<< c*sin(delta_b)*cos(delta_a) << std::endl;
-//			glVertex3f(a*sin(delta_b)*sin(delta_a), b*cos(delta_b), c*sin(delta_b)*cos(delta_a));
-			os << a*sin(beta)*sin(delta_a)<<" " << b*cos(beta)<<" " << c*sin(beta)*cos(delta_a) << std::endl;
-//			glVertex3f(a*sin(beta)*sin(delta_a), b*cos(beta), c*sin(beta)*cos(delta_a));
+			os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << std::endl;
+//			glVertex3f(a*sinf(beta)*sinf(alpha), b*cosf(beta), c*sinf(beta)*cosf(alpha));
+			os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " "<< c * sinf(nextBeta) * cosf(nextAlpha) << std::endl;
+//			glVertex3f(a*sinf(nextBeta)*sinf(nextAlpha), b*cosf(nextBeta), c*sinf(nextBeta)*cosf(nextAlpha));
+			os << a * sinf(beta) * sinf(nextAlpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(nextAlpha) << std::endl;
+//			glVertex3f(a*sinf(beta)*sinf(nextAlpha), b*cosf(beta), c*sinf(beta)*cosf(nextAlpha));
 
-			lines += 6;
+			nPoints += 6;
 		}
 
 	}
-	return std::to_string(lines) + "\n" + os.str();
+	return (std::to_string(nPoints) + "\n" + os.str());
 }
 
 std::string frustum(float baseRadius, float topRadius, float height, int slices, int stacks) {
@@ -140,7 +136,7 @@ std::string frustum(float baseRadius, float topRadius, float height, int slices,
 	}
 	delete[] cosCache; delete[] sinCache;
 
-	return (std::to_string(nPoints) + os.str());
+	return (std::to_string(nPoints) + "\n" + os.str());
 }
 
 std::string cone(float radius, float height, int slices, int stacks) {
@@ -191,7 +187,31 @@ std::string torus(float innerRadius, float outerRadius, int nsides, int nrings) 
 			os << (nextDXZ * sinNextPhi) << ' ' << (innerRadius * sinNextTheta) << ' ' << (nextDXZ * cosNextPhi) << '\n';
 		}
 	}
-	return (std::to_string(nPoints) + os.str());
+	return (std::to_string(nPoints) + "\n" + os.str());
+}
+
+int annulusGenerator(int argc, char* argv[]){
+	float dist, smj, smn;
+	int slices;
+	
+	ofstream outfile;
+	dist = atof(argv[0]);
+	smj = atof(argv[1]);
+	smn = atof(argv[2]);
+	slices = atoi(argv[3]);
+	if(dist <= 0.0f || smj <= 0.0f || smn <= 0.0f || slices <= 0){
+		fputs("Error: All parameters of the annulus must be positive numbers\n", stderr);
+		return 1;
+	}
+
+	outfile.open(argv[4]);
+	if(!outfile.is_open()) {
+		perror("ofstream.open");
+		return 1;
+	}
+	outfile << annulus(dist, smj, smn, slices);
+	outfile.close();
+	return 0;
 }
 
 int boxGenerator(int argc, char *argv[]) {
@@ -290,43 +310,19 @@ int ellipsoidGenerator(int argc, char *argv[]) {
 	return 0;
 }
 
-int annulusGenerator(int argc, char* argv[]){
-	float dist, smj, smn;
-	int slices;
-	
-	ofstream outfile;
-	dist = atof(argv[0]);
-	smj = atof(argv[1]);
-	smn = atof(argv[2]);
-	slices = atoi(argv[3]);
-
-	if(dist <= 0.0f || smj <= 0.0f || smn <= 0.0f || slices <= 0){
-		fputs("Error: All parameters of the cylinder must be positive numbers\n", stderr); // consider creating a macro for this kind of error message
-		return 1;
-	}
-
-	outfile.open(argv[4]);
-	if(!outfile.is_open()) {
-		perror("ofstream.open");
-		return 1;
-	}
-	outfile << annulus(dist, smj, smn, slices);
-	outfile.close();
-	return 0;
-}
-
 int frustumGenerator(int argc, char *argv[]) {
 	float baseRadius, topRadius, height;
 	int slices, stacks;
+	char *endptr1, *endptr2;
 	ofstream outfile;
 
-	baseRadius = atof(argv[0]);
-	topRadius = atof(argv[1]);
+	baseRadius = strtof(argv[0], &endptr1);
+	topRadius = strtof(argv[1], &endptr2);
 	height = atof(argv[2]);
 	slices = atoi(argv[3]);
 	stacks = atoi(argv[4]);
-	if(baseRadius < 0.0f || topRadius < 0.0f) {
-		fputs("Error: The base radius and the top radius must both be non-negative\n", stderr);
+	if(*endptr1 != '\0' || *endptr2 != '\0' || baseRadius < 0.0f || topRadius < 0.0f) {
+		fputs("Error: The base radius and the top radius must both be non-negative numbers\n", stderr);
 		return 1;
 	}
 	if(height <= 0 || slices <= 0 || stacks <= 0) {
@@ -420,6 +416,7 @@ void usage(const char *programName, FILE *stream) {
 	fputs("+-------------+-------------------------------------------+\n"
 		  "| primitive   | parameters                                |\n"
 		  "+-------------+-------------------------------------------+\n"
+		  "| annulus     | distance semimajor semiminor slices       |\n"
 		  "| box         | xDim yDim zDim [divisions]                |\n"
 		  "| cone        | radius height slices stacks               |\n"
 		  "| cylinder    | radius height slices stacks               |\n"
@@ -428,7 +425,6 @@ void usage(const char *programName, FILE *stream) {
 		  "| plane       | xDim yDim [divisions]                     |\n"
 		  "| sphere      | radius slices stacks                      |\n"
 		  "| torus       | innerRadius outerRadius sides rings       |\n"
-		  "| annulus     | distance semimajor semiminor slices       |\n"
 		  "+-------------+-------------------------------------------+\n"
 		  , stream
 	);
@@ -444,7 +440,10 @@ int main(int argc, char *argv[]) {
 
 	std::string primitive(argv[1]); 
 	//std::vector<Point> points;
-	if(primitive == "box" && (argc == 6 || argc == 7)) {
+	if(primitive == "annulus" && argc == 7) {
+		rval = annulusGenerator(argc - 2, &argv[2]);
+	}
+	else if(primitive == "box" && (argc == 6 || argc == 7)) {
 		rval = boxGenerator(argc - 2, &argv[2]);
 	}
 	else if(primitive == "cone" && argc == 7){
@@ -468,9 +467,6 @@ int main(int argc, char *argv[]) {
 	else if(primitive == "torus" && argc == 7){
 		rval = torusGenerator(argc - 2, &argv[2]);
 	}
-	else if(primitive == "annulus" && argc == 7){
-		rval = annulusGenerator(argc - 2, &argv[2]);
-	}
 	else if(primitive == "--help") {
 		usage(argv[0], stdout);
 		rval = 0;
@@ -480,5 +476,3 @@ int main(int argc, char *argv[]) {
 	}
 	return rval;
 }
-
-
