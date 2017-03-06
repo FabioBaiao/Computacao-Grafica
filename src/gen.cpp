@@ -25,20 +25,20 @@ string planeXZ (float x, float y, float z, int nDiv, int orient){
 	for (int i = 1; i <= nDiv; i++){
 		for (int j = 1; j <= nDiv; j++){
 			if (orient == UPWARDS){
-				os << xi << " " << y << " " << zi << '\n';				
+				os << xi << " " << y << " " << zi << '\n';
 				os << xi << " " << y << " " << (zi-deltaZ) << '\n';
 				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 
-				os << xi << " " << y << " " << zi << '\n';				
+				os << xi << " " << y << " " << zi << '\n';
 				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 				os << (xi-deltaX) << " " << y << " " << zi << '\n';
 			}
 			else {
-				os << xi << " " << y << " " << zi << '\n';				
+				os << xi << " " << y << " " << zi << '\n';
 				os << (xi-deltaX) << " " << y << " " << zi << '\n';
 				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 
-				os << xi << " " << y << " " << zi << '\n';				
+				os << xi << " " << y << " " << zi << '\n';
 				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 				os << xi << " " << y << " " << (zi-deltaZ) << '\n';
 			}
@@ -70,15 +70,15 @@ string planeXY (float x, float y, float z, int nDiv, int orient){
 				os << xi << " " << (yi+deltaY) << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
 				os << xi << " " << yi << " " << z << '\n';
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 				
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n';
 				os << (xi-deltaX) << " " << yi << " " << z << '\n';
 			}
 			else {
 				os << xi << " " << yi << " " << z << '\n';
-				os << (xi-deltaX) << " " << yi << " " << z << '\n';	
+				os << (xi-deltaX) << " " << yi << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
 				os << xi << " " << yi << " " << z << '\n';
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 				
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n';
 				os << xi << " " << (yi+deltaY) << " " << z << '\n';
 			}
 			count += 6;
@@ -190,12 +190,12 @@ string annulus(float dist, float smj, float smn, int slices) {
 		float alpha = i * deltaAlpha;
 		float nextAlpha = alpha + deltaAlpha;
 
-		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';	
-		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';	
-		os << (smj+dist) * cosf(alpha) << " 0.0 " << (smn+dist) * sinf(alpha) << '\n';	
-		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';	
-		os << smj * cosf(nextAlpha) << " 0.0 " << smn * sinf(nextAlpha) << '\n';	
-		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';	
+		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';
+		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';
+		os << (smj+dist) * cosf(alpha) << " 0.0 " << (smn+dist) * sinf(alpha) << '\n';
+		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';
+		os << smj * cosf(nextAlpha) << " 0.0 " << smn * sinf(nextAlpha) << '\n';
+		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';
 		nPoints += 6;
 	}
 	return (to_string(nPoints) + "\n" + os.str());
@@ -206,7 +206,7 @@ string ellipsoid(float a, float b, float c, float stacks, int slices) {
 	float deltaAlpha = 2.0f * M_PI / slices;
 	float deltaBeta = M_PI / stacks;
 	ostringstream os;
-		
+
 	for(int i = 0; i < stacks; i++) {
 		float beta = i * deltaBeta;
 		float nextBeta = beta + deltaBeta;
@@ -337,11 +337,11 @@ string torus(float innerRadius, float outerRadius, int nsides, int nrings) {
 			sinNextTheta = sinf(nextTheta);
 			dXZ = outerRadius + innerRadius * cosTheta;
 			nextDXZ = outerRadius + innerRadius * cosNextTheta;
-			
+
 			os << (dXZ * sinPhi) << ' ' << (innerRadius * sinTheta) << ' ' << (dXZ * cosPhi) << '\n';
 			os << (nextDXZ * sinNextPhi) << ' ' << (innerRadius * sinNextTheta) << ' ' << (nextDXZ * cosNextPhi) << '\n';
 			os << (nextDXZ * sinPhi) << ' ' << (innerRadius * sinNextTheta) << ' ' << (nextDXZ * cosPhi) << '\n';
-			
+
 			os << (dXZ * sinPhi) << ' ' << (innerRadius * sinTheta) << ' ' << (dXZ * cosPhi) << '\n';
 			os << (dXZ * sinNextPhi) << ' ' << (innerRadius * sinTheta) << ' ' << (dXZ * cosNextPhi) << '\n';
 			os << (nextDXZ * sinNextPhi) << ' ' << (innerRadius * sinNextTheta) << ' ' << (nextDXZ * cosNextPhi) << '\n';
@@ -353,7 +353,7 @@ string torus(float innerRadius, float outerRadius, int nsides, int nrings) {
 int annulusGenerator(int argc, char* argv[]){
 	float dist, smj, smn;
 	int slices;
-	
+
 	ofstream outfile;
 	dist = atof(argv[0]);
 	smj = atof(argv[1]);
@@ -388,7 +388,7 @@ int boxGenerator(int argc, char *argv[]) {
 		fputs("Error: All parameters of the box must be positive numbers\n", stderr);
 		return 1;
 	}
-	
+
 	outfile.open((argc == 5) ? argv[4] : argv[3]);
 	if(!outfile.is_open()) {
 		perror("ofstream.open");
@@ -489,7 +489,7 @@ int frustumGenerator(int argc, char *argv[]) {
 		fputs("Error: Height, slices and stacks must all be positive\n", stderr);
 		return 1;
 	}
-	
+
 	outfile.open(argv[5]);
 	if(!outfile.is_open()) {
 		perror("ofstream.open");
@@ -569,8 +569,6 @@ int torusGenerator(int argc, char *argv[]) {
 	return 0;
 }
 
-
-
 void usage(const char *programName, FILE *stream) {
 	fprintf(stream, "Usage: %s primitive parameters outfile\n\n", programName);
 	fputs("+-------------+-------------------------------------------+\n"
@@ -596,7 +594,7 @@ int main(int argc, char *argv[]) {
 	if(argc == 1){
 		usage(argv[0], stderr);
 		return 1;
-	} 
+	}
 
 	string primitive(argv[1]); 
 	if(primitive == "annulus" && argc == 7) {

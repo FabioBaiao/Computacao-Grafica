@@ -30,10 +30,9 @@ typedef vector<triangle> figure;
 // Structure to save figures to draw
 vector<figure> figures;
 
-
-string directory_of_file(const string& fname)
-{
+string directory_of_file(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
+
 	return (string::npos == pos)? "" : fname.substr(0, pos+1);
 }
 
@@ -55,7 +54,7 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_PROJECTION);
 	// Load Identity Matrix
 	glLoadIdentity();
-	
+
 	// Set the viewport to be the entire window
 	glViewport(0, 0, w, h);
 
@@ -81,7 +80,7 @@ void renderScene(void) {
 	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-	
+
 	for(auto fig:figures) {
 		int size = fig.size();
         GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
@@ -96,7 +95,6 @@ void renderScene(void) {
 	// End of frame
 	glutSwapBuffers();
 }
-
 
 void processKeys(unsigned char c, int xx, int yy) {
 // put code to process regular keys in here
@@ -115,7 +113,6 @@ void processKeys(unsigned char c, int xx, int yy) {
 	}
 	glutPostRedisplay();
 }
-
 
 void processSpecialKeys(int key, int xx, int yy) {
 // put code to process special keys in here
@@ -140,7 +137,6 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char** argv){
 	if(argc != 2){
@@ -151,7 +147,7 @@ int main(int argc, char** argv){
 	TiXmlDocument doc(argv[1]);
 	bool loadOkay = doc.LoadFile();
 	if(!loadOkay){
-		cout << "Error loading file '" << argv[1] << "'.\n";
+		cerr << "Error loading file '" << argv[1] << "'.\n";
 		return 1;
 	}
 
@@ -162,7 +158,7 @@ int main(int argc, char** argv){
 	for(; model; model=model->NextSiblingElement()){
 		string filename; 
 		int r = model->QueryStringAttribute("file", &filename);
-		
+
 		if(r == TIXML_SUCCESS) {
 			int n_vertex, n_triangles;
 			ifstream file(directory + filename);
@@ -173,7 +169,7 @@ int main(int argc, char** argv){
 			}
 			file >> n_vertex; // reads the number of vertices from the file
 			n_triangles = n_vertex/3;
-			
+
 			for(int i = 0; i < n_triangles; i++){
 				float color_r, color_g, color_b;
 				point ps[3];
@@ -191,7 +187,7 @@ int main(int argc, char** argv){
 
 				triangle t(ps[0], ps[1], ps[2], color_r, color_g, color_b);
 				triangles.push_back(t);
-			}	
+			}
 			file.close();
 			figures.push_back(triangles);
 		}
@@ -203,11 +199,11 @@ int main(int argc, char** argv){
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(800,800);
 	glutCreateWindow("Pratical Assignment 1");
-		
+
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
-	
+
 	// Callback registration for keyboard processing
 	glutKeyboardFunc(processKeys);
 	glutSpecialFunc(processSpecialKeys);
@@ -215,7 +211,7 @@ int main(int argc, char** argv){
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
-	
+
 	// enter GLUT's main cycle
 	glutMainLoop();
 
