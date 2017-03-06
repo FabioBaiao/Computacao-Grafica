@@ -499,14 +499,14 @@ int frustumGenerator(int argc, char *argv[]) {
 }
 
 int planeGenerator(int argc, char *argv[]) {
-	float xDim, yDim;
+	float xDim, zDim;
 	int divisions;
 	ofstream outfile;
 
 	xDim = atof(argv[0]);
-	yDim = atof(argv[1]);
+	zDim = atof(argv[1]);
 	divisions = (argc == 4 ? atoi(argv[2]) : 1);
-	if(xDim <= 0.0f || yDim <= 0.0f || divisions <= 0) {
+	if(xDim <= 0.0f || zDim <= 0.0f || divisions <= 0) {
 		fputs("Error: All parameters of the plane must be positive numbers\n", stderr);
 		return 1;
 	}
@@ -516,7 +516,7 @@ int planeGenerator(int argc, char *argv[]) {
 		perror("ofstream.open");
 		return 1;
 	}
-	outfile << planeXZ(xDim, yDim, 0, divisions, UPWARDS);
+	outfile << planeXZ(xDim, 0, zDim, divisions, UPWARDS);
 	outfile.close();
 	return 0;
 }
@@ -546,7 +546,7 @@ int sphereGenerator(int argc, char *argv[]) {
 
 int torusGenerator(int argc, char *argv[]) {
 	float innerRadius, outerRadius;
-	int stacks, sides, rings;
+	int sides, rings;
 	ofstream outfile;
 
 	innerRadius = atof(argv[0]);
@@ -580,7 +580,7 @@ void usage(const char *programName, FILE *stream) {
 		  "| cylinder    | radius height slices stacks               |\n"
 		  "| ellipsoid   | xRadius yRadius zRadius slices stacks     |\n"
 		  "| frustum     | baseRadius topRadius height slices stacks |\n"
-		  "| plane       | xDim yDim [divisions]                     |\n"
+		  "| plane       | xDim zDim [divisions]                     |\n"
 		  "| sphere      | radius slices stacks                      |\n"
 		  "| torus       | innerRadius outerRadius sides rings       |\n"
 		  "+-------------+-------------------------------------------+\n"
