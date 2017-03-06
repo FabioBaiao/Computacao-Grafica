@@ -216,13 +216,18 @@ string ellipsoid(float a, float b, float c, float stacks, int slices) {
 			float alpha = j * deltaAlpha;
 			float nextAlpha = alpha + deltaAlpha;
 
-			os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
-			os << a * sinf(nextBeta) * sinf(alpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(alpha) << endl;
-			os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(nextAlpha) << endl;
-			os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
-			os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " "<< c * sinf(nextBeta) * cosf(nextAlpha) << endl;
-			os << a * sinf(beta) * sinf(nextAlpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(nextAlpha) << endl;
-			nPoints += 6;
+			if(i<stacks-1){
+				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
+				os << a * sinf(nextBeta) * sinf(alpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(alpha) << endl;
+				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(nextAlpha) << endl;
+				nPoints +=3;
+			}
+			if(i>0){
+				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
+				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " "<< c * sinf(nextBeta) * cosf(nextAlpha) << endl;
+				os << a * sinf(beta) * sinf(nextAlpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(nextAlpha) << endl;
+				nPoints +=3;
+			}
 		}
 
 	}
