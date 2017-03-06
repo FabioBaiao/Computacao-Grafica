@@ -574,7 +574,7 @@ void usage(const char *programName, FILE *stream) {
 	fputs("+-------------+-------------------------------------------+\n"
 		  "| primitive   | parameters                                |\n"
 		  "+-------------+-------------------------------------------+\n"
-		  "| annulus     | thickness semimajor semiminor slices       |\n"
+		  "| annulus     | thickness semimajor semiminor slices      |\n"
 		  "| box         | xDim yDim zDim [divisions]                |\n"
 		  "| cone        | radius height slices stacks               |\n"
 		  "| cylinder    | radius height slices stacks               |\n"
