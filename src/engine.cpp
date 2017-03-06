@@ -17,12 +17,12 @@
 using namespace std;
 
 // Camera control
-float r = 10;
+float r = 10.0f;
 float alpha;
 float beta;
 
 // Polygon Mode
-int mode;
+GLenum mode;
 
 // a figure is a set of triangles 
 typedef vector<triangle> figure;
@@ -78,15 +78,17 @@ void renderScene(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// set the camera
 	glLoadIdentity();
-	gluLookAt(r*cos(beta)*cos(alpha), r*sin(beta), r*cos(beta)*sin(alpha), 
+	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-	for(auto fig:figures){
-        	int modes[] = {GL_FILL, GL_LINE, GL_POINT};
-        	glPolygonMode(GL_FRONT, modes[mode]);
+	
+	for(auto fig:figures) {
+		int size = fig.size();
+        GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
+        glPolygonMode(GL_FRONT, modes[mode]);
 
 		glBegin(GL_TRIANGLES);
-		for(int i = 0; i < fig.size(); i++){
+		for(int i = 0; i < size; i++){
 			drawTriangle(fig[i]);
 		}
 		glEnd();
@@ -99,11 +101,17 @@ void renderScene(void) {
 void processKeys(unsigned char c, int xx, int yy) {
 // put code to process regular keys in here
 	switch(toupper(c)){
-		case 'M': r+=0.2;
-			  break;
-		case 'L': r-=0.2;
-			  break;
-		case 'C': mode = (mode + 1)%3;
+		case 'M': // More radius
+			r += 0.2f;
+			break;
+		case 'L': // Less radius
+			r -= 0.2f;
+			if(r < 0.2f)
+				r = 0.2f;
+			break;
+		case 'C':
+			mode = (mode + 1) % 3;
+			break;
 	}
 	glutPostRedisplay();
 }
@@ -113,18 +121,20 @@ void processSpecialKeys(int key, int xx, int yy) {
 // put code to process special keys in here
 	switch(key){
 		case GLUT_KEY_UP:
-			if(beta < M_PI/4-0.2)
-				beta += 0.2;
+			beta += 0.1f;
+			if(beta > 1.5f)
+				beta = 1.5f;
 			break;
 		case GLUT_KEY_LEFT:
-			alpha += 0.2;
+			alpha += 0.1f;
 			break;
 		case GLUT_KEY_DOWN:
-			if(beta > -M_PI/4+0.2)
-				beta -= 0.2;
+			beta -= 0.1f;
+			if(beta < -1.5f)
+				beta = -1.5;
 			break;
 		case GLUT_KEY_RIGHT:
-			alpha -= 0.2;
+			alpha -= 0.1f;
 			break;
 	}
 	glutPostRedisplay();
@@ -134,15 +144,15 @@ void processSpecialKeys(int key, int xx, int yy) {
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char** argv){
 	if(argc != 2){
-		cout << "The command invocation must be in the form 'engine filename'\n";
-		return -1;
+		cerr << "Usage: " << argv[0] << " config_file\n";
+		return 1;
 	}
 
 	TiXmlDocument doc(argv[1]);
 	bool loadOkay = doc.LoadFile();
 	if(!loadOkay){
-		cout << "Error to load file " << argv[1] << ".\n";
-		return -1;
+		cout << "Error loading file '" << argv[1] << "'.\n";
+		return 1;
 	}
 
 	string directory = directory_of_file(argv[1]);
@@ -152,15 +162,18 @@ int main(int argc, char** argv){
 	for(; model; model=model->NextSiblingElement()){
 		string filename; 
 		int r = model->QueryStringAttribute("file", &filename);
-		if(r == TIXML_SUCCESS){
-			int n_vertex;
+		
+		if(r == TIXML_SUCCESS) {
+			int n_vertex, n_triangles;
 			ifstream file(directory + filename);
-			if(!file) {
-				cout << "The file \"" << filename << "\" was not found.\n";
-			}
-			file >> n_vertex; // reads the number of vertices in a file
-			int n_triangles = n_vertex/3;
 			figure triangles;
+
+			if(!file) {
+				cerr << "The file \"" << filename << "\" was not found.\n";
+			}
+			file >> n_vertex; // reads the number of vertices from the file
+			n_triangles = n_vertex/3;
+			
 			for(int i = 0; i < n_triangles; i++){
 				float color_r, color_g, color_b;
 				point ps[3];
@@ -172,7 +185,6 @@ int main(int argc, char** argv){
 					point p(px, py, pz);
 					ps[j] = p;
 				}
-
 				color_r = randFloat();
 				color_g = randFloat();
 				color_b = randFloat();

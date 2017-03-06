@@ -25,22 +25,22 @@ string planeXZ (float x, float y, float z, int nDiv, int orient){
 	for (int i = 1; i <= nDiv; i++){
 		for (int j = 1; j <= nDiv; j++){
 			if (orient == UPWARDS){
-				os << xi << " " << y << " " << zi << endl;				
-				os << xi << " " << y << " " << (zi-deltaZ) << endl;
-				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << endl;
+				os << xi << " " << y << " " << zi << '\n';				
+				os << xi << " " << y << " " << (zi-deltaZ) << '\n';
+				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 
-				os << xi << " " << y << " " << zi << endl;				
-				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << endl;
-				os << (xi-deltaX) << " " << y << " " << zi << endl;
+				os << xi << " " << y << " " << zi << '\n';				
+				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
+				os << (xi-deltaX) << " " << y << " " << zi << '\n';
 			}
 			else {
-				os << xi << " " << y << " " << zi << endl;				
-				os << (xi-deltaX) << " " << y << " " << zi << endl;
-				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << endl;
+				os << xi << " " << y << " " << zi << '\n';				
+				os << (xi-deltaX) << " " << y << " " << zi << '\n';
+				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
 
-				os << xi << " " << y << " " << zi << endl;				
-				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << endl;
-				os << xi << " " << y << " " << (zi-deltaZ) << endl;
+				os << xi << " " << y << " " << zi << '\n';				
+				os << (xi-deltaX) << " " << y << " " << (zi-deltaZ) << '\n';
+				os << xi << " " << y << " " << (zi-deltaZ) << '\n';
 			}
 			count += 6;
 			xi = x - j * deltaX;
@@ -66,20 +66,20 @@ string planeXY (float x, float y, float z, int nDiv, int orient){
 	for (int i = 1; i <= nDiv; i++){
 		for (int j = 1; j <= nDiv; j++){
 			if (orient == UPWARDS){
-				os << xi << " " << yi << " " << z << endl;
-				os << xi << " " << (yi+deltaY) << " " << z << endl;
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << endl; 
-				os << xi << " " << yi << " " << z << endl;
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << endl; 				
-				os << (xi-deltaX) << " " << yi << " " << z << endl;
+				os << xi << " " << yi << " " << z << '\n';
+				os << xi << " " << (yi+deltaY) << " " << z << '\n';
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
+				os << xi << " " << yi << " " << z << '\n';
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 				
+				os << (xi-deltaX) << " " << yi << " " << z << '\n';
 			}
 			else {
-				os << xi << " " << yi << " " << z << endl;
-				os << (xi-deltaX) << " " << yi << " " << z << endl;	
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << endl; 
-				os << xi << " " << yi << " " << z << endl;
-				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << endl; 				
-				os << xi << " " << (yi+deltaY) << " " << z << endl;
+				os << xi << " " << yi << " " << z << '\n';
+				os << (xi-deltaX) << " " << yi << " " << z << '\n';	
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
+				os << xi << " " << yi << " " << z << '\n';
+				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 				
+				os << xi << " " << (yi+deltaY) << " " << z << '\n';
 			}
 			count += 6;
 			xi = x - j * deltaX;
@@ -105,19 +105,19 @@ string planeYZ (float x, float y, float z, int nDiv, int orient){
 	for (int i = 1; i <= nDiv; i++){
 		for (int j = 1; j <= nDiv; j++){
 			if (orient == UPWARDS){
-				os << x << " " << yi << " " << zi << endl;
-				os << x << " " << (yi+deltaY) << " " << zi << endl;
-				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << endl;
-				os << x << " " << yi << " " << zi << endl;
-				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << endl;
-				os << x << " " << yi << " " << (zi+deltaZ) << endl;
+				os << x << " " << yi << " " << zi << '\n';
+				os << x << " " << (yi+deltaY) << " " << zi << '\n';
+				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << '\n';
+				os << x << " " << yi << " " << zi << '\n';
+				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << '\n';
+				os << x << " " << yi << " " << (zi+deltaZ) << '\n';
 			} else {
-				os << x << " " << yi << " " << zi << endl;
-				os << x << " " << yi << " " << (zi+deltaZ) << endl;
-				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << endl;
-				os << x << " " << yi << " " << zi << endl;
-				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << endl;
-				os << x << " " << (yi+deltaY) << " " << zi << endl;
+				os << x << " " << yi << " " << zi << '\n';
+				os << x << " " << yi << " " << (zi+deltaZ) << '\n';
+				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << '\n';
+				os << x << " " << yi << " " << zi << '\n';
+				os << x << " " << (yi+deltaY) << " " << (zi+deltaZ) << '\n';
+				os << x << " " << (yi+deltaY) << " " << zi << '\n';
 			}
 			count += 6;
 			zi = -z + j * deltaZ;
@@ -139,42 +139,42 @@ string box(float x, float y, float z, int nDiv){
 	getline(iss1, line);
 	count = stoi(line, nullptr, 10);
 	while (getline(iss1, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 	plane = planeXY(x, y, -z/2, nDiv, DOWNWARDS);
 	istringstream iss2 (plane);
 	getline(iss2, line);
 	count += stoi(line, nullptr, 10);
 	while (getline(iss2, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 	plane = planeXZ(x, y/2, z, nDiv, UPWARDS);
 	istringstream iss3 (plane);
 	getline(iss3, line);
 	count += stoi(line, nullptr, 10);
 	while (getline(iss3, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 	plane = planeXZ(x, -y/2, z, nDiv, DOWNWARDS);
 	istringstream iss4 (plane);
 	getline(iss4, line);
 	count += stoi(line, nullptr, 10);
 	while (getline(iss4, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 	plane = planeYZ(x/2, y, z, nDiv, UPWARDS);
 	istringstream iss5 (plane);
 	getline(iss5, line);
 	count += stoi(line, nullptr, 10);
 	while (getline(iss5, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 	plane = planeYZ(-x/2, y, z, nDiv, DOWNWARDS);
 	istringstream iss6 (plane);
 	getline(iss6, line);
 	count += stoi(line, nullptr, 10);
 	while (getline(iss6, line)){
-		os << line << endl;
+		os << line << '\n';
 	}
 
 	return to_string(count) + "\n" + os.str();
@@ -182,7 +182,6 @@ string box(float x, float y, float z, int nDiv){
 
 string annulus(float dist, float smj, float smn, int slices) {
 	int nPoints = 0;
-	float y = 0.0f;
 	float alpha, nextAlpha, deltaAlpha;
 	ostringstream os;
 
@@ -191,12 +190,12 @@ string annulus(float dist, float smj, float smn, int slices) {
 		float alpha = i * deltaAlpha;
 		float nextAlpha = alpha + deltaAlpha;
 
-		os << smj * cosf(alpha) << " " << y << " " << smn * sinf(alpha) << endl;	
-		os << (smj+dist) * cosf(nextAlpha) << " " << y << " " << (smn+dist) * sinf(nextAlpha) << endl;	
-		os << (smj+dist) * cosf(alpha) << " " << y << " " << (smn+dist) * sinf(alpha) << endl;	
-		os << smj * cosf(alpha) << " " << y << " " << smn * sinf(alpha) << endl;	
-		os << smj * cosf(nextAlpha) << " " << y << " " << smn * sinf(nextAlpha) << endl;	
-		os << (smj+dist) * cosf(nextAlpha) << " " << y << " " << (smn+dist) * sinf(nextAlpha) << endl;	
+		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';	
+		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';	
+		os << (smj+dist) * cosf(alpha) << " 0.0 " << (smn+dist) * sinf(alpha) << '\n';	
+		os << smj * cosf(alpha) << " 0.0 " << smn * sinf(alpha) << '\n';	
+		os << smj * cosf(nextAlpha) << " 0.0 " << smn * sinf(nextAlpha) << '\n';	
+		os << (smj+dist) * cosf(nextAlpha) << " 0.0 " << (smn+dist) * sinf(nextAlpha) << '\n';	
 		nPoints += 6;
 	}
 	return (to_string(nPoints) + "\n" + os.str());
@@ -217,16 +216,16 @@ string ellipsoid(float a, float b, float c, float stacks, int slices) {
 			float nextAlpha = alpha + deltaAlpha;
 
 			if(i<stacks-1){
-				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
-				os << a * sinf(nextBeta) * sinf(alpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(alpha) << endl;
-				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(nextAlpha) << endl;
-				nPoints +=3;
+				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << '\n';
+				os << a * sinf(nextBeta) * sinf(alpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(alpha) << '\n';
+				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " " << c * sinf(nextBeta) * cosf(nextAlpha) << '\n';
+				nPoints += 3;
 			}
 			if(i>0){
-				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << endl;
-				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " "<< c * sinf(nextBeta) * cosf(nextAlpha) << endl;
-				os << a * sinf(beta) * sinf(nextAlpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(nextAlpha) << endl;
-				nPoints +=3;
+				os << a * sinf(beta) * sinf(alpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(alpha) << '\n';
+				os << a * sinf(nextBeta) * sinf(nextAlpha) << " " << b * cosf(nextBeta) << " "<< c * sinf(nextBeta) * cosf(nextAlpha) << '\n';
+				os << a * sinf(beta) * sinf(nextAlpha) << " " << b * cosf(beta) << " " << c * sinf(beta) * cosf(nextAlpha) << '\n';
+				nPoints += 3;
 			}
 		}
 
@@ -238,7 +237,6 @@ string frustum(float baseRadius, float topRadius, float height, int slices, int 
 	int i, j, nPoints = 0;
 	float *cosCache, *sinCache;
 	float dr, dh, alpha, dAlpha;
-	string ret = "";
 	ostringstream os;
 
 	cosCache = new float[slices+1];
@@ -316,7 +314,6 @@ string torus(float innerRadius, float outerRadius, int nsides, int nrings) {
 	float phi, theta, nextPhi, nextTheta;
 	float cosPhi, cosTheta, sinPhi, sinTheta;
 	float cosNextPhi, cosNextTheta, sinNextPhi, sinNextTheta;
-	string res = "";
 	ostringstream os;
 
 	deltaPhi = 2.0f * M_PI / nrings;
