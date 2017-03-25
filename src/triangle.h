@@ -1,5 +1,6 @@
 #ifndef TRIANGLE
 #define TRIANGLE
+#include <vector>
 #include "point.h"
 
 class triangle{
@@ -10,5 +11,8 @@ public:
 		 float c_b):p1{pt1}, p2{pt2}, p3{pt3}, color_r{c_r}, color_g{c_g}, color_b{c_b} {};
 	triangle(point pt1, point pt2, point pt3):p1{pt1}, p2{pt2}, p3{pt3}, color_r{0}, color_g{0}, color_b{0} {};
 };
+
+// a figure is a set of triangles 
+typedef std::vector<triangle> figure;
 
 #endif

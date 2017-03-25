@@ -7,6 +7,7 @@
 #include <string>
 #define _USE_MATH_DEFINES
 #include <math.h>
+#include "group.h"
 #include <ctype.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -16,6 +17,9 @@
 
 using namespace std;
 
+// TODO
+// Por cores
+
 // Camera control
 float r = 10.0f;
 float alpha;
@@ -24,11 +28,13 @@ float beta;
 // Polygon Mode
 GLenum mode;
 
-// a figure is a set of triangles 
-typedef vector<triangle> figure;
-
 // Structure to save figures to draw
-vector<figure> figures;
+//vector<figure> figures;
+
+vector<group> groups;
+
+// directory of the read file
+string directory;
 
 string directory_of_file(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
@@ -81,16 +87,18 @@ void renderScene(void) {
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
 
-	for(auto fig:figures) {
-		int size = fig.size();
-        GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
-        glPolygonMode(GL_FRONT, modes[mode]);
-
-		glBegin(GL_TRIANGLES);
-		for(int i = 0; i < size; i++){
-			drawTriangle(fig[i]);
+	for(auto g:groups){
+		glLoadMatrixf(g.referential);
+		for(auto fig:g.figures) {
+			int size = fig.size();
+        		GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
+        		glPolygonMode(GL_FRONT, modes[mode]);
+			glBegin(GL_TRIANGLES);
+			for(int i = 0; i < size; i++){
+				drawTriangle(fig[i]);
+			}
+			glEnd();
 		}
-		glEnd();
 	}
 	// End of frame
 	glutSwapBuffers();
@@ -137,6 +145,107 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
+void parseGroup(TiXmlElement* gr) {
+	group g;
+	TiXmlElement* child = gr->FirstChildElement();
+	glPushMatrix();
+	for( ; child; child = child->NextSiblingElement()) {
+		string type = string(child->Value()); 
+		if(type == "translate"){
+			float x, y, z;
+			int rX, rY,rZ;
+
+			rX = child->QueryFloatAttribute("X", &x);
+			rY = child->QueryFloatAttribute("Y", &y);
+			rZ = child->QueryFloatAttribute("Z", &z);
+
+			/* probably not needed, if QueryIntAttribute does not change the value of the var when
+			 * the attribute is not present
+			 */
+			x = (rX == TIXML_SUCCESS)? x : 0;
+			y = (rY == TIXML_SUCCESS)? y : 0;
+			z = (rZ == TIXML_SUCCESS)? z : 0;
+
+			glTranslatef(x, y, z);
+		} else if(type == "rotate"){
+			float angle, axisX, axisY, axisZ;
+			int rAngle, rAxisX, rAxisY, rAxisZ;
+
+			rAngle = child->QueryFloatAttribute("angle", &angle);
+			rAxisX = child->QueryFloatAttribute("axisX", &axisX);
+			rAxisY = child->QueryFloatAttribute("axisY", &axisY);
+			rAxisZ = child->QueryFloatAttribute("axisZ", &axisZ);
+
+			axisX = (rAxisX == TIXML_SUCCESS)? axisX : 0.0;
+			axisY = (rAxisY == TIXML_SUCCESS)? axisY : 0.0;
+			axisZ = (rAxisZ == TIXML_SUCCESS)? axisZ : 0.0;
+			angle = (rAngle == TIXML_SUCCESS)? angle : 0.0;
+
+			glRotatef(angle, axisX, axisY, axisZ);
+		} else if(type == "scale"){
+			float x, y, z;
+			int rX, rY,rZ;
+
+			rX = child->QueryFloatAttribute("X", &x);
+			rY = child->QueryFloatAttribute("Y", &y);
+			rZ = child->QueryFloatAttribute("Z", &z);
+
+			/* probably not needed, if QueryIntAttribute does not change the value of the var when
+			 * the attribute is not present
+			 */
+			x = (rX == TIXML_SUCCESS)? x : 0;
+			y = (rY == TIXML_SUCCESS)? y : 0;
+			z = (rZ == TIXML_SUCCESS)? z : 0;
+			glScalef(x, y, z);
+		} else if(type == "group"){
+			parseGroup(child);
+		} else if(type == "models"){
+			TiXmlElement* model = child->FirstChild("model")->ToElement();
+			for(; model; model=model->NextSiblingElement()){
+				string filename; 
+				int r = model->QueryStringAttribute("file", &filename);
+
+				if(r == TIXML_SUCCESS) {
+					int n_vertex, n_triangles;
+					ifstream file(directory + filename);
+					figure triangles;
+
+					if(!file) {
+						cerr << "The file \"" << filename << "\" was not found.\n";
+					}
+					file >> n_vertex; // reads the number of vertices from the file
+					n_triangles = n_vertex/3;
+
+					for(int i = 0; i < n_triangles; i++){
+						float color_r, color_g, color_b;
+						point ps[3];
+						for(int j = 0; j < 3; j++){
+							float px, py, pz;
+							file >> px;
+							file >> py;
+							file >> pz;
+							point p(px, py, pz);
+							ps[j] = p;
+						}
+						color_r = randFloat();
+						color_g = randFloat();
+						color_b = randFloat();
+
+						triangle t(ps[0], ps[1], ps[2], color_r, color_g, color_b);
+						triangles.push_back(t);
+					}
+					file.close();
+					g.figures.push_back(triangles);
+					//figures.push_back(triangles);
+				}
+			}
+			// guardar matriz!
+		}
+	}
+	groups.push_back(g);
+	glPopMatrix();
+}
+
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char** argv){
 	if(argc != 2){
@@ -151,9 +260,17 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	string directory = directory_of_file(argv[1]);
+	directory = directory_of_file(argv[1]);
 
 	TiXmlHandle docHandle(&doc);
+	cout << "bla\n";
+	TiXmlElement* group = doc.FirstChild("scene")->FirstChild("group")->ToElement();
+	cout << "bla\n";
+
+	for(; group; group=group->NextSiblingElement()){
+		parseGroup(group);
+	}
+	/*
 	TiXmlElement* model = doc.FirstChild("scene")->FirstChild("model")->ToElement();
 	for(; model; model=model->NextSiblingElement()){
 		string filename; 
@@ -192,6 +309,7 @@ int main(int argc, char** argv){
 			figures.push_back(triangles);
 		}
 	}
+	*/
 
 	// init GLUT and the window
 	glutInit(&argc, argv);
