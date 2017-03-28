@@ -38,6 +38,7 @@ vector<group> groups;
 // directory of the read file
 string directory; 
 
+// need to correct to accept full paths
 string directory_of_file(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
 
@@ -80,6 +81,15 @@ void drawTriangle(triangle t){
 	glVertex3f(t.p3.x, t.p3.y, t.p3.z);
 }
 
+void print_matrix(float m[], int I, int J){
+	for(int i  = 0; i < I; i++){
+		for(int j  = 0; j < J; j++){
+			cout << m[i*4 + j] << " ";
+		}
+		cout << endl;
+	}
+}
+
 void renderScene(void) {
         GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	// clear buffers
@@ -91,7 +101,10 @@ void renderScene(void) {
 			  0.0f,1.0f,0.0f);
         glPolygonMode(GL_FRONT, modes[mode]);
 	for(auto g : groups){
+		
 		glLoadMatrixf(g.referential);
+		cout << "=============================================" << endl;
+		print_matrix(g.referential, 4, 4);
 		for(auto f : g.figures){
 			glBegin(GL_TRIANGLES);
 			for(triangle t:f){
@@ -165,9 +178,9 @@ void parseGroup(XMLElement* gr) {
 			 * the attribute is not present
 			 */
 			// MUDAR TIPO rX
-			x = (rX == XML_SUCCESS)? x : 0;
+			/*x = (rX == XML_SUCCESS)? x : 0;
 			y = (rY == XML_SUCCESS)? y : 0;
-			z = (rZ == XML_SUCCESS)? z : 0;
+			z = (rZ == XML_SUCCESS)? z : 0;*/
 
 			glTranslatef(x, y, z);
 			cout << "translation read\n";
@@ -180,10 +193,10 @@ void parseGroup(XMLElement* gr) {
 			rAxisY = child->QueryFloatAttribute("axisY", &axisY);
 			rAxisZ = child->QueryFloatAttribute("axisZ", &axisZ);
 
-			axisX = (rAxisX == XML_SUCCESS)? axisX : 0.0;
+			/*axisX = (rAxisX == XML_SUCCESS)? axisX : 0.0;
 			axisY = (rAxisY == XML_SUCCESS)? axisY : 0.0;
 			axisZ = (rAxisZ == XML_SUCCESS)? axisZ : 0.0;
-			angle = (rAngle == XML_SUCCESS)? angle : 0.0;
+			angle = (rAngle == XML_SUCCESS)? angle : 0.0;*/
 
 			glRotatef(angle, axisX, axisY, axisZ);
 			cout << "rotation read\n";
@@ -198,9 +211,9 @@ void parseGroup(XMLElement* gr) {
 			/* probably not needed, if QueryIntAttribute does not change the value of the var when
 			 * the attribute is not present
 			 */
-			x = (rX == XML_SUCCESS)? x : 0;
+			/*x = (rX == XML_SUCCESS)? x : 0;
 			y = (rY == XML_SUCCESS)? y : 0;
-			z = (rZ == XML_SUCCESS)? z : 0;
+			z = (rZ == XML_SUCCESS)? z : 0;*/
 			glScalef(x, y, z);
 			cout << "scale read\n";
 		} else if(type == "group"){
@@ -248,6 +261,9 @@ void parseGroup(XMLElement* gr) {
 					//figures.push_back(triangles);
 				}
 			}
+			float m[16];
+			glGetFloatv (GL_MODELVIEW_MATRIX, m); 
+			print_matrix(m, 4, 4);
 			// guardar matriz!
 			glGetFloatv (GL_MODELVIEW_MATRIX, g.referential); // save matrix for later
 		}
@@ -278,20 +294,22 @@ int main(int argc, char** argv){
 
 	XMLElement* group = doc.FirstChildElement("scene")->FirstChildElement("group");
 
-	
-	for(; group; group=group->NextSiblingElement()){
-		parseGroup(group);
-	}
 	cout << "ngrupos: " << groups.size() << endl;
 	
-	
+
+				
 	// init GLUT and the window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(800,800);
-	glutCreateWindow("Pratical Assignment 1");
+	glutCreateWindow("Pratical Assignment");
 
+
+	glLoadIdentity(); // delete if there are problems, loads identity before parsing the groups
+	for(; group; group=group->NextSiblingElement()){
+		parseGroup(group);
+	}
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
@@ -303,6 +321,7 @@ int main(int argc, char** argv){
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_CULL_FACE);
+
 
 	// enter GLUT's main cycle
 	glutMainLoop();
