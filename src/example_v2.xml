@@ -1,6 +1,6 @@
 <scene>
 	<group>
-		<translate X="0" Y="0" Z="2" />
+		<translate X="3" Y="4" Z="2" />
 		<rotate angle="45" X="0" Y="1" Z="0" />
 		<scale X="1" Y="2" Z="3" /> 
 		<models>
