@@ -1,6 +1,7 @@
-#define TIXML_USE_STL 
+//#define TIXML_USE_STL 
 #include <vector>
-#include "tinyxml/tinyxml.h"
+#include <iostream>
+#include "tinyxml2.h"
 #include "point.h"
 #include "triangle.h"
 #include <fstream>
@@ -15,6 +16,7 @@
 #include <GL/glut.h>
 #endif
 
+using namespace tinyxml2;
 using namespace std;
 
 // TODO
@@ -79,6 +81,7 @@ void drawTriangle(triangle t){
 }
 
 void renderScene(void) {
+        GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	// set the camera
@@ -86,16 +89,13 @@ void renderScene(void) {
 	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-
-	for(auto g:groups){
+        glPolygonMode(GL_FRONT, modes[mode]);
+	for(auto g : groups){
 		glLoadMatrixf(g.referential);
-		for(auto fig:g.figures) {
-			int size = fig.size();
-        		GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
-        		glPolygonMode(GL_FRONT, modes[mode]);
+		for(auto f : g.figures){
 			glBegin(GL_TRIANGLES);
-			for(int i = 0; i < size; i++){
-				drawTriangle(fig[i]);
+			for(triangle t:f){
+				drawTriangle(t);
 			}
 			glEnd();
 		}
@@ -145,18 +145,14 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-void parseGroup(TiXmlElement* gr) {
+void parseGroup(XMLElement* gr) {
 	group g;
 	//TiXmlElement* child = gr->FirstChildElement();
-	TiXmlNode* child2 = gr->FirstChild();
-	TiXmlElement * child = gr->FirstChildElement();
+	XMLElement * child = gr->FirstChildElement();
 	glPushMatrix();
-	for( ; child2; child2 = child2->NextSibling()) {
-		// string type = string(child->Value()); 
-		// DA MERDA QUANDO INVOCO COM O VALUE, NEM COMPILA
-		child = child2->ToElement();
-		string type = child2->ValueStr(); 
-		cout << type << endl << "imprimiu tipo\n";
+	for( ; child; child = child->NextSiblingElement()) {
+		string type = child->Name(); 
+		cout << "tipo: " << type << endl;
 		if(type == "translate"){
 			float x, y, z;
 			int rX, rY,rZ;
@@ -168,9 +164,10 @@ void parseGroup(TiXmlElement* gr) {
 			/* probably not needed, if QueryIntAttribute does not change the value of the var when
 			 * the attribute is not present
 			 */
-			x = (rX == TIXML_SUCCESS)? x : 0;
-			y = (rY == TIXML_SUCCESS)? y : 0;
-			z = (rZ == TIXML_SUCCESS)? z : 0;
+			// MUDAR TIPO rX
+			x = (rX == XML_SUCCESS)? x : 0;
+			y = (rY == XML_SUCCESS)? y : 0;
+			z = (rZ == XML_SUCCESS)? z : 0;
 
 			glTranslatef(x, y, z);
 			cout << "translation read\n";
@@ -183,10 +180,10 @@ void parseGroup(TiXmlElement* gr) {
 			rAxisY = child->QueryFloatAttribute("axisY", &axisY);
 			rAxisZ = child->QueryFloatAttribute("axisZ", &axisZ);
 
-			axisX = (rAxisX == TIXML_SUCCESS)? axisX : 0.0;
-			axisY = (rAxisY == TIXML_SUCCESS)? axisY : 0.0;
-			axisZ = (rAxisZ == TIXML_SUCCESS)? axisZ : 0.0;
-			angle = (rAngle == TIXML_SUCCESS)? angle : 0.0;
+			axisX = (rAxisX == XML_SUCCESS)? axisX : 0.0;
+			axisY = (rAxisY == XML_SUCCESS)? axisY : 0.0;
+			axisZ = (rAxisZ == XML_SUCCESS)? axisZ : 0.0;
+			angle = (rAngle == XML_SUCCESS)? angle : 0.0;
 
 			glRotatef(angle, axisX, axisY, axisZ);
 			cout << "rotation read\n";
@@ -201,9 +198,9 @@ void parseGroup(TiXmlElement* gr) {
 			/* probably not needed, if QueryIntAttribute does not change the value of the var when
 			 * the attribute is not present
 			 */
-			x = (rX == TIXML_SUCCESS)? x : 0;
-			y = (rY == TIXML_SUCCESS)? y : 0;
-			z = (rZ == TIXML_SUCCESS)? z : 0;
+			x = (rX == XML_SUCCESS)? x : 0;
+			y = (rY == XML_SUCCESS)? y : 0;
+			z = (rZ == XML_SUCCESS)? z : 0;
 			glScalef(x, y, z);
 			cout << "scale read\n";
 		} else if(type == "group"){
@@ -212,12 +209,12 @@ void parseGroup(TiXmlElement* gr) {
 			
 		} else if(type == "models"){
 			cout << "models read\n";
-			TiXmlElement* model = child->FirstChild("model")->ToElement();
+			XMLElement* model = child->FirstChildElement("model");
 			for(; model; model=model->NextSiblingElement()){
-				string filename; 
-				int r = model->QueryStringAttribute("file", &filename);
+				const char * filename= model->Attribute("file");
+				cout << "ficheiro lido: " << filename << endl;
 
-				if(r == TIXML_SUCCESS) {
+				if(filename != NULL) {
 					int n_vertex, n_triangles;
 					ifstream file(directory + filename);
 					figure triangles;
@@ -252,6 +249,7 @@ void parseGroup(TiXmlElement* gr) {
 				}
 			}
 			// guardar matriz!
+			glGetFloatv (GL_MODELVIEW_MATRIX, g.referential); // save matrix for later
 		}
 	}
 	groups.push_back(g);
@@ -266,26 +264,26 @@ int main(int argc, char** argv){
 	}
 
 	// FILE * f = fopen(argv[1], "r");
-	TiXmlDocument doc(argv[1]);
+	XMLDocument doc;
 	//bool loadOkay = doc.LoadFile(f);
-	bool loadOkay = doc.LoadFile();
+	XMLError loadOkay = doc.LoadFile(argv[1]);
 
-	if(!loadOkay){
-		perror("Error: ");
+	if(loadOkay != XML_SUCCESS){ // Condicao para erro
+		perror("");
 		cerr << "Error loading file '" << argv[1] << "'.\n";
 		return 1;
 	}
 
 	directory = directory_of_file(argv[1]);
 
-	//cout << "bla\n";
-	TiXmlElement* group = doc.FirstChildElement("scene")->FirstChildElement("group");
-	//cout << "bla\n";
+	XMLElement* group = doc.FirstChildElement("scene")->FirstChildElement("group");
 
 	
 	for(; group; group=group->NextSiblingElement()){
 		parseGroup(group);
 	}
+	cout << "ngrupos: " << groups.size() << endl;
+	
 	
 	// init GLUT and the window
 	glutInit(&argc, argv);

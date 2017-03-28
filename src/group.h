@@ -13,8 +13,8 @@
 
 class group{
 public:
-	float referential[16];
 	std::vector<figure> figures;
+	float referential[16];
 };
 
 #endif
