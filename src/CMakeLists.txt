@@ -21,14 +21,9 @@ if(NOT OPENGL_FOUND)
 endif(NOT OPENGL_FOUND)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml)
-
-add_subdirectory(${CMAKE_CURRENT_SOURCE_DIR}/tinyxml)
 add_definitions(-std=c++11 -g)
 
-add_executable(engine engine.cpp)
-add_executable(engine2 engine_tinyxml2.cpp tinyxml2.cpp)
+add_executable(engine engine_tinyxml2.cpp tinyxml2.cpp)
 add_executable(gen gen.cpp)
 
-target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY} tinyxml)
-target_link_libraries(engine2 ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
