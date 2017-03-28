@@ -1,0 +1,12 @@
+<scene>
+	<group>
+		<translate X="0" Y="0" Z="2" />
+		<rotate angle="45" X="0" Y="1" Z="0" />
+		<scale X="1" Y="2" Z="3" /> 
+		<models>
+			<model file="sphere.3d" />
+			<model file="cone.3d" />
+		</models>
+
+	</group>
+</scene>
