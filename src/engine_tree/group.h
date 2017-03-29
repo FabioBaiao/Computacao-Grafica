@@ -11,14 +11,17 @@
 #include "triangle.h"
 #include "transform.h"
 
+class color{
+public:
+	float r, g, b;
+	color(float rr, float gg, float bb) : r{rr}, g{gg}, b{bb} {};
+};
 
 class group{
 public:
-	//string model_name;
-	//std::vector<figure> figures;
 	std::vector<std::string> models;
-	//float referential[16];
-	std::vector<transform*> transforms; // fazer class ou por já campos das transformacoes? 
+	std::vector<color> models_color;
+	std::vector<transform*> transforms; 
 	std::vector<group> child_groups;
 };
 

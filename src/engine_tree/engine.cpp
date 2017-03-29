@@ -1,21 +1,19 @@
-//#define TIXML_USE_STL 
 #include <vector>
 #include <iostream>
-#include "tinyxml2.h"
-#include "point.h"
-#include "triangle.h"
 #include <fstream>
 #include <string>
 #include <map>
+#include <ctype.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
-#include "group.h"
-#include <ctype.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>
 #endif
+#include "tinyxml2.h"
+#include "point.h"
+#include "group.h"
 #include "transform.h"
 #include "scale.h"
 #include "translate.h"
@@ -24,8 +22,7 @@
 using namespace tinyxml2;
 using namespace std;
 
-// TODO
-// Por cores
+typedef vector<point> Model;
 
 // Camera control
 float r = 10.0f;
@@ -35,15 +32,13 @@ float beta;
 // Polygon Mode
 GLenum mode;
 
-// Structure to save figures to draw
-//vector<figure> figures;
-
 vector<group> groups;
-map<string, figure> models;
+map<string, Model> models;
 
 // directory of the read file
 string directory; 
 
+// TODO!!
 // need to correct to accept full paths
 string directory_of_file(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
@@ -56,8 +51,7 @@ float randFloat() {
 }
 
 void changeSize(int w, int h) {
-	if(h == 0)
-		h = 1;
+	if(h == 0) h = 1;
 	float ratio = w * 1.0 / h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -66,17 +60,10 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void drawTriangle(triangle t){
-	glColor3f(t.color_r, t.color_g, t.color_b);
-	glVertex3f(t.p1.x, t.p1.y, t.p1.z);
-	glVertex3f(t.p2.x, t.p2.y, t.p2.z);
-	glVertex3f(t.p3.x, t.p3.y, t.p3.z);
-}
-
 void print_matrix(float m[], int I, int J){
 	for(int i  = 0; i < I; i++){
 		for(int j  = 0; j < J; j++){
-			cout << m[i + j*4] << " ";
+			cout << m[i + j*I] << " ";
 		}
 		cout << endl;
 	}
@@ -87,13 +74,16 @@ void drawGroup(group g){
 	for(transform* t : g.transforms){
 		t->apply();
 	}
+	int i = 0;
 	for(string model: g.models){
+		color c = g.models_color[i];
 		glBegin(GL_TRIANGLES);
-		figure f = models[model];
-		for(triangle t:f){
-			drawTriangle(t);
+		glColor3f( c.r, c.g, c.b);
+		for(auto p:models[model]){
+			glVertex3f(p.x, p.y, p.z);
 		}
 		glEnd();
+		i++;
 	}
 	for(auto gr : g.child_groups){
 		drawGroup(gr);
@@ -112,23 +102,11 @@ void renderScene(void) {
 
 	for(auto g : groups){
 		drawGroup(g);
-		/*glMultMatrixf(g.referential);
-		//cout << "=============================================" << endl;
-		glBegin(GL_TRIANGLES);
-		for(auto f : g.models){
-			for(triangle t:f){
-				drawTriangle(t);
-			}
-		}
-		glEnd();*/
-		//print_matrix(g.referential, 4, 4);
 	}
-	// End of frame
 	glutSwapBuffers();
 }
 
 void processKeys(unsigned char c, int xx, int yy) {
-// put code to process regular keys in here
 	switch(toupper(c)){
 		case 'M': // More radius
 			r += 0.2f;
@@ -146,7 +124,6 @@ void processKeys(unsigned char c, int xx, int yy) {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-// put code to process special keys in here
 	switch(key){
 		case GLUT_KEY_UP:
 			beta += 0.1f;
@@ -173,116 +150,91 @@ group parseGroup(XMLElement* gr) {
 	XMLElement * child = gr->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement()) {
 		string type = string(child->Name()); 
-		cout << "tipo: " << type << endl;
 		if(type == "translate"){
 			float x, y, z;
-			int rX, rY,rZ;
+			x = y = z = 0;
 
-			rX = child->QueryFloatAttribute("X", &x);
-			rY = child->QueryFloatAttribute("Y", &y);
-			rZ = child->QueryFloatAttribute("Z", &z);
-
-			/* probably not needed, if QueryIntAttribute does not change the value of the var when
-			 * the attribute is not present
-			 */
-			// MUDAR TIPO rX
-			x = (rX == XML_SUCCESS)? x : 0;
-			y = (rY == XML_SUCCESS)? y : 0;
-			z = (rZ == XML_SUCCESS)? z : 0;
-
+			child->QueryFloatAttribute("X", &x);
+			child->QueryFloatAttribute("Y", &y);
+			child->QueryFloatAttribute("Z", &z);
+			
 			g.transforms.push_back(new translate(x,y,z));
-			cout << "translation read " << x << " " << y << " " << z << "\n";
 		} else if(type == "rotate"){
 			float angle, axisX, axisY, axisZ;
-			int rAngle, rAxisX, rAxisY, rAxisZ;
+			angle = axisX = axisY = axisZ = 0.0;
 
-			rAngle = child->QueryFloatAttribute("angle", &angle);
-			rAxisX = child->QueryFloatAttribute("axisX", &axisX);
-			rAxisY = child->QueryFloatAttribute("axisY", &axisY);
-			rAxisZ = child->QueryFloatAttribute("axisZ", &axisZ);
-
-			axisX = (rAxisX == XML_SUCCESS)? axisX : 0.0;
-			axisY = (rAxisY == XML_SUCCESS)? axisY : 0.0;
-			axisZ = (rAxisZ == XML_SUCCESS)? axisZ : 0.0;
-			angle = (rAngle == XML_SUCCESS)? angle : 0.0;
+			child->QueryFloatAttribute("angle", &angle);
+			child->QueryFloatAttribute("axisX", &axisX);
+			child->QueryFloatAttribute("axisY", &axisY);
+			child->QueryFloatAttribute("axisZ", &axisZ);
 
 			g.transforms.push_back(new rotate(angle, axisX, axisY, axisZ));
-			cout << "rotation read " << angle << " " << axisX << " " << axisY << " " << axisZ << "\n";
 		} else if(type == "scale"){
 			float x, y, z;
-			int rX, rY,rZ;
+			x = y = z = 1.0;
 
-			rX = child->QueryFloatAttribute("X", &x);
-			rY = child->QueryFloatAttribute("Y", &y);
-			rZ = child->QueryFloatAttribute("Z", &z);
+			child->QueryFloatAttribute("X", &x);
+			child->QueryFloatAttribute("Y", &y);
+			child->QueryFloatAttribute("Z", &z);
 
-			x = (rX == XML_SUCCESS)? x : 1;
-			y = (rY == XML_SUCCESS)? y : 1;
-			z = (rZ == XML_SUCCESS)? z : 1;
-			//glScalef(x, y, z);
 			g.transforms.push_back(new scale(x,y,z));
-			cout << "scale read: " << x << " " << y <<" " << z <<"\n";
 		} else if(type == "group"){
 			group g_child = parseGroup(child);
 			g.child_groups.push_back(g_child);
-			cout << "group read\n";
 		} else if(type == "models"){
-			cout << "models read\n";
 			XMLElement* model = child->FirstChildElement("model");
 			for(; model; model=model->NextSiblingElement()){
 				const char * filename= model->Attribute("file");
-				// cout << "ficheiro lido: " << filename << endl;
-
 				if(filename != NULL) {
 					string f_name = string(filename);
-					int n_vertex, n_triangles;
+					int n_vertex;
 
 					ifstream file(directory + filename);
 
 					if(!file) {
 						cerr << "The file \"" << filename << "\" was not found.\n";
 					}
-					// estrutura com cores deve ficar aqui
+
+					float rr, gg, bb;
+					int r_r, r_g, r_b;
+					rr = gg = bb = 0.0;
+
+					r_r = model->QueryFloatAttribute("R", &rr);
+					r_g = model->QueryFloatAttribute("G", &gg);
+					r_b = model->QueryFloatAttribute("B", &bb);
+
+					if(r_r != XML_SUCCESS && r_g != XML_SUCCESS && r_b != XML_SUCCESS){
+						// the color defaults to white if not specified
+						rr = gg = bb = 1;
+					}
+					color c(rr,gg,bb);
+
 					g.models.push_back(f_name);
+					g.models_color.push_back(c);
 					if(models.find(f_name) != models.end()){
 						// if the model file was already read
 						continue;
 					}
 
-					file >> n_vertex; // reads the number of vertices from the file
-					n_triangles = n_vertex/3;
-					figure triangles;
+					// reads the number of vertices from the file
+					file >> n_vertex; 
+					Model model_read;
 
-					for(int i = 0; i < n_triangles; i++){
+					for(int i = 0; i < n_vertex; i++){
 						float color_r, color_g, color_b;
-						point ps[3];
-						for(int j = 0; j < 3; j++){
-							float px, py, pz;
-							file >> px;
-							file >> py;
-							file >> pz;
-							point p(px, py, pz);
-							ps[j] = p;
-						}
-						color_r = randFloat();
-						color_g = randFloat();
-						color_b = randFloat();
-
-						triangle t(ps[0], ps[1], ps[2], color_r, color_g, color_b);
-						triangles.push_back(t);
+						float px, py, pz;
+						file >> px;
+						file >> py;
+						file >> pz;
+						point p(px, py, pz);
+						model_read.push_back(p);
 					}
 					file.close();
-					//inserir map da string para a figura
-					//g.figures.push_back(triangles);
-					//figures.push_back(triangles);
-					models[f_name] = triangles;
+					models[f_name] = model_read;
 				}
 			}
-			// guardar matriz!
-			//glGetFloatv (GL_MODELVIEW_MATRIX, g.referential); // save matrix for later
 		}
 	}
-	glPopMatrix();
 	return g;
 }
 
@@ -296,7 +248,7 @@ int main(int argc, char** argv){
 	XMLDocument doc;
 	XMLError loadOkay = doc.LoadFile(argv[1]);
 
-	if(loadOkay != XML_SUCCESS){ // Condicao para erro
+	if(loadOkay != XML_SUCCESS){ 
 		perror("");
 		cerr << "Error loading file '" << argv[1] << "'.\n";
 		return 1;
