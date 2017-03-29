@@ -1,9 +1,9 @@
 #ifndef SCALE
 #define SCALE
 
-#include "transform.h"
+#include "geoTransform.h"
 
-class scale : public transform {
+class scale : public geoTransform {
 public:
 	float x, y, z;
 	scale(float fx, float fy, float fz) : x{fx}, y{fy}, z{fz} {};

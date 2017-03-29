@@ -1,8 +1,9 @@
-#include <vector>
-#include <iostream>
 #include <fstream>
-#include <string>
+#include <iostream>
 #include <map>
+#include <string>
+#include <vector>
+
 #include <ctype.h>
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -11,16 +12,17 @@
 #else
 #include <GL/glut.h>
 #endif
-#include "tinyxml2.h"
-#include "point.h"
-#include "group.h"
-#include "transform.h"
-#include "scale.h"
-#include "translate.h"
-#include "rotate.h"
 
-using namespace tinyxml2;
+#include "geoTransform.h"
+#include "group.h"
+#include "point.h"
+#include "rotation.h"
+#include "scale.h"
+#include "tinyxml2.h"
+#include "translation.h"
+
 using namespace std;
+using namespace tinyxml2;
 
 typedef vector<point> Model;
 
@@ -40,7 +42,7 @@ string directory;
 
 // TODO!!
 // need to correct to accept full paths
-string directory_of_file(const string& fname) {
+string directoryOfFile(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
 
 	return (string::npos == pos)? "" : fname.substr(0, pos+1);
@@ -51,7 +53,9 @@ float randFloat() {
 }
 
 void changeSize(int w, int h) {
-	if(h == 0) h = 1;
+	if(h == 0)
+		h = 1;
+	
 	float ratio = w * 1.0 / h;
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
@@ -60,54 +64,56 @@ void changeSize(int w, int h) {
 	glMatrixMode(GL_MODELVIEW);
 }
 
-void print_matrix(float m[], int I, int J){
+void print_matrix(float m[], int I, int J) {
 	for(int i  = 0; i < I; i++){
 		for(int j  = 0; j < J; j++){
-			cout << m[i + j*I] << " ";
+			cout << m[i + j * I] << " ";
 		}
 		cout << endl;
 	}
 }
 
-void drawGroup(group g){
+void drawGroup(group g) {
 	glPushMatrix();
-	for(transform* t : g.transforms){
+	
+	for(geoTransform* t : g.transforms) {
 		t->apply();
 	}
 	int i = 0;
-	for(string model: g.models){
-		color c = g.models_color[i];
+	for(string model : g.models) {
+		color c = g.modelsColor[i];
+		
 		glBegin(GL_TRIANGLES);
 		glColor3f( c.r, c.g, c.b);
-		for(auto p:models[model]){
+		for(auto p : models[model]) {
 			glVertex3f(p.x, p.y, p.z);
 		}
 		glEnd();
 		i++;
 	}
-	for(auto gr : g.child_groups){
+	for(auto gr : g.childGroups) {
 		drawGroup(gr);
 	}
 	glPopMatrix();
 }
 
 void renderScene(void) {
-        GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
+    GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        glPolygonMode(GL_FRONT, modes[mode]);
+    glPolygonMode(GL_FRONT, modes[mode]);
 	glLoadIdentity();
 	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
 
-	for(auto g : groups){
+	for(auto g : groups) {
 		drawGroup(g);
 	}
 	glutSwapBuffers();
 }
 
 void processKeys(unsigned char c, int xx, int yy) {
-	switch(toupper(c)){
+	switch(toupper(c)) {
 		case 'M': // More radius
 			r += 0.2f;
 			break;
@@ -124,7 +130,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-	switch(key){
+	switch(key) {
 		case GLUT_KEY_UP:
 			beta += 0.1f;
 			if(beta > 1.5f)
@@ -145,48 +151,51 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-group parseGroup(XMLElement* gr) {
+group parseGroup(XMLElement *gr) {
 	group g;
-	XMLElement * child = gr->FirstChildElement();
+	XMLElement *child = gr->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement()) {
 		string type = string(child->Name()); 
+		
 		if(type == "translate"){
 			float x, y, z;
-			x = y = z = 0;
+			x = y = z = 0.0f;
 
 			child->QueryFloatAttribute("X", &x);
 			child->QueryFloatAttribute("Y", &y);
 			child->QueryFloatAttribute("Z", &z);
 			
-			g.transforms.push_back(new translate(x,y,z));
-		} else if(type == "rotate"){
+			g.transforms.push_back(new translation(x,y,z));
+		} else if(type == "rotate") {
 			float angle, axisX, axisY, axisZ;
-			angle = axisX = axisY = axisZ = 0.0;
+			angle = axisX = axisY = axisZ = 0.0f;
 
 			child->QueryFloatAttribute("angle", &angle);
 			child->QueryFloatAttribute("axisX", &axisX);
 			child->QueryFloatAttribute("axisY", &axisY);
 			child->QueryFloatAttribute("axisZ", &axisZ);
 
-			g.transforms.push_back(new rotate(angle, axisX, axisY, axisZ));
-		} else if(type == "scale"){
+			g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ));
+		} else if(type == "scale") {
 			float x, y, z;
-			x = y = z = 1.0;
+			x = y = z = 1.0f;
 
 			child->QueryFloatAttribute("X", &x);
 			child->QueryFloatAttribute("Y", &y);
 			child->QueryFloatAttribute("Z", &z);
 
 			g.transforms.push_back(new scale(x,y,z));
-		} else if(type == "group"){
+		} else if(type == "group") {
 			group g_child = parseGroup(child);
-			g.child_groups.push_back(g_child);
-		} else if(type == "models"){
-			XMLElement* model = child->FirstChildElement("model");
+			g.childGroups.push_back(g_child);
+		} else if(type == "models") {
+			XMLElement *model = child->FirstChildElement("model");
+			
 			for(; model; model=model->NextSiblingElement()){
-				const char * filename= model->Attribute("file");
+				const char* filename= model->Attribute("file");
+				
 				if(filename != NULL) {
-					string f_name = string(filename);
+					string fName = string(filename);
 					int n_vertex;
 
 					ifstream file(directory + filename);
@@ -209,9 +218,9 @@ group parseGroup(XMLElement* gr) {
 					}
 					color c(rr,gg,bb);
 
-					g.models.push_back(f_name);
-					g.models_color.push_back(c);
-					if(models.find(f_name) != models.end()){
+					g.models.push_back(fName);
+					g.modelsColor.push_back(c);
+					if(models.find(fName) != models.end()){
 						// if the model file was already read
 						continue;
 					}
@@ -230,7 +239,7 @@ group parseGroup(XMLElement* gr) {
 						model_read.push_back(p);
 					}
 					file.close();
-					models[f_name] = model_read;
+					models[fName] = model_read;
 				}
 			}
 		}
@@ -239,24 +248,29 @@ group parseGroup(XMLElement* gr) {
 }
 
 //We assume that the .xml and .3d files passed are correct.
-int main(int argc, char** argv){
-	if(argc != 2){
+int main(int argc, char **argv) {
+	if(argc != 2) {
 		cerr << "Usage: " << argv[0] << " config_file\n";
 		return 1;
 	}
-
 	XMLDocument doc;
 	XMLError loadOkay = doc.LoadFile(argv[1]);
 
-	if(loadOkay != XML_SUCCESS){ 
-		perror("");
+	if(loadOkay != XML_SUCCESS) { 
+		perror("LoadFile");
 		cerr << "Error loading file '" << argv[1] << "'.\n";
 		return 1;
 	}
 
-	directory = directory_of_file(argv[1]);
-	XMLElement* gr = doc.FirstChildElement("scene")->FirstChildElement("group");
-	for(; gr; gr=gr->NextSiblingElement()){
+	directory = directoryOfFile(argv[1]);
+	XMLElement* scene = doc.FirstChildElement("scene");
+	if(scene == NULL) {
+		cerr << "Error: The first XML element must be \"scene\"" << endl;
+		return 1;
+	}
+
+	XMLElement* gr = scene->FirstChildElement("group");
+	for(; gr; gr = gr->NextSiblingElement()){
 		group g = parseGroup(gr);
 		groups.push_back(g);
 	}

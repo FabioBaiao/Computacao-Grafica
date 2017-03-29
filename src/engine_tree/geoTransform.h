@@ -1,5 +1,5 @@
-#ifndef TRANSFORM
-#define TRANSFORM
+#ifndef GEO_TRANSFORM
+#define GEO_TRANSFORM
 
 #ifdef __APPLE__
 #include <GLUT/glut.h>
@@ -7,7 +7,7 @@
 #include <GL/glut.h>
 #endif
 
-class transform {
+class geoTransform {
 public:
 	virtual void apply() = 0;
 };

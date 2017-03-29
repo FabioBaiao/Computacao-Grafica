@@ -135,6 +135,34 @@
 					<model file="ringA_v3.3d" R="0.431" G="0.439" B="0.427" />
 				</models>
 			</group>
+			<group>
+				<rotate axisX="1" axisY="0" axisZ="0" angle="180"/>
+				<group>
+					<!-- Upside-down ring D -->
+					<scale X="0.765" Y="0.765" Z="0.765" />
+					<models>
+						<model file="ringD_v3.3d" R="0.208" G="0.188" B="0.204" />
+					</models>
+				</group>
+				<group>
+					<!-- Upside-down ring C -->
+					<models>
+						<model file="ringC_v3.3d" R="0.643" G="0.604" B="0.576" />
+					</models>
+				</group>
+				<group>
+					<!-- Upside-down ring B -->
+					<models>
+						<model file="ringB_v3.3d" R="0.220" G="0.224" B="0.231" />
+					</models>
+				</group>
+				<group>
+					<!-- Upside-down ring A -->
+					<models>
+						<model file="ringA_v3.3d" R="0.431" G="0.439" B="0.427" />
+					</models>
+				</group>
+			</group>
 		</group>
 		<group>
 			<translate X="120" Y="0.0" Z="0.0" />
