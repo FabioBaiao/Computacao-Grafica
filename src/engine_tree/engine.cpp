@@ -6,6 +6,7 @@
 #include "triangle.h"
 #include <fstream>
 #include <string>
+#include <map>
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include "group.h"
@@ -15,6 +16,10 @@
 #else
 #include <GL/glut.h>
 #endif
+#include "transform.h"
+#include "scale.h"
+#include "translate.h"
+#include "rotate.h"
 
 using namespace tinyxml2;
 using namespace std;
@@ -51,27 +56,13 @@ float randFloat() {
 }
 
 void changeSize(int w, int h) {
-
-	// Prevent a divide by zero, when window is too short
-	// (you cant make a window with zero width).
 	if(h == 0)
 		h = 1;
-
-	// compute window's aspect ratio 
 	float ratio = w * 1.0 / h;
-
-	// Set the projection matrix as current
 	glMatrixMode(GL_PROJECTION);
-	// Load Identity Matrix
 	glLoadIdentity();
-
-	// Set the viewport to be the entire window
 	glViewport(0, 0, w, h);
-
-	// Set perspective
 	gluPerspective(45.0f ,ratio, 1.0f ,1000.0f);
-
-	// return to the model view matrix mode
 	glMatrixMode(GL_MODELVIEW);
 }
 
@@ -91,25 +82,45 @@ void print_matrix(float m[], int I, int J){
 	}
 }
 
+void drawGroup(group g){
+	glPushMatrix();
+	for(transform* t : g.transforms){
+		t->apply();
+	}
+	for(string model: g.models){
+		glBegin(GL_TRIANGLES);
+		figure f = models[model];
+		for(triangle t:f){
+			drawTriangle(t);
+		}
+		glEnd();
+	}
+	for(auto gr : g.child_groups){
+		drawGroup(gr);
+	}
+	glPopMatrix();
+}
+
 void renderScene(void) {
         GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glPolygonMode(GL_FRONT, modes[mode]);
-
-	for(auto g : groups){
-		glLoadIdentity();
-		gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
+	glLoadIdentity();
+	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-		glMultMatrixf(g.referential);
+
+	for(auto g : groups){
+		drawGroup(g);
+		/*glMultMatrixf(g.referential);
 		//cout << "=============================================" << endl;
 		glBegin(GL_TRIANGLES);
-		for(auto f : g.figures){
+		for(auto f : g.models){
 			for(triangle t:f){
 				drawTriangle(t);
 			}
 		}
-		glEnd();
+		glEnd();*/
 		//print_matrix(g.referential, 4, 4);
 	}
 	// End of frame
@@ -157,10 +168,9 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-void parseGroup(XMLElement* gr) {
+group parseGroup(XMLElement* gr) {
 	group g;
 	XMLElement * child = gr->FirstChildElement();
-	glPushMatrix();
 	for( ; child; child = child->NextSiblingElement()) {
 		string type = string(child->Name()); 
 		cout << "tipo: " << type << endl;
@@ -180,7 +190,7 @@ void parseGroup(XMLElement* gr) {
 			y = (rY == XML_SUCCESS)? y : 0;
 			z = (rZ == XML_SUCCESS)? z : 0;
 
-			glTranslatef(x, y, z);
+			g.transforms.push_back(new translate(x,y,z));
 			cout << "translation read " << x << " " << y << " " << z << "\n";
 		} else if(type == "rotate"){
 			float angle, axisX, axisY, axisZ;
@@ -196,7 +206,7 @@ void parseGroup(XMLElement* gr) {
 			axisZ = (rAxisZ == XML_SUCCESS)? axisZ : 0.0;
 			angle = (rAngle == XML_SUCCESS)? angle : 0.0;
 
-			glRotatef(angle, axisX, axisY, axisZ);
+			g.transforms.push_back(new rotate(angle, axisX, axisY, axisZ));
 			cout << "rotation read " << angle << " " << axisX << " " << axisY << " " << axisZ << "\n";
 		} else if(type == "scale"){
 			float x, y, z;
@@ -209,28 +219,39 @@ void parseGroup(XMLElement* gr) {
 			x = (rX == XML_SUCCESS)? x : 1;
 			y = (rY == XML_SUCCESS)? y : 1;
 			z = (rZ == XML_SUCCESS)? z : 1;
-			glScalef(x, y, z);
+			//glScalef(x, y, z);
+			g.transforms.push_back(new scale(x,y,z));
 			cout << "scale read: " << x << " " << y <<" " << z <<"\n";
 		} else if(type == "group"){
-			parseGroup(child);
+			group g_child = parseGroup(child);
+			g.child_groups.push_back(g_child);
 			cout << "group read\n";
 		} else if(type == "models"){
 			cout << "models read\n";
 			XMLElement* model = child->FirstChildElement("model");
 			for(; model; model=model->NextSiblingElement()){
 				const char * filename= model->Attribute("file");
-				cout << "ficheiro lido: " << filename << endl;
+				// cout << "ficheiro lido: " << filename << endl;
 
 				if(filename != NULL) {
+					string f_name = string(filename);
 					int n_vertex, n_triangles;
+
 					ifstream file(directory + filename);
-					figure triangles;
 
 					if(!file) {
 						cerr << "The file \"" << filename << "\" was not found.\n";
 					}
+					// estrutura com cores deve ficar aqui
+					g.models.push_back(f_name);
+					if(models.find(f_name) != models.end()){
+						// if the model file was already read
+						continue;
+					}
+
 					file >> n_vertex; // reads the number of vertices from the file
 					n_triangles = n_vertex/3;
+					figure triangles;
 
 					for(int i = 0; i < n_triangles; i++){
 						float color_r, color_g, color_b;
@@ -251,16 +272,18 @@ void parseGroup(XMLElement* gr) {
 						triangles.push_back(t);
 					}
 					file.close();
-					g.figures.push_back(triangles);
+					//inserir map da string para a figura
+					//g.figures.push_back(triangles);
 					//figures.push_back(triangles);
+					models[f_name] = triangles;
 				}
 			}
 			// guardar matriz!
-			glGetFloatv (GL_MODELVIEW_MATRIX, g.referential); // save matrix for later
+			//glGetFloatv (GL_MODELVIEW_MATRIX, g.referential); // save matrix for later
 		}
 	}
-	groups.push_back(g);
 	glPopMatrix();
+	return g;
 }
 
 //We assume that the .xml and .3d files passed are correct.
@@ -270,9 +293,7 @@ int main(int argc, char** argv){
 		return 1;
 	}
 
-	// FILE * f = fopen(argv[1], "r");
 	XMLDocument doc;
-	//bool loadOkay = doc.LoadFile(f);
 	XMLError loadOkay = doc.LoadFile(argv[1]);
 
 	if(loadOkay != XML_SUCCESS){ // Condicao para erro
@@ -282,7 +303,11 @@ int main(int argc, char** argv){
 	}
 
 	directory = directory_of_file(argv[1]);
-
+	XMLElement* gr = doc.FirstChildElement("scene")->FirstChildElement("group");
+	for(; gr; gr=gr->NextSiblingElement()){
+		group g = parseGroup(gr);
+		groups.push_back(g);
+	}
 
 	// init GLUT and the window
 	glutInit(&argc, argv);
@@ -291,29 +316,17 @@ int main(int argc, char** argv){
 	glutInitWindowSize(800,800);
 	glutCreateWindow("Pratical Assignment");
 
-
 	// Required callback registry 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
-
-	// Callback registration for keyboard processing
 	glutKeyboardFunc(processKeys);
 	glutSpecialFunc(processSpecialKeys);
 
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
-
-	//glLoadIdentity(); // delete if there are problems, loads identity before parsing the groups
-	XMLElement* group = doc.FirstChildElement("scene")->FirstChildElement("group");
-	for(; group; group=group->NextSiblingElement()){
-		parseGroup(group);
-	}
-	// cout << "ngrupos: " << groups.size() << endl;
 	glEnable(GL_CULL_FACE);
 
-
-	// enter GLUT's main cycle
 	glutMainLoop();
 
 	return 1;
