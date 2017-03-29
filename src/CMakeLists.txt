@@ -23,7 +23,7 @@ endif(NOT OPENGL_FOUND)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 add_definitions(-std=c++11 -g)
 
-add_executable(engine engine_tinyxml2.cpp tinyxml2.cpp)
+add_executable(engine engine.cpp tinyxml2.cpp)
 add_executable(gen gen.cpp)
 
 target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
