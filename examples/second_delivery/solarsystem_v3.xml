@@ -1,0 +1,168 @@
+<!-- Based on the calculations showed in "CG - Dimensões do Sistema Solar.docx" -->
+<!-- All planets, moons and rings are scaled 1:10^4 . Distances are not scaled -->
+<scene>
+	<group>
+		<models>
+			<model file="sun_v3.3d" R="0.945" G="0.412" B="0.082"/>
+		</models>
+		<group>
+			<!-- Mercury -->
+			<translate X="26" Y="0.0" Z="0.0" />
+			<scale X="0.535" Y="0.535" Z="0.535" />
+			<models>
+				<model file="terrestrial_v3.3d" R="0.412" G="0.388" B="0.376" />
+			</models>
+		</group>
+		<group>
+			<!-- Venus -->
+			<translate X="31" Y="0.0" Z="0.0" />
+			<scale X="1.326" Y="1.326" Z="1.326" />
+			<models>
+				<model file="terrestrial_v3.3d" R="0.816" G="0.533" B="0.208" />
+			</models>
+		</group>
+		<group>
+			<translate X="38" Y="0.0" Z="0.0" />
+			<group>
+				<!-- Earth -->
+				<scale X="1.396" Y="1.396" Z="1.396" />
+				<models>
+					<model file="terrestrial_v3.3d" R="0.145" G="0.192" B="0.388" />
+				</models>
+			</group>	
+			<group>
+				<!-- Moon -->
+				<translate X="2" Y="0.0" Z="0.0" />
+				<scale X="0.863" Y="0.863" Z="0.863" />
+				<models>
+					<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<!-- Mars -->
+			<translate X="45" Y="0.0" Z="0.0" />
+			<scale X="0.743" Y="0.743" Z="0.743" />
+			<models>
+				<model file="terrestrial_v3.3d" R="0.788" G="0.243" B="0.020" />
+			</models>
+		</group>
+		<!--
+			Asteroid belt???
+		-->
+		<group>
+			<translate X="68" Y="0.0" Z="0.0" />
+			<group>
+				<!-- Jupiter -->
+				<scale X="1.570" Y="1.570" Z="1.570" />
+				<models>
+					<model file="gaseous_v3.3d" R="0.984" G="0.808" B="0.573" />
+				</models>
+			</group>
+			<group>
+				<!-- Europa -->
+				<translate X="8" Y="0.0" Z="0.0" />
+				<scale X="0.776" Y="0.776" Z="0.776" />
+				<models>
+					<model file="moon_v3.3d" R="0.592" G="0.388" B="0.203" />
+				</models>
+			</group>
+			<group>
+				<!-- Io -->
+				<translate X="10" Y="0.0" Z="0.0" />
+				<scale X="0.905" Y="0.905" Z="0.905" />
+				<models>
+					<model file="moon_v3.3d" R="0.749" G="0.714" B="0.318" />
+				</models>
+			</group>
+			<group>
+				<!-- Calisto -->
+				<translate X="12" Y="0.0" Z="0.0" />
+				<scale X="1.198" Y="1.198" Z="1.198" />
+				<models>
+					<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176" />
+				</models>
+			</group>
+			<group>
+				<!-- Ganimede -->
+				<translate X="13.5" Y="0.0" Z="0.0" />
+				<scale X="1.307" Y="1.307" Z="1.307" />
+				<models>
+					<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="100" Y="0.0" Z="0.0" />
+			<rotate axisX="0" axisY="1" axisZ="1" angle="50" />
+			<group>
+				<!-- Saturn -->
+				<scale X="1.308" Y="1.308" Z="1.308" />
+				<models>
+					<model file="gaseous_v3.3d" R="0.835" G="0.694" B="0.467" />
+				</models>
+			</group>
+			<group>
+				<!-- Titan -->
+				<translate X="10" Y="0.0" Z="0.0" />
+				<scale X="1.280" Y="1.280" Z="1.280" />
+				<models>
+					<model file="moon_v3.3d" R="0.824" G="0.733" B="0.357"/>
+				</models>
+			</group>
+			<group>
+				<!-- Ring D -->
+				<scale X="0.765" Y="0.765" Z="0.765" />
+				<models>
+					<model file="ringD_v3.3d" R="0.208" G="0.188" B="0.204" />
+				</models>
+			</group>
+			<group>
+				<!-- Ring C -->
+				<models>
+					<model file="ringC_v3.3d" R="0.643" G="0.604" B="0.576" />
+				</models>
+			</group>
+			<group>
+				<!-- Ring B -->
+				<models>
+					<model file="ringB_v3.3d" R="0.220" G="0.224" B="0.231" />
+				</models>
+			</group>
+			<group>
+				<!-- Ring A -->
+				<models>
+					<model file="ringA_v3.3d" R="0.431" G="0.439" B="0.427" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="120" Y="0.0" Z="0.0" />
+			<group>
+				<!-- Uranus -->
+				<scale X="0.57" Y="0.57" Z="0.57" />
+				<models>
+					<model file="gaseous_v3.3d" R="0.757" G="0.906" B="0.918" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="130" Y="0.0" Z="0.0" />
+			<group>
+				<!-- Neptune -->
+				<scale X="0.553" Y="0.553" Z="0.553" />
+				<models>
+					<model file="gaseous_v3.3d" R="0.251" G="0.416" B="0.988" />
+				</models>
+			</group>
+			<group>
+				<!-- Triton -->
+				<translate X="7" Y="0.0" Z="0.0" />
+				<scale X="0.672" Y="0.672" Z="0.672" />
+				<models>
+					<model file="moon_v3.3d" R="0.525" G="0.478" B="0.416" />
+				</models>
+			</group>
+		</group>
+	</group>
+</scene>

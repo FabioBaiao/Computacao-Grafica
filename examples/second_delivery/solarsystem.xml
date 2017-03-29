@@ -1,0 +1,190 @@
+<!-- Based on the calculations showed in "CG - Dimensões do Sistema.docx" -->
+<scene>
+	<group>
+		<!-- <color R="0.945" G="0.412" B="0.082" /> -->
+		<models>
+			<model file="sun.3d" />
+		</models>
+		<!-- The radiuses of the orbits are scaled 1:10e7 -->
+		<group>
+			<translate X="5.7" Y="0.0" Z="0.0" />
+			<scale X="0.535" Y="0.535" Z="0.535" />
+			<!-- <color R="0.412" G="0.388" B="0.376" /> -->
+			<models>
+				<!-- Mercury -->
+				<model file="terrestrial.3d" />
+			</models>
+		</group>
+		<group>
+			<translate X="10.8" Y="0.0" Z="0.0" />
+			<scale X="1.326" Y="1.326" Z="1.326" />
+			<!-- <color R="0.749" G="0.714" B="0.318" /> -->
+			<models>
+				<!-- Venus -->
+				<model file="terrestrial.3d" />
+			</models>
+		</group>
+		<group>
+			<translate X="15.0" Y="0.0" Z="0.0" />
+			<scale X="1.396" Y="1.396" Z="1.396" />
+			<!-- <color R="0.592" G="0.388" B="0.203" /> -->
+			<models>
+				<!-- Earth -->
+				<model file="terrestrial.3d" />
+			</models>
+			<group>
+				<!-- HOW TO COMPENSATE FOR EARTH's SCALE? -->
+				<scale X="0.618" Y="0.618" Z="0.618" />
+				<translate X="0.045" Y="0.0" Z="0.0" />
+				<!-- <color R="0.412" G="0.388" B="0.376" /> -->
+				<models>
+					<!-- Moon -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="22.8" Y="0.0" Z="0.0" />
+			<scale X="0.743" Y="0.743" Z="0.743" />
+			<!-- <color R="0.788" G="0.243" B="0.020" /> -->
+			<models>
+				<!-- Mars -->
+				<model file="terrestrial.3d" />
+			</models>
+			<!--
+			<group>
+				<translate X=x Y=y Z=z />
+				<models>
+					<model file="deimos.3d" />
+				</models>
+			</group>
+			<group>
+				<translate X=x Y=y Z=z />
+				<models>
+					<model file="phobos.3d" />
+				</models>
+			</group>
+			-->
+		</group>
+		<!--
+			Asteroid belt???
+		-->
+		<group>
+			<translate X="77.9" Y="0.0" Z="0.0" />
+			<scale X="1.570" Y="1.570" Z="1.570" />
+			<!-- <color R="0.984" G="0.808" B="0.573" /> -->
+			<models>
+				<!-- Jupiter -->
+				<model file="gaseous.3d" />
+			</models>
+			<group>
+				<scale X="0.576" Y="0.576" Z="0.576" />
+				<translate X="0.047" Y="0.0" Z="0.0" />
+				<!-- color R="0.749" G="0.714" B="0.318" /> -->
+				<models>
+					<!-- Io -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.494" Y="0.494" Z="0.494" />
+				<translate X="0.086" Y="0.0" Z="0.0" />
+				<!-- color R="0.592" G="0.388" B="0.203" /> -->
+				<models>
+					<!-- Europa -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.832" Y="0.832" Z="0.832" />
+				<translate X="0.14" Y="0.0" Z="0.0" />
+				<!-- color R="0.263" G="0.208" B="0.176" /> -->
+				<models>
+					<!-- Ganimede -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.763" Y="0.763" Z="0.763" />
+				<translate X="0.226" Y="0.0" Z="0.0" />
+				<!-- color R="0.263" G="0.208" B="0.176" /> -->
+				<models>
+					<!-- Calisto -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="143" Y="0.0" Z="0.0" />
+			<scale X="1.308" Y="1.308" Z="1.308" />
+			<!-- color R="0.835" G="0.694" B="0.467" /> -->
+			<models>
+				<!-- Saturn -->
+				<model file="gaseous.3d" />
+			</models>
+			<group>
+				<scale X="0.979" Y="0.979" Z="0.979" />
+				<translate X="0.156" Y="0.0" Z="0.0" />
+				<models>
+					<!-- Titan -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.765" Y="0.765" Z="0.765" />
+				<!-- color R="0.208" G="0.188" B="0.204" /> -->
+				<models>
+					<model file="ringD.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.765" Y="0.765" Z="0.765" />
+				<!-- color R="0.643" G="0.604" B="0.576" /> -->
+				<models>
+					<model file="ringC.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.765" Y="0.765" Z="0.765" />
+				<!-- color R="0.220" G="0.224" B="0.231" /> -->
+				<models>
+					<model file="ringB.3d" />
+				</models>
+			</group>
+			<group>
+				<scale X="0.765" Y="0.765" Z="0.765" />
+				<!-- color R="0.431" G="0.439" B="0.427" /> -->
+				<models>
+					<model file="ringA.3d" />
+				</models>
+			</group>
+		</group>
+		<group>
+			<translate X="288" Y="0.0" Z="0.0" />
+			<scale X="0.57" Y="0.57" Z="0.57" />
+			<!-- color R="0.757" G="0.906" B="0.918" /> -->
+			<models>
+				<!-- Uranus -->
+				<model file="gaseous.3d" />
+			</models>
+		</group>
+		<group>
+			<translate X="450" Y="0.0" Z="0.0" />
+			<scale X="0.553" Y="0.553" Z="0.553" />
+			<!-- color R="0.251" G="0.416" B="0.988" /> -->
+			<models>
+				<!-- Neptune -->
+				<model file="gaseous.3d" />
+			</models>
+			<group>
+				<scale X="1.215" Y="1.215" Z="1.215" />
+				<translate X="0.024" Y="0.0" Z="0.0" />
+				<!-- color R="0.525" G="0.478" B="0.416" /> -->
+				<models>
+					<!-- Triton -->
+					<model file="moon.3d" />
+				</models>
+			</group>
+		</group>
+	</group>
+</scene>
