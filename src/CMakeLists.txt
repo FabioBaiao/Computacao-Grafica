@@ -21,9 +21,13 @@ if(NOT OPENGL_FOUND)
 endif(NOT OPENGL_FOUND)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine_linear/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine_tree/)
 add_definitions(-std=c++11 -g)
 
-add_executable(engine engine.cpp tinyxml2.cpp)
+add_executable(linear_engine engine_linear/engine.cpp tinyxml2.cpp)
+add_executable(tree_engine engine_tree/engine.cpp tinyxml2.cpp)
 add_executable(gen gen.cpp)
 
-target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+target_link_libraries(linear_engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})
+target_link_libraries(tree_engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

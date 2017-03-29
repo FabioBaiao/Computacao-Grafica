@@ -1,9 +1,9 @@
 //#define TIXML_USE_STL 
 #include <vector>
 #include <iostream>
-#include "tinyxml2.h"
-#include "point.h"
-#include "triangle.h"
+#include "../tinyxml2.h"
+#include "../point.h"
+#include "../triangle.h"
 #include <fstream>
 #include <string>
 #define _USE_MATH_DEFINES
@@ -92,27 +92,24 @@ void print_matrix(float m[], int I, int J){
 
 void renderScene(void) {
         GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
-	// clear buffers
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// set the camera
-	glLoadIdentity();
         glPolygonMode(GL_FRONT, modes[mode]);
+
 	for(auto g : groups){
-		
-		glLoadMatrixf(g.referential);
+		glLoadIdentity();
 		gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
-		print_matrix(g.referential, 4, 4);
-		cout << "=============================================" << endl;
+		glMultMatrixf(g.referential);
+		//cout << "=============================================" << endl;
+		glBegin(GL_TRIANGLES);
 		for(auto f : g.figures){
-			glBegin(GL_TRIANGLES);
 			for(triangle t:f){
 				drawTriangle(t);
 			}
-			glEnd();
 		}
-		//glutSolidTeapot(1);
+		glEnd();
+		//print_matrix(g.referential, 4, 4);
 	}
 	// End of frame
 	glutSwapBuffers();
@@ -311,7 +308,7 @@ int main(int argc, char** argv){
 	for(; group; group=group->NextSiblingElement()){
 		parseGroup(group);
 	}
-	cout << "ngrupos: " << groups.size() << endl;
+	// cout << "ngrupos: " << groups.size() << endl;
 	glEnable(GL_CULL_FACE);
 
 
