@@ -102,10 +102,10 @@ void drawRandom(randomModel rnd){
 				float r = rand();
 				float alfa = rand();
 				float s = rand();
-				// coordenadas polares
+				// polar coordinates
 				r = r/RAND_MAX * (maxR - minR) + minR;
 				alfa = alfa/RAND_MAX * 2*M_PI;
-				// escala aleatoria
+				// random scale 
 				s = s/RAND_MAX * (maxS - minS) + minS;
 
 				glPushMatrix();
@@ -142,14 +142,10 @@ void drawGroup(group g) {
 }
 
 void renderScene(void) {
-    GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
+	GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glPolygonMode(GL_FRONT, modes[mode]);
+	glPolygonMode(GL_FRONT, modes[mode]);
 	glLoadIdentity();
-/*	gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
-		      0.0,0.0,0.0,
-			  0.0f,1.0f,0.0f);
-*/
 	gluLookAt(Px, Py, Pz, 
 	          lookX,lookY,lookZ,
 		      0.0f,1.0f,0.0f);
@@ -179,23 +175,15 @@ void normalize(float* vx, float* vy, float* vz){
 }
 
 void processKeys(unsigned char c, int xx, int yy) {
-// put code to process regular keys in here
-	
-	/* */
 	float k = 0.5f;
-	
-	/*up vector*/
 	float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
-
 	/* forward vector */
 	float dX = lookX - Px;
 	float dY = lookY - Py;
 	float dZ = lookZ - Pz;
 
 	normalize(&dX, &dY, &dZ);
-
 	float rX, rY, rZ;
-
 	switch(toupper(c)){
 		case 27: exit(0);
 		case 'W': 
@@ -260,7 +248,6 @@ void processKeys(unsigned char c, int xx, int yy) {
 }
 
 void processSpecialKeys(int key, int xx, int yy) {
-// put code to process special keys in here
 	switch(key){
 		case GLUT_KEY_UP:
 			pitch += 0.01f;
@@ -326,19 +313,19 @@ color& parseColor(XMLElement* model){
 	return *c;
 }
 
-void readFile(ifstream * file, string fName){
+void readFile(ifstream& file, string fName){
 	int n_vertex;
-	*file >> n_vertex; 
+	file >> n_vertex; 
 	Model model_read;
 	for(int i = 0; i < n_vertex; i++){
 		float px, py, pz;
-		*file >> px;
-		*file >> py;
-		*file >> pz;
+		file >> px;
+		file >> py;
+		file >> pz;
 		point p(px, py, pz);
 		model_read.push_back(p);
 	}
-	(*file).close();
+	file.close();
 	models[fName] = model_read;
 }
 
@@ -353,11 +340,10 @@ void parseModel(group& g, XMLElement * model){
 		color c = parseColor(model);
 		g.models.push_back(fName);
 		g.modelsColor.push_back(c);
-		if(models.find(fName) != models.end()){
-			// if the model file was already read
-			return;
+		if(models.find(fName) == models.end()){
+			// if the model file was not already read
+			readFile(file, fName);
 		}
-		readFile(&file, fName);
 	}
 }
 
@@ -372,17 +358,17 @@ void parseModel(randomModel& r, XMLElement * model){
 		color c = parseColor(model);
 		r.models.push_back(fName);
 		r.modelsColor.push_back(c);
-		if(models.find(fName) != models.end()){
-			// if the model file was already read
-			return;
+		if(models.find(fName) == models.end()){
+			// if the model file was not already read
+			readFile(file, fName);
 		}
-		readFile(&file, fName);
 	}
 }
 
 void parseSpecs(randomModel& r, XMLElement * model){
-	int n;
+	int n = 0;
 	float minR, maxR, minS, maxS;
+	minR = maxR = minS = maxS = 0;
 	model->QueryIntAttribute("N", &n);
 	model->QueryFloatAttribute("minRadius", &minR);
 	model->QueryFloatAttribute("maxRadius", &maxR);
@@ -420,41 +406,6 @@ void parseModels(group& g, XMLElement * elem){
 		}
 	}
 }
-
-/*void parseModels(group& g, XMLElement * elem){
-	XMLElement *model = elem->FirstChildElement("model");
-	for(; model; model=model->NextSiblingElement()){
-		const char* filename= model->Attribute("file");
-		if(filename != NULL) {
-			string fName = string(filename);
-			int n_vertex;
-			ifstream file(directory + filename);
-			if(!file) {
-				cerr << "The file \"" << filename << "\" was not found.\n";
-			}
-			color c = parseColor(model);
-			g.models.push_back(fName);
-			g.modelsColor.push_back(c);
-			if(models.find(fName) != models.end()){
-				// if the model file was already read
-				continue;
-			}
-			// reads the number of vertices from the file
-			file >> n_vertex; 
-			Model model_read;
-			for(int i = 0; i < n_vertex; i++){
-				float px, py, pz;
-				file >> px;
-				file >> py;
-				file >> pz;
-				point p(px, py, pz);
-				model_read.push_back(p);
-			}
-			file.close();
-			models[fName] = model_read;
-		}
-	}
-}*/
 
 group parseGroup(XMLElement *gr) {
 	group g;
