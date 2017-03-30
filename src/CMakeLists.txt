@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 
-# Project Name
 PROJECT(cg_assignment)
 
 find_package(GLUT REQUIRED)
@@ -23,7 +22,7 @@ endif(NOT OPENGL_FOUND)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine_linear/)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine_tree/)
-add_definitions(-std=c++11 -g)
+add_definitions(-std=c++11 -Wall )
 
 add_executable(linear_engine engine_linear/engine.cpp tinyxml2.cpp)
 add_executable(tree_engine engine_tree/engine.cpp tinyxml2.cpp)

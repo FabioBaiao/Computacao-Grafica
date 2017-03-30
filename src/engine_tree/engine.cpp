@@ -131,7 +131,7 @@ float magnitude(float vx, float vy, float vz){
 	return sqrtf((vx*vx) + (vy*vy) + (vz*vz));
 }
 
-float normalize(float* vx, float* vy, float* vz){
+void normalize(float* vx, float* vy, float* vz){
 	float mag = magnitude(*vx, *vy, *vz);
 	*vx = (*vx) / mag;
 	*vy = (*vy) / mag;
@@ -248,7 +248,6 @@ group parseGroup(XMLElement *gr) {
 	XMLElement *child = gr->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement()) {
 		string type = string(child->Name()); 
-		
 		if(type == "translate"){
 			float x, y, z;
 			x = y = z = 0.0f;
@@ -322,7 +321,6 @@ group parseGroup(XMLElement *gr) {
 					Model model_read;
 
 					for(int i = 0; i < n_vertex; i++){
-						float color_r, color_g, color_b;
 						float px, py, pz;
 						file >> px;
 						file >> py;
