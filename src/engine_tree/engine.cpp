@@ -191,7 +191,7 @@ void processKeys(unsigned char c, int xx, int yy) {
 			lookZ += k*rZ;
 			break;
 		case 'D': 
-			/* cross product: up x forwardV */
+			/* cross product: forwardV x up */
 			rX = (dY * upZ) - (dZ * upY);
 			rY = (dZ * upX) - (dX * upZ);
 			rZ = (dX * upY) - (dY * upX);
