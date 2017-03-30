@@ -79,6 +79,46 @@ void print_matrix(float m[], int I, int J) {
 	}
 }
 
+void drawModel(string model, color c){
+	glBegin(GL_TRIANGLES);
+		glColor3f( c.r, c.g, c.b);
+		for(auto p : models[model]) {
+			glVertex3f(p.x, p.y, p.z);
+		}
+	glEnd();
+}
+
+void drawRandom(randomModel rnd){
+	for (auto spec : rnd.specs){
+		int n = spec.n;
+		float maxR = spec.maxR;
+		float minR = spec.minR;
+		float maxS = spec.maxS;
+		float minS = spec.minS;
+		int i = 0;
+		for (string model : rnd.models){
+			color c = rnd.modelsColor[i];
+			for (int j = 0; j < n; j++){
+				float r = rand();
+				float alfa = rand();
+				float s = rand();
+				// coordenadas polares
+				r = r/RAND_MAX * (maxR - minR) + minR;
+				alfa = alfa/RAND_MAX * 2*M_PI;
+				// escala aleatoria
+				s = s/RAND_MAX * (maxS - minS) + minS;
+
+				glPushMatrix();
+				glTranslatef(r * sin(alfa), 0, r * cos(alfa));
+				glScalef(s, s, s);
+				drawModel(model, c);
+				glPopMatrix();
+			}
+			i++;
+		}
+	}
+}
+
 void drawGroup(group g) {
 	glPushMatrix();
 	
@@ -89,13 +129,11 @@ void drawGroup(group g) {
 	for(string model : g.models) {
 		color c = g.modelsColor[i];
 		
-		glBegin(GL_TRIANGLES);
-		glColor3f( c.r, c.g, c.b);
-		for(auto p : models[model]) {
-			glVertex3f(p.x, p.y, p.z);
-		}
-		glEnd();
+		drawModel(model, c);
 		i++;
+	}
+	for (auto rnd : g.randoms){
+		drawRandom(rnd);
 	}
 	for(auto gr : g.childGroups) {
 		drawGroup(gr);
@@ -115,6 +153,8 @@ void renderScene(void) {
 	gluLookAt(Px, Py, Pz, 
 	          lookX,lookY,lookZ,
 		      0.0f,1.0f,0.0f);
+
+	srand(0);
 	for(auto g : groups) {
 		drawGroup(g);
 	}
@@ -286,7 +326,102 @@ color& parseColor(XMLElement* model){
 	return *c;
 }
 
+void readFile(ifstream * file, string fName){
+	int n_vertex;
+	*file >> n_vertex; 
+	Model model_read;
+	for(int i = 0; i < n_vertex; i++){
+		float px, py, pz;
+		*file >> px;
+		*file >> py;
+		*file >> pz;
+		point p(px, py, pz);
+		model_read.push_back(p);
+	}
+	(*file).close();
+	models[fName] = model_read;
+}
+
+void parseModel(group& g, XMLElement * model){
+	const char* filename= model->Attribute("file");
+	if(filename != NULL) {
+		string fName = string(filename);
+		ifstream file(directory + filename);
+		if(!file) {
+			cerr << "The file \"" << filename << "\" was not found.\n";
+		}
+		color c = parseColor(model);
+		g.models.push_back(fName);
+		g.modelsColor.push_back(c);
+		if(models.find(fName) != models.end()){
+			// if the model file was already read
+			return;
+		}
+		readFile(&file, fName);
+	}
+}
+
+void parseModel(randomModel& r, XMLElement * model){
+	const char* filename= model->Attribute("file");
+	if(filename != NULL) {
+		string fName = string(filename);
+		ifstream file(directory + filename);
+		if(!file) {
+			cerr << "The file \"" << filename << "\" was not found.\n";
+		}
+		color c = parseColor(model);
+		r.models.push_back(fName);
+		r.modelsColor.push_back(c);
+		if(models.find(fName) != models.end()){
+			// if the model file was already read
+			return;
+		}
+		readFile(&file, fName);
+	}
+}
+
+void parseSpecs(randomModel& r, XMLElement * model){
+	int n;
+	float minR, maxR, minS, maxS;
+	model->QueryIntAttribute("N", &n);
+	model->QueryFloatAttribute("minRadius", &minR);
+	model->QueryFloatAttribute("maxRadius", &maxR);
+	model->QueryFloatAttribute("minScale", &minS);
+	model->QueryFloatAttribute("maxScale", &maxS);
+
+	randSpecs* rs = new randSpecs(n, minR, maxR, minS, maxS);
+	r.specs.push_back(*rs);
+}
+
+void parseRandom(group& g, XMLElement * elem){
+	randomModel r;
+	XMLElement *child = elem->FirstChildElement();
+	for(; child; child = child->NextSiblingElement()){
+		string type = string(child->Name());
+		if (type == "model"){
+			parseModel(r, child);
+		}
+		else if(type == "specs"){
+			parseSpecs(r, child);
+		}
+	}
+	g.randoms.push_back(r);
+}
+
 void parseModels(group& g, XMLElement * elem){
+	XMLElement *child = elem->FirstChildElement();
+	for(; child; child = child->NextSiblingElement()){
+		string type = string(child->Name());
+		if (type == "model"){
+			parseModel(g, child);
+		}
+		else if(type == "random"){
+			parseRandom(g, child);
+		}
+	}
+}
+
+/*void parseModels(group& g, XMLElement * elem){
 	XMLElement *model = elem->FirstChildElement("model");
 	for(; model; model=model->NextSiblingElement()){
 		const char* filename= model->Attribute("file");
@@ -319,7 +454,7 @@ void parseModels(group& g, XMLElement * elem){
 			models[fName] = model_read;
 		}
 	}
-}
+}*/
 
 group parseGroup(XMLElement *gr) {
 	group g;
