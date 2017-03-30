@@ -192,5 +192,62 @@
 				</models>
 			</group>
 		</group>
+		<!-- Planet trajectories -->
+		<group>
+			<!-- Mercury's trajectory -->
+			<scale X="0.743" Y="1" Z="0.743" />
+			<models>
+				<model file="terrestrial_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Venus' trajectory -->
+			<scale X="0.886" Y="1" Z="0.866" />
+			<models>
+				<model file="terrestrial_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Earth's trajectory -->
+			<scale X="1.086" Y="1" Z="1.086" />
+			<models>
+				<model file="terrestrial_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Mars' trajectory -->
+			<scale X="1.286" Y="1" Z="1.286" />
+			<models>
+				<model file="terrestrial_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Jupiter's trajectory -->
+			<scale X="0.65" Y="1" Z="0.65" />
+			<models>
+				<model file="gaseous_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Saturn's trajectory -->
+			<scale X="0.957" Y="1" Z="0.957" />
+			<models>
+				<model file="gaseous_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Neptune's trajectory -->
+			<scale X="1.148" Y="1" Z="1.148" />
+			<models>
+				<model file="gaseous_trajectory.3d" />
+			</models>
+		</group>
+		<group>
+			<!-- Uranus' trajectory -->
+			<scale X="1.244" Y="1" Z="1.244" />
+			<models>
+				<model file="gaseous_trajectory.3d" />
+			</models>
+		</group>
 	</group>
 </scene>
