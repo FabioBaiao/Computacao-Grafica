@@ -243,95 +243,100 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
+void parseTranslate(group& g, XMLElement* elem){
+	float x, y, z;
+	x = y = z = 0.0f;
+	elem->QueryFloatAttribute("X", &x);
+	elem->QueryFloatAttribute("Y", &y);
+	elem->QueryFloatAttribute("Z", &z);
+	g.transforms.push_back(new translation(x,y,z));
+}
+
+void parseRotate(group& g, XMLElement* elem){
+	float angle, axisX, axisY, axisZ;
+	angle = axisX = axisY = axisZ = 0.0f;
+	elem->QueryFloatAttribute("angle", &angle);
+	elem->QueryFloatAttribute("axisX", &axisX);
+	elem->QueryFloatAttribute("axisY", &axisY);
+	elem->QueryFloatAttribute("axisZ", &axisZ);
+	g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ));
+}
+
+void parseScale(group& g, XMLElement* elem){
+	float x, y, z;
+	x = y = z = 1.0f;
+	elem->QueryFloatAttribute("X", &x);
+	elem->QueryFloatAttribute("Y", &y);
+	elem->QueryFloatAttribute("Z", &z);
+	g.transforms.push_back(new scale(x,y,z));
+}
+
+color& parseColor(XMLElement* model){
+	float rr, gg, bb;
+	int r_r, r_g, r_b;
+	rr = gg = bb = 0.0;
+	r_r = model->QueryFloatAttribute("R", &rr);
+	r_g = model->QueryFloatAttribute("G", &gg);
+	r_b = model->QueryFloatAttribute("B", &bb);
+	if(r_r != XML_SUCCESS && r_g != XML_SUCCESS && r_b != XML_SUCCESS){
+		// the color defaults to white if not specified
+		rr = gg = bb = 1;
+	}
+	color* c = new color(rr,gg,bb);
+	return *c;
+}
+
+void parseModels(group& g, XMLElement * elem){
+	XMLElement *model = elem->FirstChildElement("model");
+	for(; model; model=model->NextSiblingElement()){
+		const char* filename= model->Attribute("file");
+		if(filename != NULL) {
+			string fName = string(filename);
+			int n_vertex;
+			ifstream file(directory + filename);
+			if(!file) {
+				cerr << "The file \"" << filename << "\" was not found.\n";
+			}
+			color c = parseColor(model);
+			g.models.push_back(fName);
+			g.modelsColor.push_back(c);
+			if(models.find(fName) != models.end()){
+				// if the model file was already read
+				continue;
+			}
+			// reads the number of vertices from the file
+			file >> n_vertex; 
+			Model model_read;
+			for(int i = 0; i < n_vertex; i++){
+				float px, py, pz;
+				file >> px;
+				file >> py;
+				file >> pz;
+				point p(px, py, pz);
+				model_read.push_back(p);
+			}
+			file.close();
+			models[fName] = model_read;
+		}
+	}
+}
+
 group parseGroup(XMLElement *gr) {
 	group g;
 	XMLElement *child = gr->FirstChildElement();
 	for( ; child; child = child->NextSiblingElement()) {
 		string type = string(child->Name()); 
 		if(type == "translate"){
-			float x, y, z;
-			x = y = z = 0.0f;
-
-			child->QueryFloatAttribute("X", &x);
-			child->QueryFloatAttribute("Y", &y);
-			child->QueryFloatAttribute("Z", &z);
-			
-			g.transforms.push_back(new translation(x,y,z));
+			parseTranslate(g, child);
 		} else if(type == "rotate") {
-			float angle, axisX, axisY, axisZ;
-			angle = axisX = axisY = axisZ = 0.0f;
-
-			child->QueryFloatAttribute("angle", &angle);
-			child->QueryFloatAttribute("axisX", &axisX);
-			child->QueryFloatAttribute("axisY", &axisY);
-			child->QueryFloatAttribute("axisZ", &axisZ);
-
-			g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ));
+			parseRotate(g, child);
 		} else if(type == "scale") {
-			float x, y, z;
-			x = y = z = 1.0f;
-
-			child->QueryFloatAttribute("X", &x);
-			child->QueryFloatAttribute("Y", &y);
-			child->QueryFloatAttribute("Z", &z);
-
-			g.transforms.push_back(new scale(x,y,z));
+			parseScale(g, child);
 		} else if(type == "group") {
 			group g_child = parseGroup(child);
 			g.childGroups.push_back(g_child);
 		} else if(type == "models") {
-			XMLElement *model = child->FirstChildElement("model");
-			
-			for(; model; model=model->NextSiblingElement()){
-				const char* filename= model->Attribute("file");
-				
-				if(filename != NULL) {
-					string fName = string(filename);
-					int n_vertex;
-
-					ifstream file(directory + filename);
-
-					if(!file) {
-						cerr << "The file \"" << filename << "\" was not found.\n";
-					}
-
-					float rr, gg, bb;
-					int r_r, r_g, r_b;
-					rr = gg = bb = 0.0;
-
-					r_r = model->QueryFloatAttribute("R", &rr);
-					r_g = model->QueryFloatAttribute("G", &gg);
-					r_b = model->QueryFloatAttribute("B", &bb);
-
-					if(r_r != XML_SUCCESS && r_g != XML_SUCCESS && r_b != XML_SUCCESS){
-						// the color defaults to white if not specified
-						rr = gg = bb = 1;
-					}
-					color c(rr,gg,bb);
-
-					g.models.push_back(fName);
-					g.modelsColor.push_back(c);
-					if(models.find(fName) != models.end()){
-						// if the model file was already read
-						continue;
-					}
-
-					// reads the number of vertices from the file
-					file >> n_vertex; 
-					Model model_read;
-
-					for(int i = 0; i < n_vertex; i++){
-						float px, py, pz;
-						file >> px;
-						file >> py;
-						file >> pz;
-						point p(px, py, pz);
-						model_read.push_back(p);
-					}
-					file.close();
-					models[fName] = model_read;
-				}
-			}
+			parseModels(g, child);
 		}
 	}
 	return g;
