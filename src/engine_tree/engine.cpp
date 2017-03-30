@@ -428,6 +428,15 @@ group parseGroup(XMLElement *gr) {
 	return g;
 }
 
+void parseInitialPosition(XMLElement* scene){
+// if a coordinate is not specified, it will default to 0
+	scene->QueryFloatAttribute("camX", &Px);
+    scene->QueryFloatAttribute("camY", &Py);
+	scene->QueryFloatAttribute("camZ", &Pz);
+	lookX = Px + cos(pitch) * sin(yaw);
+	lookY = Py + sin(pitch);
+	lookZ = Pz + cos(pitch) * cos(yaw);
+}
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char **argv) {
 	if(argc != 2) {
@@ -449,6 +458,8 @@ int main(int argc, char **argv) {
 		cerr << "Error: The first XML element must be \"scene\"" << endl;
 		return 1;
 	}
+
+	parseInitialPosition(scene);
 
 	XMLElement* gr = scene->FirstChildElement("group");
 	for(; gr; gr = gr->NextSiblingElement()){
