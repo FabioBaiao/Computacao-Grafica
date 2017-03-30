@@ -27,6 +27,13 @@ float r = 10.0f;
 float alpha;
 float beta;
 
+float pitch = 0.0f, yaw = 0.0f;
+
+float Px = 2.0f, Py = 2.0f, Pz = 2.0f;
+float lookX = Px + cos(pitch) * sin(yaw);
+float lookY = Py + sin(pitch);
+float lookZ = Pz + cos(pitch) * cos(yaw);
+
 // Polygon Mode
 GLenum mode;
 
@@ -97,9 +104,14 @@ void renderScene(void) {
 
 	for(auto g : groups){
 		glLoadIdentity();
-		gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
+/*		gluLookAt(r*cosf(beta)*cosf(alpha), r*sinf(beta), r*cosf(beta)*sinf(alpha), 
 		      0.0,0.0,0.0,
 			  0.0f,1.0f,0.0f);
+*/
+		gluLookAt(Px, Py, Pz, 
+		          lookX,lookY,lookZ,
+			      0.0f,1.0f,0.0f);
+
 		glMultMatrixf(g.referential);
 		//cout << "=============================================" << endl;
 		glBegin(GL_TRIANGLES);
@@ -115,9 +127,89 @@ void renderScene(void) {
 	glutSwapBuffers();
 }
 
+void lookAt(float alpha, float beta){
+	lookX = Px + cos(beta) * sin(alpha);
+	lookY = Py + sin(beta);
+	lookZ = Pz + cos(beta) * cos(alpha);
+}
+
+float magnitude(float vx, float vy, float vz){
+	return sqrtf((vx*vx) + (vy*vy) + (vz*vz));
+}
+
+float normalize(float* vx, float* vy, float* vz){
+	float mag = magnitude(*vx, *vy, *vz);
+	*vx = (*vx) / mag;
+	*vy = (*vy) / mag;
+	*vz = (*vz) / mag;
+}
+
 void processKeys(unsigned char c, int xx, int yy) {
 // put code to process regular keys in here
+	
+	/* */
+	float k = 0.5f;
+	
+	/*up vector*/
+	float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
+
+	/* forward vector */
+	float dX = lookX - Px;
+	float dY = lookY - Py;
+	float dZ = lookZ - Pz;
+
+	normalize(&dX, &dY, &dZ);
+
+	float rX, rY, rZ;
+
 	switch(toupper(c)){
+		case 27: exit(0);
+		case 'W': 
+			Px += k*dX;
+			Py += k*dY;
+			Pz += k*dZ;
+
+			lookX += k*dX;
+			lookY += k*dY;
+			lookZ += k*dZ;
+			break;
+		case 'S': 
+			Px -= k*dX;
+			Py -= k*dY;
+			Pz -= k*dZ;
+
+			lookX -= k*dX;
+			lookY -= k*dY;
+			lookZ -= k*dZ;
+			break;
+		case 'A': 
+			/* cross product: up x forwardV */
+			rX = (upY * dZ) - (upZ * dY);
+			rY = (upZ * dX) - (upX * dZ);
+			rZ = (upX * dY) - (upY * dX);
+
+			Px += k*rX;
+			Py += k*rY;
+			Pz += k*rZ;
+	
+			lookX += k*rX;
+			lookY += k*rY;
+			lookZ += k*rZ;
+			break;
+		case 'D': 
+			/* cross product: up x forwardV */
+			rX = (dY * upZ) - (dZ * upY);
+			rY = (dZ * upX) - (dX * upZ);
+			rZ = (dX * upY) - (dY * upX);
+
+			Px += k*rX;
+			Py += k*rY;
+			Pz += k*rZ;
+	
+			lookX += k*rX;
+			lookY += k*rY;
+			lookZ += k*rZ;
+			break;
 		case 'M': // More radius
 			r += 0.2f;
 			break;
@@ -137,22 +229,23 @@ void processSpecialKeys(int key, int xx, int yy) {
 // put code to process special keys in here
 	switch(key){
 		case GLUT_KEY_UP:
-			beta += 0.1f;
-			if(beta > 1.5f)
-				beta = 1.5f;
+			pitch += 0.01f;
+			if(pitch > 1.5f)
+				pitch = 1.5f;
 			break;
 		case GLUT_KEY_LEFT:
-			alpha += 0.1f;
+			yaw += 0.01f;
 			break;
 		case GLUT_KEY_DOWN:
-			beta -= 0.1f;
-			if(beta < -1.5f)
-				beta = -1.5;
+			pitch -= 0.01f;
+			if(pitch < -1.5f)
+				pitch = -1.5;
 			break;
 		case GLUT_KEY_RIGHT:
-			alpha -= 0.1f;
+			yaw -= 0.01f;
 			break;
 	}
+	lookAt(yaw, pitch);
 	glutPostRedisplay();
 }
 
