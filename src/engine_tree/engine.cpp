@@ -367,7 +367,7 @@ void parseModel(randomModel& r, XMLElement * model){
 
 void parseSpecs(randomModel& r, XMLElement * model){
 	int n = 0;
-	float minR, maxR, minS, maxS;
+	float minR=0.0, maxR=0.0, minS=1.0, maxS=1.0;
 	minR = maxR = minS = maxS = 0;
 	model->QueryIntAttribute("N", &n);
 	model->QueryFloatAttribute("minRadius", &minR);
