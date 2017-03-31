@@ -612,7 +612,7 @@ int main(int argc, char *argv[]) {
 	else if(primitive == "ellipsoid" && argc == 8) {
 		rval = ellipsoidGenerator(argc - 2, &argv[2]);
 	}
-	else if(primitive == "frustum" && argc) {
+	else if(primitive == "frustum" && argc == 8) {
 		rval = frustumGenerator(argc - 2, &argv[2]);
 	}
 	else if(primitive == "plane" && (argc == 5 || argc == 6)) {

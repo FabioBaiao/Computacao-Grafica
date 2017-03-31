@@ -1,4 +1,4 @@
-<scene camX="33" camY="10" camZ="-35" pitch="-40">
+<scene camX="52.131718" camY="1.786648" camZ="-30.641312" pitch="0.204533" yaw="-0.922665">
 	<group>
 		<models>
 			<model file="water.3d" R="0.012" G="0.196" B="0.275" />
@@ -114,6 +114,7 @@
 					<translate Y="2.05" Z="-0.5" />
 					<rotate axisX="1" angle="-10" />
 					<models>
+						<!-- Torso -->
 						<model file="man_torso.3d" R="0" G="0.686" B="0.686" />
 					</models>
 					<group>
@@ -129,8 +130,69 @@
 						<translate X="-0.8" Z="-0.5" />
 						<rotate axisX="1" axisZ="-0.4" angle="40" />
 						<models>
-							<model file="man_arm.3d"  R="0.969" G="0.745" B="0.486" />
+							<model file="man_arm.3d" R="0.969" G="0.745" B="0.486" />
 						</models>
+					</group>
+					<group>
+						<!-- Head -->
+						<translate Y="1.4" />
+						<models>
+							<model file="man_head.3d" R="0.969" G="0.745" B="0.486" />
+						</models>
+						<group>
+							<!-- Top hair layer -->
+							<translate Y="0.6" Z="0.01" />
+							<models>
+								<model file="man_hair.3d" R="0.212" G="0.149" B="0.122" />
+							</models>
+						</group>
+						<group>
+							<!-- Low hair layer -->
+							<translate Y="0.5" Z="-0.025" />
+							<scale X="1.01" Z="0.925" />
+							<models>
+								<model file="man_hair.3d" R="0.212" G="0.149" B="0.122" />
+							</models>
+						</group>
+						<group>
+							<translate Z="0.4" />
+							<!-- Eyes and mouth -->
+							<group>
+								<!-- Mouth -->
+								<translate Y="-0.3" />
+								<models>
+									<model file="man_mouth.3d" R="0.784" G="0.424" B="0.388" />
+								</models>
+							</group>
+							<group>
+								<!-- Left Eye -->
+								<translate X="0.225" Y="0.04" />
+								<models>
+									<model file="man_eye.3d" />
+								</models>
+								<group>
+									<!-- Left eyeball -->
+									<translate X="-0.0375" Z="0.01" />
+									<models>
+										<model file="man_eyeball.3d" R="0.251" G="0.102" B="0.65" />
+									</models>
+								</group>
+							</group>
+							<group>
+								<!-- Right Eye -->
+								<translate X="-0.225" Y="0.04" />
+								<models>
+									<model file="man_eye.3d" />
+								</models>
+								<group>
+									<!-- Right eyeball -->
+									<translate X="0.0375" Z="0.01" />
+									<models>
+										<model file="man_eyeball.3d" R="0.251" G="0.102" B="0.65" />
+									</models>
+								</group>
+							</group>
+						</group>
 					</group>
 				</group>
 			</group>
