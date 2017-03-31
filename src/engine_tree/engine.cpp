@@ -34,7 +34,7 @@ float beta;
 
 float pitch = 0.0f, yaw = 0.0f;
 
-float Px = 2.0f, Py = 2.0f, Pz = 2.0f;
+float Px = 0.0f, Py = 0.0f, Pz = 0.0f;
 float lookX = Px + cos(pitch) * sin(yaw);
 float lookY = Py + sin(pitch);
 float lookZ = Pz + cos(pitch) * cos(yaw);
@@ -432,9 +432,9 @@ group parseGroup(XMLElement *gr) {
 void parseInitialPosition(XMLElement* scene){
 // if a coordinate is not specified, it will default to 0
 	scene->QueryFloatAttribute("camX", &Px);
-    scene->QueryFloatAttribute("camY", &Py);
+	scene->QueryFloatAttribute("camY", &Py);
 	scene->QueryFloatAttribute("camZ", &Pz);
-    scene->QueryFloatAttribute("yaw", &yaw);
+	scene->QueryFloatAttribute("yaw", &yaw);
 	scene->QueryFloatAttribute("pitch", &pitch);
 	yaw *= ANG2RAD; 
 	pitch *= ANG2RAD; 
