@@ -24,6 +24,7 @@
 using namespace std;
 using namespace tinyxml2;
 
+#define ANG2RAD M_PI/180
 typedef vector<point> Model;
 
 // Camera control
@@ -433,6 +434,10 @@ void parseInitialPosition(XMLElement* scene){
 	scene->QueryFloatAttribute("camX", &Px);
     scene->QueryFloatAttribute("camY", &Py);
 	scene->QueryFloatAttribute("camZ", &Pz);
+    scene->QueryFloatAttribute("yaw", &yaw);
+	scene->QueryFloatAttribute("pitch", &pitch);
+	yaw *= ANG2RAD; 
+	pitch *= ANG2RAD; 
 	lookX = Px + cos(pitch) * sin(yaw);
 	lookY = Py + sin(pitch);
 	lookZ = Pz + cos(pitch) * cos(yaw);

@@ -1,6 +1,6 @@
 <!-- Based on the calculations showed in "CG - Dimensões do Sistema Solar.docx" -->
 <!-- All planets, moons and rings are scaled 1:10^4 . Distances are not scaled -->
-<scene camY="20" camX="20" camZ="20" >
+<scene camY="20" camX="20" camZ="20" yaw="120" pitch="-30" >
 	<group>
 		<models>
 			<model file="sun_v3.3d" R="0.945" G="0.412" B="0.082"/>
