@@ -38,7 +38,9 @@ float Px = 0.0f, Py = 0.0f, Pz = 0.0f;
 float lookX = Px + cos(pitch) * sin(yaw);
 float lookY = Py + sin(pitch);
 float lookZ = Pz + cos(pitch) * cos(yaw);
+
 // Polygon Mode
+GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 GLenum mode;
 
 vector<group> groups;
@@ -47,8 +49,6 @@ map<string, Model> models;
 // directory of the read file
 string directory; 
 
-// TODO!!
-// need to correct to accept full paths
 string directoryOfFile(const string& fname) {
 	size_t pos = fname.find_last_of("\\/");
 
@@ -143,7 +143,6 @@ void drawGroup(group g) {
 }
 
 void renderScene(void) {
-	GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT, modes[mode]);
 	glLoadIdentity();

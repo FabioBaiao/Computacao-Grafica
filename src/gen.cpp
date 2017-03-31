@@ -132,7 +132,7 @@ string box(float x, float y, float z, int nDiv){
 	string plane, line;
 	ostringstream os;
 	istringstream iss;
-	int vertices, count;
+	int count;
 
 	plane = planeXY(x, y, z/2, nDiv, UPWARDS);
 	istringstream iss1 (plane);
@@ -182,7 +182,7 @@ string box(float x, float y, float z, int nDiv){
 
 string annulus(float dist, float smj, float smn, int slices) {
 	int nPoints = 0;
-	float alpha, nextAlpha, deltaAlpha;
+	float deltaAlpha;
 	ostringstream os;
 
 	deltaAlpha = (2.0f * M_PI) / slices;

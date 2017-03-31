@@ -137,7 +137,7 @@ float magnitude(float vx, float vy, float vz){
 	return sqrtf((vx*vx) + (vy*vy) + (vz*vz));
 }
 
-float normalize(float* vx, float* vy, float* vz){
+void normalize(float* vx, float* vy, float* vz){
 	float mag = magnitude(*vx, *vy, *vz);
 	*vx = (*vx) / mag;
 	*vy = (*vy) / mag;
