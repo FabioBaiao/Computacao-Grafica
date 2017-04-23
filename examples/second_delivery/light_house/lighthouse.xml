@@ -1,0 +1,201 @@
+<scene camX="50.885651" camY="1.655998" camZ="-32.858150" pitch="13.361604966" yaw="-47,778606761">
+	<group>
+		<models>
+			<model file="water.3d" R="0.012" G="0.196" B="0.275" />
+			<model file="lighthouse_floor.3d" R="0.627" G="0.573" B="0.529" />
+		</models>
+		<group>
+			<translate Y="1.5" Z="28" />
+			<models>
+				<model file="lighthouse_bridge.3d" R="0.75" G="0.761" B="0.808"/>
+			</models>
+		</group>
+		<group>
+			<translate Y="4" />
+			<models>
+				<model file="lighthouse_base.3d" R="0.663" G="0.663" B="0.663" />
+			</models>
+		</group>
+		<group>
+			<translate Y="8" />
+			<models>
+				<model file="lighthouse_body.3d" />
+			</models>
+		</group>
+		<group>
+			<translate Y="22.5" />
+			<models>
+				<model file="lighthouse_ring.3d" R="0.211" G="0.208" B="0.161" />
+			</models>
+		</group>
+		<group>
+			<translate Y="26" />
+			<models>
+				<model file="lighthouse_top1.3d" R="0.059" G="0.165" B="0.424" />
+				<model file="lighthouse_platform.3d" R="0.196" G="0.216" B="0.243" />
+			</models>
+		</group>
+		<group>
+			<translate Y="29" />
+			<models>
+				<model file="lighthouse_top2.3d" R="0.059" G="0.165" B="0.424" />
+			</models>
+		</group>
+		<group>
+			<translate Y="29.1" />
+			<models>
+				<model file="lighthouse_glass.3d" R="0.984" G="0.953" B="0.808" />
+			</models>
+		</group>
+		<group>
+			<translate Y="31.35" />
+			<models>
+				<model file="lighthouse_roof.3d" R="0.439" G="0.102" B="0.106" />
+			</models>
+		</group>
+		<group>
+			<translate Y="33.15" />
+			<models>
+				<model file="lighthouse_roof_ball.3d" R="0.439" G="0.102" B="0.106" />
+			</models>
+		</group>
+		<!-- Boat -->
+		<group>
+			<translate X="33" Y="0.75" Z="-20" />
+			<rotate axisY="1.0" angle="-25" />
+			<group>
+				<rotate axisY="1.0" angle="45" />
+				<models>
+					<model file="boat_nose.3d" R="0.439" G="0.306" B="0.196" />
+				</models>
+			</group>
+			<group>
+				<translate Z="-4.5" />
+				<models>
+					<model file="boat_body.3d" R="0.439" G="0.306" B="0.196" />
+				</models>
+				<group>
+					<!-- Man's lower body -->
+					<translate Y="1.5" Z="0.5" />
+					<rotate axisX="1" angle="-90" />
+					<group>
+						<!-- Left leg -->
+						<translate X="0.35" />
+						<rotate axisZ="1" angle="9" />
+						<models>
+							<model file="man_leg.3d" R="0.278" G="0.227" B="0.643" />
+						</models>
+						<group>
+							<!-- Left foot -->
+							<translate Y="-0.775" Z="0.175" />
+							<models>
+								<model file="man_foot.3d" R="0.251" G="0.165" B="0.141" />
+							</models>
+						</group>
+					</group>
+					<group>
+						<!-- Right leg -->
+						<translate X="-0.35" />
+						<rotate axisZ="1" angle="-9" />
+						<models>
+							<model file="man_leg.3d" R="0.278" G="0.227" B="0.643" />
+						</models>
+						<group>
+							<!-- Right foot -->
+							<translate Y="-0.775" Z="0.175" />
+							<models>
+								<model file="man_foot.3d" R="0.251" G="0.165" B="0.141" />
+							</models>
+						</group>
+					</group>
+				</group>
+				<group>
+					<!-- Man's upper body -->
+					<translate Y="2.05" Z="-0.5" />
+					<rotate axisX="1" angle="-10" />
+					<models>
+						<!-- Torso -->
+						<model file="man_torso.3d" R="0" G="0.686" B="0.686" />
+					</models>
+					<group>
+						<!-- Left arm -->
+						<translate X="0.8" Z="-0.5" />
+						<rotate axisX="1" axisZ="0.4" angle="40" />
+						<models>
+							<model file="man_arm.3d" R="0.969" G="0.745" B="0.486" />
+						</models>
+					</group>
+					<group>
+						<!-- Right arm -->
+						<translate X="-0.8" Z="-0.5" />
+						<rotate axisX="1" axisZ="-0.4" angle="40" />
+						<models>
+							<model file="man_arm.3d" R="0.969" G="0.745" B="0.486" />
+						</models>
+					</group>
+					<group>
+						<!-- Head -->
+						<translate Y="1.4" />
+						<models>
+							<model file="man_head.3d" R="0.969" G="0.745" B="0.486" />
+						</models>
+						<group>
+							<!-- Top hair layer -->
+							<translate Y="0.6" Z="0.01" />
+							<models>
+								<model file="man_hair.3d" R="0.212" G="0.149" B="0.122" />
+							</models>
+						</group>
+						<group>
+							<!-- Low hair layer -->
+							<translate Y="0.5" Z="-0.025" />
+							<scale X="1.01" Z="0.925" />
+							<models>
+								<model file="man_hair.3d" R="0.212" G="0.149" B="0.122" />
+							</models>
+						</group>
+						<group>
+							<translate Z="0.4" />
+							<!-- Eyes and mouth -->
+							<group>
+								<!-- Mouth -->
+								<translate Y="-0.3" />
+								<models>
+									<model file="man_mouth.3d" R="0.784" G="0.424" B="0.388" />
+								</models>
+							</group>
+							<group>
+								<!-- Left Eye -->
+								<translate X="0.225" Y="0.04" />
+								<models>
+									<model file="man_eye.3d" />
+								</models>
+								<group>
+									<!-- Left eyeball -->
+									<translate X="-0.0375" Z="0.01" />
+									<models>
+										<model file="man_eyeball.3d" R="0.251" G="0.102" B="0.65" />
+									</models>
+								</group>
+							</group>
+							<group>
+								<!-- Right Eye -->
+								<translate X="-0.225" Y="0.04" />
+								<models>
+									<model file="man_eye.3d" />
+								</models>
+								<group>
+									<!-- Right eyeball -->
+									<translate X="0.0375" Z="0.01" />
+									<models>
+										<model file="man_eyeball.3d" R="0.251" G="0.102" B="0.65" />
+									</models>
+								</group>
+							</group>
+						</group>
+					</group>
+				</group>
+			</group>
+		</group>
+	</group>
+</scene>

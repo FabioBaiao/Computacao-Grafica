@@ -1,12 +1,13 @@
 <!-- Based on the calculations showed in "CG - Dimensões do Sistema Solar.docx" -->
 <!-- All planets, moons and rings are scaled 1:10^4 . Distances are not scaled -->
-<scene>
+<scene camY="20" camX="20" camZ="20" yaw="120" pitch="-30" >
 	<group>
 		<models>
 			<model file="sun_v3.3d" R="0.945" G="0.412" B="0.082"/>
 		</models>
 		<group>
 			<!-- Mercury -->
+			<rotate axisX="0" axisY="1" axisZ="0" angle="180"/>
 			<translate X="26" Y="0.0" Z="0.0" />
 			<scale X="0.535" Y="0.535" Z="0.535" />
 			<models>
@@ -15,6 +16,7 @@
 		</group>
 		<group>
 			<!-- Venus -->
+			<rotate axisX="0" axisY="1" axisZ="0" angle="90"/>
 			<translate X="31" Y="0.0" Z="0.0" />
 			<scale X="1.326" Y="1.326" Z="1.326" />
 			<models>
@@ -41,21 +43,36 @@
 		</group>
 		<group>
 			<!-- Mars -->
+			<rotate axisX="0" axisY="1" axisZ="0" angle="270"/>
 			<translate X="45" Y="0.0" Z="0.0" />
-			<scale X="0.743" Y="0.743" Z="0.743" />
-			<models>
-				<model file="terrestrial_v3.3d" R="0.788" G="0.243" B="0.020" />
-			</models>
+			<group>
+				<scale X="0.743" Y="0.743" Z="0.743" />
+				<models>
+					<model file="terrestrial_v3.3d" R="0.788" G="0.243" B="0.020" />
+				</models>
+			</group>
+			<group>
+				<!-- Mars Moons -->
+				<models>
+					<random>
+						<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<specs N="1" minRadius="1" maxRadius="2" minScale="0.2" maxScale="0.8" />
+					</random>
+				</models>
+			</group>
 		</group>
 		<group>
+			<!-- Asteroid Belt -->
 			<models>
 				<random>
-					<model file="moon_v3.3d" R="1" G="1" B="1"/>
-					<specs N="400" minRadius="53" maxRadius="60" minScale="0.3" maxScale="0.6"/>
+					<model file="asteroid.3d" R="0.643" G="0.604" B="0.576" />
+					<specs N="400" minRadius="50" maxRadius="57" minScale="0.3" maxScale="0.6"/>
 				</random>
 			</models>
 		</group>
 		<group>
+			<rotate axisX="0" axisY="1" axisZ="0" angle="45"/>
 			<translate X="68" Y="0.0" Z="0.0" />
 			<group>
 				<!-- Jupiter -->
@@ -65,7 +82,18 @@
 				</models>
 			</group>
 			<group>
-				<!-- Europa -->
+				<!-- Jupiter Moons -->
+				<models>
+					<random>
+						<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<specs N="33" minRadius="7" maxRadius="10" minScale="0.3" maxScale="1" />
+					</random>
+				</models>
+			</group>
+			<!--
+			<group>
+				<!-- Europa >
 				<translate X="8" Y="0.0" Z="0.0" />
 				<scale X="0.776" Y="0.776" Z="0.776" />
 				<models>
@@ -73,7 +101,7 @@
 				</models>
 			</group>
 			<group>
-				<!-- Io -->
+				<!-- Io >
 				<translate X="10" Y="0.0" Z="0.0" />
 				<scale X="0.905" Y="0.905" Z="0.905" />
 				<models>
@@ -81,7 +109,7 @@
 				</models>
 			</group>
 			<group>
-				<!-- Calisto -->
+				<!-- Calisto >
 				<translate X="12" Y="0.0" Z="0.0" />
 				<scale X="1.198" Y="1.198" Z="1.198" />
 				<models>
@@ -89,13 +117,14 @@
 				</models>
 			</group>
 			<group>
-				<!-- Ganimede -->
+				<!-- Ganimede >
 				<translate X="13.5" Y="0.0" Z="0.0" />
 				<scale X="1.307" Y="1.307" Z="1.307" />
 				<models>
 					<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176" />
 				</models>
 			</group>
+			-->
 		</group>
 		<group>
 			<translate X="100" Y="0.0" Z="0.0" />
@@ -108,13 +137,25 @@
 				</models>
 			</group>
 			<group>
-				<!-- Titan -->
+				<!-- Saturn Moons -->
+				<models>
+					<random>
+						<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<specs N="31" minRadius="10" maxRadius="13" minScale="0.2" maxScale="0.8" />
+					</random>
+				</models>
+			</group>
+			<!--
+			<group>
+				<!-- Titan >
 				<translate X="10" Y="0.0" Z="0.0" />
 				<scale X="1.280" Y="1.280" Z="1.280" />
 				<models>
 					<model file="moon_v3.3d" R="0.824" G="0.733" B="0.357"/>
 				</models>
 			</group>
+			-->
 			<group>
 				<!-- Ring D -->
 				<scale X="0.765" Y="0.765" Z="0.765" />
@@ -170,6 +211,7 @@
 			</group>
 		</group>
 		<group>
+			<rotate axisX="0" axisY="1" axisZ="0" angle="135"/>
 			<translate X="120" Y="0.0" Z="0.0" />
 			<group>
 				<!-- Uranus -->
@@ -178,9 +220,21 @@
 					<model file="gaseous_v3.3d" R="0.757" G="0.906" B="0.918" />
 				</models>
 			</group>
+			<group>
+				<!-- Uranus Moons -->
+				<models>
+					<random>
+						<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<specs N="9" minRadius="3" maxRadius="4" minScale="0.15" maxScale="0.65" />
+					</random>
+				</models>
+			</group>
 		</group>
 		<group>
-			<translate X="130" Y="0.0" Z="0.0" />
+			<rotate axisX="0" axisY="1" axisZ="0" angle="215"/>
+			<translate X="140" Y="0.0" Z="0.0" />
 			<group>
 				<!-- Neptune -->
 				<scale X="0.553" Y="0.553" Z="0.553" />
@@ -189,13 +243,25 @@
 				</models>
 			</group>
 			<group>
-				<!-- Triton -->
+				<!-- Saturn Moons -->
+				<models>
+					<random>
+						<model file="moon_v3.3d" R="0.263" G="0.208" B="0.176"  />
+						<model file="moon_v3.3d" R="0.412" G="0.388" B="0.376"  />
+						<specs N="7" minRadius="3" maxRadius="4" minScale="0.2" maxScale="0.8" />
+					</random>
+				</models>
+			</group>
+			<!--
+			<group>
+				<!-- Triton >
 				<translate X="7" Y="0.0" Z="0.0" />
 				<scale X="0.672" Y="0.672" Z="0.672" />
 				<models>
 					<model file="moon_v3.3d" R="0.525" G="0.478" B="0.416" />
 				</models>
 			</group>
+			-->
 		</group>
 		<!-- Planet trajectories -->
 		<group>
@@ -249,7 +315,7 @@
 		</group>
 		<group>
 			<!-- Uranus' trajectory -->
-			<scale X="1.244" Y="1" Z="1.244" />
+			<scale X="1.339" Y="1" Z="1.339" />
 			<models>
 				<model file="gaseous_trajectory.3d" />
 			</models>
