@@ -20,10 +20,10 @@ if(NOT OPENGL_FOUND)
 endif(NOT OPENGL_FOUND)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine_tree/)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/engine/)
 add_definitions(-std=c++11 -Wall )
 
-add_executable(engine engine_tree/engine.cpp tinyxml2.cpp)
-add_executable(gen gen.cpp)
+add_executable(engine engine/engine.cpp tinyxml2.cpp)
+add_executable(generator generator.cpp)
 
 target_link_libraries(engine ${OPENGL_LIBRARIES} ${GLUT_LIBRARY})

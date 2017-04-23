@@ -1,7 +1,7 @@
 #ifndef POINT
 #define POINT
 
-// Imutable three-dimensional points
+// Three-dimensional point
 class point{
 public:
 	float x, y, z;
