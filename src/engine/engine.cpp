@@ -3,10 +3,11 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <ctype.h>
-#define _USE_MATH_DEFINES
 #include <math.h>
+#include <GL/glew.h>
 #ifdef __APPLE__
 #include <GLUT/glut.h>
 #else
@@ -15,7 +16,6 @@
 
 #include "geoTransform.h"
 #include "group.h"
-#include "point.h"
 #include "rotation.h"
 #include "scale.h"
 #include "tinyxml2.h"
@@ -25,7 +25,18 @@ using namespace std;
 using namespace tinyxml2;
 
 #define ANG2RAD M_PI/180
-typedef vector<point> Model;
+
+/* Scene models */
+typedef vector<float> Model;
+vector<group> groups;
+
+map<string, Model> models;
+/* maps model_name to buffer id and number of vertices */
+map<string, pair<GLuint,int>> model_to_buffer;
+
+/* VBO's */
+int n_models;
+GLuint* buffers;
 
 // Camera control
 float r = 10.0f;
@@ -42,9 +53,6 @@ float lookZ = Pz + cos(pitch) * cos(yaw);
 // Polygon Mode
 GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
 GLenum mode;
-
-vector<group> groups;
-map<string, Model> models;
 
 // directory of the read file
 string directory; 
@@ -72,6 +80,7 @@ void changeSize(int w, int h) {
 }
 
 void print_matrix(float m[], int I, int J) {
+        /* useful for debugging */
 	for(int i  = 0; i < I; i++){
 		for(int j  = 0; j < J; j++){
 			cout << m[i + j * I] << " ";
@@ -81,12 +90,12 @@ void print_matrix(float m[], int I, int J) {
 }
 
 void drawModel(string model, color c){
-	glBegin(GL_TRIANGLES);
-		glColor3f( c.r, c.g, c.b);
-		for(auto p : models[model]) {
-			glVertex3f(p.x, p.y, p.z);
-		}
-	glEnd();
+        auto buffer_id_size = model_to_buffer[model];
+
+	glColor3f(c.r, c.g, c.b);
+        glBindBuffer(GL_ARRAY_BUFFER, buffer_id_size.first);
+        glVertexPointer(3,GL_FLOAT, 0, 0);
+        glDrawArrays(GL_TRIANGLES, 0, buffer_id_size.second/3);
 }
 
 void drawRandom(randomModel rnd){
@@ -177,6 +186,7 @@ void normalize(float* vx, float* vy, float* vz){
 void processKeys(unsigned char c, int xx, int yy) {
 	float k = 0.5f;
 	float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
+
 	/* forward vector */
 	float dX = lookX - Px;
 	float dY = lookY - Py;
@@ -314,16 +324,16 @@ color& parseColor(XMLElement* model){
 }
 
 void readFile(ifstream& file, string fName){
-	int n_vertex;
+	int n_vertex, n_values;
+        Model model_read;
+
 	file >> n_vertex; 
-	Model model_read;
-	for(int i = 0; i < n_vertex; i++){
-		float px, py, pz;
-		file >> px;
-		file >> py;
-		file >> pz;
-		point p(px, py, pz);
-		model_read.push_back(p);
+        n_values = 3*n_vertex;
+
+	for(int i = 0; i < n_values; i++){
+            float tmp;
+            file >> tmp;
+            model_read.push_back(tmp);
 	}
 	file.close();
 	models[fName] = model_read;
@@ -429,7 +439,7 @@ group parseGroup(XMLElement *gr) {
 }
 
 void parseInitialPosition(XMLElement* scene){
-// if a coordinate is not specified, it will default to 0
+        // if a coordinate is not specified, it will default to 0
 	scene->QueryFloatAttribute("camX", &Px);
 	scene->QueryFloatAttribute("camY", &Py);
 	scene->QueryFloatAttribute("camZ", &Pz);
@@ -441,6 +451,7 @@ void parseInitialPosition(XMLElement* scene){
 	lookY = Py + sin(pitch);
 	lookZ = Pz + cos(pitch) * cos(yaw);
 }
+
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char **argv) {
 	if(argc != 2) {
@@ -466,28 +477,50 @@ int main(int argc, char **argv) {
 	parseInitialPosition(scene);
 
 	XMLElement* gr = scene->FirstChildElement("group");
+
+        /* Read all the groups */
 	for(; gr; gr = gr->NextSiblingElement()){
 		group g = parseGroup(gr);
 		groups.push_back(g);
 	}
 
-	// init GLUT and the window
+        // init GLUT and the window
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
 	glutInitWindowPosition(100,100);
 	glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
 	glutCreateWindow("Pratical Assignment");
 
-	// Required callback registry 
+	// Callback registry 
 	glutDisplayFunc(renderScene);
 	glutReshapeFunc(changeSize);
 	glutKeyboardFunc(processKeys);
 	glutSpecialFunc(processSpecialKeys);
 
+        glewInit();
+
+        n_models = models.size();
+        buffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
+        glGenBuffers(n_models, buffers);
+        
+        int i = 0;
+        for(auto it = models.begin(); it != models.end(); it++){
+            auto model = it->second;
+
+            /* maps the name of the model to the id of the buffer and number of vertices */
+            pair<GLuint, int> id_number_elements(buffers[i], model.size());
+            model_to_buffer[it->first] = id_number_elements;
+
+            /* fills the buffers */
+            glBindBuffer(GL_ARRAY_BUFFER, buffers[i++]); 
+            glBufferData(GL_ARRAY_BUFFER, model.size() * sizeof(float), model.data(), GL_STATIC_DRAW);
+        }
+
 	//  OpenGL settings
 	glEnable(GL_DEPTH_TEST);
 	glMatrixMode(GL_MODELVIEW);
 	glEnable(GL_CULL_FACE);
+        glEnableClientState(GL_VERTEX_ARRAY);
 
 	glutMainLoop();
 
