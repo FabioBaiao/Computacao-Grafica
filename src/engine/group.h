@@ -7,7 +7,6 @@
 #include <GL/glut.h>
 #endif
 
-#include "point.h"
 #include "geoTransform.h"
 
 class color {
