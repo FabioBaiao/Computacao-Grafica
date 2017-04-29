@@ -4,11 +4,27 @@
 #include <fstream>
 #include <cstdlib>
 #include <math.h>
+#include <string.h>
+#include <stdlib.h>
+
 
 using namespace std;
 
 #define UPWARDS 1
 #define DOWNWARDS (-1)
+
+#define BUFF_SIZE 1024
+
+typedef struct point{
+	float x;
+	float y;
+	float z;
+}point;
+
+point* cpoints;		// control points
+int** indexes;		// indexes dos pontos dos varios patches
+int patches;		// numero de patches
+int ncpoints;		// numero de control points
 
 string planeXZ (float x, float y, float z, int nDiv, int orient){
 	ostringstream os;
@@ -569,6 +585,221 @@ int torusGenerator(int argc, char *argv[]) {
 	return 0;
 }
 
+void cross(float *a, float *b, float *res) {
+
+	res[0] = a[1]*b[2] - a[2]*b[1];
+	res[1] = a[2]*b[0] - a[0]*b[2];
+	res[2] = a[0]*b[1] - a[1]*b[0];
+}
+
+float length(float *v) {
+
+	float res = sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+	return res;
+
+}
+
+void normalize(float *a) {
+
+	float l = length(a);
+	a[0] = a[0]/l;
+	a[1] = a[1]/l;
+	a[2] = a[2]/l;
+}
+
+void multMatrixVector(float *m, float *v, float *res) {
+
+	for (int j = 0; j < 4; ++j) {
+		res[j] = 0;
+		for (int k = 0; k < 4; ++k) {
+			res[j] += v[k] * m[j * 4 + k];
+		}
+	}
+}
+
+void multVectorMatrix(float *v, float *m, float *res) {
+	for(int i = 0; i < 4; ++i){
+		res[i] = 0;
+		for(int j = 0; j < 4; ++j){
+			res[i] += v[j] * m[j*4+i]; 
+		}
+	}
+}
+
+void multMatrixMatrix(float *m1, float *m2, float *res){
+	for(int i = 0; i < 4; ++i){
+		for(int j = 0; j < 4; ++j){
+			res[i*4+j] = 0.0f;
+			for(int k = 0; k < 4; ++k)
+				res[i*4+j] += m1[i*4+k] * m2[k*4+j];
+		}
+	}
+}
+
+void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_normal){
+	float d_u[3];
+	float d_v[3];
+	/* Setup */	
+	float m[4][4] = {	{-1.0f, 3.0f, -3.0f, 1.0f},
+						{ 3.0f,-6.0f,  3.0f, 0.0f},
+						{-3.0f, 3.0f,  0.0f, 0.0f},
+						{ 1.0f, 0.0f,  0.0f, 0.0f}};
+
+	/* a transposta de m é igual a m */
+
+	float Px[4][4] = { 	{ pv[0].x, pv[1].x, pv[2].x, pv[3].x},
+						{ pv[4].x, pv[5].x, pv[6].x, pv[7].x},
+						{ pv[8].x, pv[9].x, pv[10].x, pv[11].x},
+						{ pv[12].x, pv[13].x, pv[14].x, pv[15].x}};
+	
+	float Py[4][4] = { 	{ pv[0].y, pv[1].y, pv[2].y, pv[3].y},
+						{ pv[4].y, pv[5].y, pv[6].y, pv[7].y},
+						{ pv[8].y, pv[9].y, pv[10].y, pv[11].y},
+						{ pv[12].y, pv[13].y, pv[14].y, pv[15].y}};
+	
+	float Pz[4][4] = { 	{ pv[0].z, pv[1].z, pv[2].z, pv[3].z},
+						{ pv[4].z, pv[5].z, pv[6].z, pv[7].z},
+						{ pv[8].z, pv[9].z, pv[10].z, pv[11].z},
+						{ pv[12].z, pv[13].z, pv[14].z, pv[15].z}};
+	
+	float U[4] = {u*u*u, u*u, u, 1};
+	float UD[4]= {3*u*u, 2*u, 1, 0};
+	float V[4] = {v*v*v, v*v, v, 1};
+	float VD[4]= {3*v*v, 2*v, 1, 0};
+
+	// solution 1: doesnt work and i dont know why
+	float MdV[4];
+	float MV[4];
+	multMatrixVector((float*)m, V, MV);
+	multMatrixVector((float*)m, VD, MdV);
+
+	float dUM[4];
+	float UM[4];
+	multVectorMatrix(U, (float*)m, UM);
+	multVectorMatrix(UD, (float*)m, dUM);
+	
+	float UMP[3][4];
+	multVectorMatrix(UM, (float*) Px, UMP[0]);	
+	multVectorMatrix(UM, (float*) Py, UMP[1]);	
+	multVectorMatrix(UM, (float*) Pz, UMP[2]);	
+
+	float dUMP[3][4];
+	multVectorMatrix(dUM, (float*) Px, dUMP[0]);	
+	multVectorMatrix(dUM, (float*) Py, dUMP[1]);	
+	multVectorMatrix(dUM, (float*) Pz, dUMP[2]);	
+	
+	for(int j = 0; j < 3; j++)
+	{
+		res[j] = 0.0f;
+		d_u[j] = 0.0f;
+		d_v[j] = 0.0f;
+		for(int i = 0; i < 4; i++ )
+		{
+			res[j] += MV[i] * UMP[j][i]; 
+			d_u[j] += MV[i] * dUMP[j][i];
+			d_v[j] += MdV[i] * UMP[j][i];
+		}
+	}
+	
+	normalize(d_u);
+	normalize(d_v);
+	cross(d_v, d_u, p_normal);
+}
+
+
+void bezierPatchGenerator(char* outfile)
+{
+	point pv[16];
+	int divs = 16; // change this to change the tesselation level
+	int p = 0;
+	ofstream out;
+	ostringstream os;
+	
+	for(int i = 0; i < patches; i++)
+	{
+		for(int j = 0; j < 16; j++)
+			pv[j] = cpoints[indexes[i][j]];
+		
+		for(int u = 0; u < divs; u++)
+		{
+			float resP1[3], p_normal1[3];
+			float resP2[3], p_normal2[3];
+			float resP3[3], p_normal3[3];
+			float resP4[3], p_normal4[3];
+			
+			for(int v = 0; v < divs; v++)
+			{
+				
+				getBezierPatchPoint(u/(float)divs, v/(float)divs, pv, resP1,p_normal1 );
+				getBezierPatchPoint((u+1)/(float)divs, v/(float)divs, pv, resP2, p_normal2 );
+				getBezierPatchPoint(u/(float)divs, (v+1)/(float)divs, pv, resP3, p_normal3);
+				getBezierPatchPoint((u+1)/(float)divs, (v+1)/(float)divs, pv, resP4,p_normal4);
+				
+				os << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
+				os << resP3[0] << ' ' << resP3[1] << ' ' << resP3[2] << '\n';
+				os << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
+				
+				os << resP2[0] << ' ' << resP2[1] << ' ' << resP2[2] << '\n';
+				os << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
+				os << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
+				
+				p += 6;
+			}
+		}
+	}
+	out.open(outfile);
+	out << to_string(p) + "\n" + os.str();
+	out.close();	
+}
+
+int bezierPatchParser(char* patch)
+{
+	int l_index;
+	int i, j;
+	char line[BUFF_SIZE];
+	FILE* f = fopen(patch, "r");
+	if(!f)
+		return -1;
+
+	fscanf(f, "%d\n", &l_index);
+	patches = l_index;
+	printf("%d\n", patches);
+	indexes = (int**) malloc(sizeof(int*)*l_index);
+	if(!indexes)
+		return -1;
+
+	for(i = 0; i < l_index; i++)
+	{
+		indexes[i] = (int*) malloc(sizeof(int) * 16);
+		if(!indexes[i])
+			return -1;
+		
+		memset(line, 0, BUFF_SIZE);
+		fgets(line, BUFF_SIZE, f);
+		char* ind = NULL;
+		for(j = 0, ind = strtok(line,", "); ind && j < 16; ind = strtok(NULL, ", "), j++)
+			indexes[i][j] = atoi(ind);
+	}
+	
+	fscanf(f, "%d\n", &ncpoints);
+
+	cpoints = (point*) malloc(sizeof(point) * ncpoints);
+	if(!cpoints)
+		return -1;
+	
+	for(i = 0; i < ncpoints; i++)
+	{
+		memset(line, 0, BUFF_SIZE);
+		fgets(line,BUFF_SIZE, f);
+		cpoints[i].x = atof(strtok(line, ", "));
+		cpoints[i].y = atof(strtok(NULL, ", "));
+		cpoints[i].z = atof(strtok(NULL, ", "));
+	}
+
+	fclose(f);
+	return 0;
+}
+
 void usage(const char *programName, FILE *stream) {
 	fprintf(stream, "Usage: %s primitive parameters outfile\n\n", programName);
 	fputs("+-------------+-------------------------------------------+\n"
@@ -623,6 +854,12 @@ int main(int argc, char *argv[]) {
 	}
 	else if(primitive == "torus" && argc == 7){
 		rval = torusGenerator(argc - 2, &argv[2]);
+	}
+	else if(primitive == "patch" && argc == 4)
+	{
+		rval = bezierPatchParser(argv[2]);
+		if(!rval)
+			bezierPatchGenerator(argv[3]);
 	}
 	else if(primitive == "--help") {
 		usage(argv[0], stdout);
