@@ -707,10 +707,10 @@ void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_norma
 }
 
 
-void bezierPatchGenerator(char* outfile)
+void bezierPatchGenerator(char* outfile, int tesselation_level)
 {
 	point pv[16];
-	int divs = 16; // change this to change the tesselation level
+	int divs = tesselation_level; // change this to change the tesselation level
 	int p = 0;
 	ofstream out;
 	ostringstream os;
@@ -814,6 +814,7 @@ void usage(const char *programName, FILE *stream) {
 		  "| plane       | xDim zDim [divisions]                     |\n"
 		  "| sphere      | radius slices stacks                      |\n"
 		  "| torus       | innerRadius outerRadius sides rings       |\n"
+		  "| patch       | TesselationLevel patchFile                |\n"
 		  "+-------------+-------------------------------------------+\n"
 		  , stream
 	);
@@ -855,11 +856,11 @@ int main(int argc, char *argv[]) {
 	else if(primitive == "torus" && argc == 7){
 		rval = torusGenerator(argc - 2, &argv[2]);
 	}
-	else if(primitive == "patch" && argc == 4)
+	else if(primitive == "patch" && argc == 5)
 	{
-		rval = bezierPatchParser(argv[2]);
+		rval = bezierPatchParser(argv[3]);
 		if(!rval)
-			bezierPatchGenerator(argv[3]);
+			bezierPatchGenerator(argv[4], atoi(argv[2]));
 	}
 	else if(primitive == "--help") {
 		usage(argv[0], stdout);
