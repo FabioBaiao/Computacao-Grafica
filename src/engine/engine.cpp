@@ -280,37 +280,40 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-void parsePoint(translationTime& tt, XMLElement* elem){
+void parsePoint(float **points, int i, XMLElement* elem){
 	float x, y, z;
 	elem->QueryFloatAttribute("X", &x);
 	elem->QueryFloatAttribute("Y", &y);
 	elem->QueryFloatAttribute("Z", &z);
 
-	std::vector<float> p;
-	p.push_back(x);
-	p.push_back(y);
-	p.push_back(z);
-	tt.points.push_back(p);
+	points[i] = (float *) malloc(sizeof(float) * 3);
+
+	points[i][0] = x;
+	points[i][1] = y;
+	points[i][2] = z;
 }
 
 void parseTranslate(group& g, XMLElement* elem){
 	float x, y, z, time;
 	x = y = z = time = 0.0f;
-	if (true){ // testar se é X, Y ou Z
+	/*if (true){ // testar se é X, Y ou Z
 		elem->QueryFloatAttribute("X", &x);
 		elem->QueryFloatAttribute("Y", &y);
 		elem->QueryFloatAttribute("Z", &z);
 		g.transforms.push_back(new translationCoords(x,y,z));
 	}
-	/*else if (true){ // testar se é time
+	else*/ if (true){ // testar se é time
 		elem->QueryFloatAttribute("time", &time);
-		translationTime tt (time);
 		XMLElement *child = elem->FirstChildElement();
+		float **points = NULL;
+		int n = 0;
 		for(; child; child = child->NextSiblingElement()){
-			parsePoint(tt, child);
+			n++;
+			points = (float **) realloc(points, n*sizeof(float *));
+			parsePoint(points, n-1, child);
 		}
-		g.transforms.push_back(tt);
-	}*/
+		g.transforms.push_back(new translationTime(time, points, n));
+	}
 }
 
 void parseRotate(group& g, XMLElement* elem){
