@@ -3,24 +3,14 @@
 
 #include "geoTransform.h"
 
-class rotationAngle : public geoTransform {
+class rotation : public geoTransform {
 public:
-	float angle, x, y, z;
-	rotationAngle(float fangle, float fx, float fy, float fz) : angle{fangle}, x{fx}, y{fy}, z{fz} {};
+	float angle, x, y, z, time;
+	rotation(float fangle, float fx, float fy, float fz, float ftime) : angle{fangle}, x{fx}, y{fy}, z{fz}, time{ftime*(float)1e3} {};
 	
 	void apply() {
+		angle = (time == 0 ? angle : glutGet(GLUT_ELAPSED_TIME)*360/time);
 		glRotatef(angle, x, y, z);
-	}
-
-};
-
-class rotationTime : public geoTransform {
-public:
-	float time, x, y, z;
-	rotationTime(float ftime, float fx, float fy, float fz) : time{ftime}, x{fx}, y{fy}, z{fz} {};
-	
-	void apply() {
-		//glRotatef(time, x, y, z);
 	}
 
 };

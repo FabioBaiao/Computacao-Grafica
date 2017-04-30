@@ -302,7 +302,7 @@ void parseTranslate(group& g, XMLElement* elem){
 		elem->QueryFloatAttribute("Z", &z);
 		g.transforms.push_back(new translationCoords(x,y,z));
 	}
-	else if (true){ // testar se é time
+	/*else if (true){ // testar se é time
 		elem->QueryFloatAttribute("time", &time);
 		translationTime tt (time);
 		XMLElement *child = elem->FirstChildElement();
@@ -310,27 +310,18 @@ void parseTranslate(group& g, XMLElement* elem){
 			parsePoint(tt, child);
 		}
 		g.transforms.push_back(tt);
-	}
+	}*/
 }
 
 void parseRotate(group& g, XMLElement* elem){
 	float angle, time, axisX, axisY, axisZ;
 	angle = axisX = axisY = axisZ = time = 0.0f;
-	if (true){ // testar se é angle
-		elem->QueryFloatAttribute("angle", &angle);
-		elem->QueryFloatAttribute("axisX", &axisX);
-		elem->QueryFloatAttribute("axisY", &axisY);
-		elem->QueryFloatAttribute("axisZ", &axisZ);
-		g.transforms.push_back(new rotationAngle(angle, axisX, axisY, axisZ));
-	}
-	else if (true){ // testar se é time
-		elem->QueryFloatAttribute("time", &time);
-		elem->QueryFloatAttribute("axisX", &axisX);
-		elem->QueryFloatAttribute("axisY", &axisY);
-		elem->QueryFloatAttribute("axisZ", &axisZ);
-		g.transforms.push_back(new rotationTime(time, axisX, axisY, axisZ));
-	}
-	
+	elem->QueryFloatAttribute("angle", &angle);
+	elem->QueryFloatAttribute("time", &time);
+	elem->QueryFloatAttribute("axisX", &axisX);
+	elem->QueryFloatAttribute("axisY", &axisY);
+	elem->QueryFloatAttribute("axisZ", &axisZ);
+	g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ, time));
 }
 
 void parseScale(group& g, XMLElement* elem){
@@ -527,6 +518,7 @@ int main(int argc, char **argv) {
 
 	// Callback registry 
 	glutDisplayFunc(renderScene);
+	glutIdleFunc(renderScene);
 	glutReshapeFunc(changeSize);
 	glutKeyboardFunc(processKeys);
 	glutSpecialFunc(processSpecialKeys);

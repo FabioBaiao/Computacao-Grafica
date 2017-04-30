@@ -1,0 +1,8 @@
+<scene>
+	<group>
+		<rotate time="10" axisX="0" axisY="1" axisZ="0" />
+		<models>
+			<model file="box.3d" />
+		</models>
+	</group>
+</scene>
