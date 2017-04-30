@@ -280,23 +280,57 @@ void processSpecialKeys(int key, int xx, int yy) {
 	glutPostRedisplay();
 }
 
-void parseTranslate(group& g, XMLElement* elem){
+void parsePoint(translationTime& tt, XMLElement* elem){
 	float x, y, z;
-	x = y = z = 0.0f;
 	elem->QueryFloatAttribute("X", &x);
 	elem->QueryFloatAttribute("Y", &y);
 	elem->QueryFloatAttribute("Z", &z);
-	g.transforms.push_back(new translation(x,y,z));
+
+	std::vector<float> p;
+	p.push_back(x);
+	p.push_back(y);
+	p.push_back(z);
+	tt.points.push_back(p);
+}
+
+void parseTranslate(group& g, XMLElement* elem){
+	float x, y, z, time;
+	x = y = z = time = 0.0f;
+	if (true){ // testar se é X, Y ou Z
+		elem->QueryFloatAttribute("X", &x);
+		elem->QueryFloatAttribute("Y", &y);
+		elem->QueryFloatAttribute("Z", &z);
+		g.transforms.push_back(new translationCoords(x,y,z));
+	}
+	else if (true){ // testar se é time
+		elem->QueryFloatAttribute("time", &time);
+		translationTime tt (time);
+		XMLElement *child = elem->FirstChildElement();
+		for(; child; child = child->NextSiblingElement()){
+			parsePoint(tt, child);
+		}
+		g.transforms.push_back(tt);
+	}
 }
 
 void parseRotate(group& g, XMLElement* elem){
-	float angle, axisX, axisY, axisZ;
-	angle = axisX = axisY = axisZ = 0.0f;
-	elem->QueryFloatAttribute("angle", &angle);
-	elem->QueryFloatAttribute("axisX", &axisX);
-	elem->QueryFloatAttribute("axisY", &axisY);
-	elem->QueryFloatAttribute("axisZ", &axisZ);
-	g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ));
+	float angle, time, axisX, axisY, axisZ;
+	angle = axisX = axisY = axisZ = time = 0.0f;
+	if (true){ // testar se é angle
+		elem->QueryFloatAttribute("angle", &angle);
+		elem->QueryFloatAttribute("axisX", &axisX);
+		elem->QueryFloatAttribute("axisY", &axisY);
+		elem->QueryFloatAttribute("axisZ", &axisZ);
+		g.transforms.push_back(new rotationAngle(angle, axisX, axisY, axisZ));
+	}
+	else if (true){ // testar se é time
+		elem->QueryFloatAttribute("time", &time);
+		elem->QueryFloatAttribute("axisX", &axisX);
+		elem->QueryFloatAttribute("axisY", &axisY);
+		elem->QueryFloatAttribute("axisZ", &axisZ);
+		g.transforms.push_back(new rotationTime(time, axisX, axisY, axisZ));
+	}
+	
 }
 
 void parseScale(group& g, XMLElement* elem){
