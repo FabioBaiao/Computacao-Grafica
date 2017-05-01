@@ -26,23 +26,27 @@
 using namespace std;
 using namespace tinyxml2;
 
-// Scene models
+/********************** SCENE MODELS **********************/ 
 typedef vector<float> Model;
 vector<group> groups;
-
 map<string, Model> models;
 // maps model_name to buffer id and number of vertices
 map<string, pair<GLuint,int>> model_to_buffer;
+/******************** END SCENE MODELS ********************/ 
 
+/********************** KEY BINDINGS **********************/ 
 // maps keybindings to increase and decrease angle actions in rotations
 map<char, rotation*> increaseBindings, decreaseBindings;
+// maps keybindings to increase and decrease coordinates actions in translations 
+map<char, translationCoords*> increaseX, increaseY, increaseZ, decreaseX, decreaseY, decreaseZ;
 //vector<char> keysInUse{
+/******************** END KEY BINDINGS ********************/ 
 
 // VBO's
 int n_models;
 GLuint* buffers;
 
-// Camera control
+/********************** CAMERA CONTROL **********************/ 
 float r = 10.0f;
 float alpha;
 float beta;
@@ -53,6 +57,7 @@ float Px = 0.0f, Py = 0.0f, Pz = 0.0f;
 float lookX = Px + cos(pitch) * sin(yaw);
 float lookY = Py + sin(pitch);
 float lookZ = Pz + cos(pitch) * cos(yaw);
+/******************** END CAMERA CONTROL ********************/ 
 
 // Polygon Mode
 GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
@@ -181,7 +186,7 @@ void processKeys(unsigned char c, int xx, int yy) {
     float k = 0.5f;
     float upX = 0.0f, upY = 1.0f, upZ = 0.0f;
 
-    /* forward vector */
+    // forward vector
     float dX = lookX - Px;
     float dY = lookY - Py;
     float dZ = lookZ - Pz;
@@ -191,7 +196,7 @@ void processKeys(unsigned char c, int xx, int yy) {
     char cc = toupper(c);
     switch(cc) {
     case 27:
-        /* ESC key */
+        // ESC key
         exit(0);
     case 'W':
         Px += k*dX;
@@ -212,7 +217,7 @@ void processKeys(unsigned char c, int xx, int yy) {
         lookZ -= k*dZ;
         break;
     case 'A':
-        /* cross product: up x forwardV */
+        // cross product: up x forwardV 
         rX = (upY * dZ) - (upZ * dY);
         rY = (upZ * dX) - (upX * dZ);
         rZ = (upX * dY) - (upY * dX);
@@ -226,7 +231,7 @@ void processKeys(unsigned char c, int xx, int yy) {
         lookZ += k*rZ;
         break;
     case 'D':
-        /* cross product: forwardV x up */
+        // cross product: forwardV x up
         rX = (dY * upZ) - (dZ * upY);
         rY = (dZ * upX) - (dX * upZ);
         rZ = (dX * upY) - (dY * upX);
@@ -239,10 +244,12 @@ void processKeys(unsigned char c, int xx, int yy) {
         lookY += k*rY;
         lookZ += k*rZ;
         break;
-    case 'M': // More radius
+    case 'M': 
+        // More radius
         r += 0.2f;
         break;
-    case 'L': // Less radius
+    case 'L': 
+        // Less radius
         r -= 0.2f;
         if(r < 0.2f)
             r = 0.2f;
@@ -302,6 +309,15 @@ void parsePoint(float **points, int i, XMLElement* elem) {
     points[i][2] = z;
 }
 
+void bindTranslateIfAvailable(XMLElement* elem, const char* attributeName, map<char, translationCoords*> binds, translationCoords* trans){
+    // TO-DO: check if keys are in use
+    const char * attribute = elem->Attribute(attributeName);
+    if(attribute && strlen(attribute) == 1) {
+        char c = toupper(attribute[0]);
+        binds[c] = trans;
+    }
+}
+
 void parseTranslate(group& g, XMLElement* elem) {
     float x, y, z, time;
     x = y = z = time = 0.0f;
@@ -324,7 +340,16 @@ void parseTranslate(group& g, XMLElement* elem) {
     	elem->QueryFloatAttribute("X", &x);
     	elem->QueryFloatAttribute("Y", &y);
     	elem->QueryFloatAttribute("Z", &z);
-    	g.transforms.push_back(new translationCoords(x,y,z));
+
+        translationCoords* trans = new translationCoords(x,y,z);
+    	g.transforms.push_back(trans);
+
+        bindTranslateIfAvailable(elem, "incX", increaseX, trans);
+        bindTranslateIfAvailable(elem, "incY", increaseY, trans);
+        bindTranslateIfAvailable(elem, "incZ", increaseZ, trans);
+        bindTranslateIfAvailable(elem, "decX", decreaseX, trans);
+        bindTranslateIfAvailable(elem, "decY", decreaseY, trans);
+        bindTranslateIfAvailable(elem, "decZ", decreaseZ, trans);
     }
 }
 
@@ -345,6 +370,7 @@ void parseRotate(group& g, XMLElement* elem) {
     const char * decreaseBind = elem->Attribute("decreaseBind");
     const char * increaseBind = elem->Attribute("increaseBind");
 
+    // TO-DO: Create pparser and check existing bindings like above
     if(decreaseBind && strlen(decreaseBind) == 1) {
         // if there is a keybinding to lower the angle
         char c = toupper(decreaseBind[0]);
@@ -538,7 +564,7 @@ int main(int argc, char **argv) {
 
     XMLElement* gr = scene->FirstChildElement("group");
 
-    /* Read all the groups */
+    // Read all the groups
     for(; gr; gr = gr->NextSiblingElement()) {
         group g = parseGroup(gr);
         groups.push_back(g);
@@ -568,11 +594,11 @@ int main(int argc, char **argv) {
     for(auto it = models.begin(); it != models.end(); it++) {
         auto model = it->second;
 
-        /* maps the name of the model to the id of the buffer and number of vertices */
+        // maps the name of the model to the id of the buffer and number of vertices
         pair<GLuint, int> id_number_elements(buffers[i], model.size());
         model_to_buffer[it->first] = id_number_elements;
 
-        /* fills the buffers */
+        // fills the buffers 
         glBindBuffer(GL_ARRAY_BUFFER, buffers[i++]);
         glBufferData(GL_ARRAY_BUFFER, model.size() * sizeof(float), model.data(), GL_STATIC_DRAW);
     }
