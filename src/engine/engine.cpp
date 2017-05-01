@@ -55,9 +55,9 @@ float beta;
 float pitch = 0.0f, yaw = 0.0f;
 
 float Px = 0.0f, Py = 0.0f, Pz = 0.0f;
-float lookX = Px + cos(pitch) * sin(yaw);
-float lookY = Py + sin(pitch);
-float lookZ = Pz + cos(pitch) * cos(yaw);
+float lookX= Px + cos(pitch) * sin(yaw);
+float lookY= Py + sin(pitch);
+float lookZ= Pz + cos(pitch) * cos(yaw);
 /******************** END CAMERA CONTROL ********************/ 
 
 // Polygon Mode
