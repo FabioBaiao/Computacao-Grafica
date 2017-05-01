@@ -29,6 +29,7 @@ public:
         // draw the curves using line segments - GL_LINE_LOOP
         // note: ONLY the models are required to be drawn with VBO's
         glBegin(GL_LINE_LOOP);
+        glColor3f(1,1,1);
         for(float i = 0.0; i < 1.0; i+=0.0001) {
             getGlobalCatmullRomPoint(i, (float *)pos, (float *)deriv);
             glVertex3f(pos[0], pos[1], pos[2]);
