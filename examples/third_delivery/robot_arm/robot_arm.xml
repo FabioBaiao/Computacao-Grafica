@@ -1,0 +1,121 @@
+<!-- os grupos com comentários a dizer que foram acrescentados para poderem rodar no eixo dos y
+	podem ser retirados por estarem a "roubar" demasiadas teclas, as restantes rotações são mais que
+	suficientes -->
+
+<scene yaw="180">
+	<group> <!-- Base of the arm -->
+		<translate X="0" Y="-0.2" Z="0" />
+		<models>
+			<model file="base.3d" R="0" G="0" B="1"/>
+		</models>
+	</group>
+<!-- adicionei este grupo exterior para rodar nos y -->
+	<group>
+	<!-- rotate do braço afeta antebraco e mao--> 
+	<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="Q" increaseBind="E"/>
+	<group>
+		<!-- rotate do braço afeta antebraco e mao--> 
+		<rotate axisX="1" axisY="0" axisZ="0" decreaseBind="O" increaseBind="P"/>
+		<models>
+			<model file="braco.3d" R="0.8" G="0.8" B="0.8"/>
+			<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+		</models>
+<!-- adicionei este grupo exterior para rodar nos y -->	
+		<group>	
+		<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="G" increaseBind="H"/> <!-- Controla a articulacao do antebraco (eixo y)-->
+		<group>
+			<!-- rotate do antebraco afeta mao e dedos--> 
+			<translate X="0.0" Y="1" Z="0.0"/>
+			<rotate axisX="1" axisY="0" axisZ="0" decreaseBind="U" increaseBind="I"/> <!-- Controla a articulacao do antebraco (eixo x)-->
+			<models>
+				<model file="braco.3d" R="0.8" G="0.8" B="0.8"/>
+				<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+			</models>
+<!-- adicionei este grupo exterior para rodar nos y -->		
+			<group>	
+			<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="1" increaseBind="2"/> <!-- controla a articulacao da mao (eixo y) -->
+			<group>
+				<translate X="0.0" Y="1" Z="0.0"/>
+				<rotate axisX="1" axisY="0" axisZ="0" decreaseBind="J" increaseBind="K"/> <!-- controla a articulacao da mao (eixo x)-->
+				<models>
+					<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+				</models>
+
+				<group>
+					<translate X="-0.15" Y="0.15" Z="0.0"/>
+					<rotate axisX="0" axisY="0" axisZ="1" decreaseBind="t" increaseBind="y"/> <!-- controla dedo esquerdo (eixo z)-->
+					<group>
+						<scale X="0.5" Y="0.5" Z="0.5" />
+						<models>
+							<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+						</models>
+					</group>
+					
+					<group>
+						<translate X="0.0" Y="0.075" Z="0.0" />
+						<models>
+							<model file="dedo.3d" R="0.5" G="0.5" B="0.5" />
+						</models>
+						
+						<group>
+							<translate X="0.0" Y="0.2" Z="0.0" />
+							<rotate axisX="0" axisY="0" axisZ="1" decreaseBind="5" increaseBind="6"/> <!-- controla ponta do dedo esquerdo (eixo z)-->
+							<group>
+								<scale X="0.2" Y="0.2" Z="0.2" />
+								<models>
+									<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+								</models>
+							</group>
+							<group>
+							<!--	<translate X="0" Y="0.0" Z="0" />-->
+								<models>
+									<model file="ponta.3d" R="0.5" G="0.5" B="0.5"/>
+								</models>
+							</group>
+						</group>
+					</group>
+
+				</group>
+
+				<group>
+					<translate X="0.15" Y="0.15" Z="0.0"/>
+					<rotate axisX="0" axisY="0" axisZ="1" decreaseBind="," increaseBind="."/> <!-- controla dedo direito (eixo z) -->
+					<group>
+						<scale X="0.5" Y="0.5" Z="0.5" />
+						<models>
+							<model file="articulacao.3d" R="0.25" G="0.25" B="0.25" />
+						</models>
+					</group>
+					
+					<group>
+						<translate X="0.0" Y="0.075" Z="0.0" />
+						<models>
+							<model file="dedo.3d" R="0.5" G="0.5" B="0.5" />
+						</models>
+						
+						<group>
+							<translate X="0.0" Y="0.2" Z="0.0" />
+							<rotate axisX="0" axisY="0" axisZ="1" decreaseBind="7" increaseBind="8"/> <!-- controla ponta do dedo direito (eixo z)-->
+							<group>
+								<scale X="0.2" Y="0.2" Z="0.2" />
+								<models>
+									<model file="articulacao.3d" R="0.25" G="0.25" B="0.25"  />
+								</models>
+							</group>
+							<group>
+							<!--	<translate X="0" Y="0.23" Z="0" />-->
+								<models>
+									<model file="ponta.3d" R="0.5" G="0.5" B="0.5"  />
+								</models>
+							</group>
+						</group>
+					</group>
+				</group>
+
+			</group> 
+			</group>
+		</group>
+		</group>
+	</group>
+	</group>
+</scene>
