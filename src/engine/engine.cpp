@@ -26,15 +26,19 @@
 using namespace std;
 using namespace tinyxml2;
 
-/* Scene models */
+// Scene models
 typedef vector<float> Model;
 vector<group> groups;
 
 map<string, Model> models;
-/* maps model_name to buffer id and number of vertices */
+// maps model_name to buffer id and number of vertices
 map<string, pair<GLuint,int>> model_to_buffer;
 
-/* VBO's */
+// maps keybindings to increase and decrease angle actions in rotations
+map<char, rotation*> increaseBindings, decreaseBindings;
+//vector<char> keysInUse{
+
+// VBO's
 int n_models;
 GLuint* buffers;
 
@@ -184,7 +188,8 @@ void processKeys(unsigned char c, int xx, int yy) {
 
     normalize(&dX, &dY, &dZ);
     float rX, rY, rZ;
-    switch(toupper(c)) {
+    char cc = toupper(c);
+    switch(cc) {
     case 27:
         /* ESC key */
         exit(0);
@@ -244,6 +249,18 @@ void processKeys(unsigned char c, int xx, int yy) {
         break;
     case 'C':
         mode = (mode + 1) % 3;
+        break;
+    default:
+        auto itDec = decreaseBindings.find(cc);
+
+        if(itDec != decreaseBindings.end()) {
+            itDec->second->decreaseAngle();
+        } else{ 
+            auto itInc = increaseBindings.find(cc);
+            if(itInc != increaseBindings.end()) {
+                 itInc->second->increaseAngle();
+            }
+        }
         break;
     }
     glutPostRedisplay();
@@ -321,7 +338,25 @@ void parseRotate(group& g, XMLElement* elem) {
     elem->QueryFloatAttribute("axisY", &axisY);
     elem->QueryFloatAttribute("axisZ", &axisZ);
 
-    g.transforms.push_back(new rotation(angle, axisX, axisY, axisZ, time));
+
+    rotation* rot = new rotation(angle, axisX, axisY, axisZ, time);
+    g.transforms.push_back(rot);
+
+    const char * decreaseBind = elem->Attribute("decreaseBind");
+    const char * increaseBind = elem->Attribute("increaseBind");
+
+    if(decreaseBind && strlen(decreaseBind) == 1) {
+        // if there is a keybinding to lower the angle
+        char c = toupper(decreaseBind[0]);
+        decreaseBindings[c] = rot;
+    } 
+
+    if(increaseBind && strlen(increaseBind) == 1) {
+        // if there is a keybinding to lower the angle
+        char c = toupper(increaseBind[0]);
+        increaseBindings[c] = rot;
+    } 
+
 }
 
 void parseScale(group& g, XMLElement* elem) {

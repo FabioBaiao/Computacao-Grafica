@@ -1,6 +1,6 @@
 #ifndef ROTATION 
 #define ROTATION 
-
+#define ANGLE_VARIATION 1.5
 #include "geoTransform.h"
 
 class rotation : public geoTransform {
@@ -12,6 +12,14 @@ public:
 		angle = (time == 0 ? angle : glutGet(GLUT_ELAPSED_TIME)*360/time);
 		glRotatef(angle, x, y, z);
 	}
+
+        void increaseAngle() {
+            angle += ANGLE_VARIATION;
+        }
+
+        void decreaseAngle() {
+            angle -= ANGLE_VARIATION;
+        }
 
 };
 #endif
