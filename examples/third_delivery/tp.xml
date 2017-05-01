@@ -1,4 +1,4 @@
-<scene>
+<scene camX="0" camY="0" camZ="5" yaw="180">
 	<group>
 		<models>
 			<model file='tp.3d' />

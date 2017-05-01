@@ -38,17 +38,21 @@ map<string, pair<GLuint,int>> model_to_buffer;
 int n_models;
 GLuint* buffers;
 
+void* font = GLUT_BITMAP_9_BY_15;
+
 // Camera control
 float r = 10.0f;
 float alpha;
 float beta;
 
+int timebase = 0, frame = 0;
+
 float pitch = 0.0f, yaw = 0.0f;
 
 float Px = 0.0f, Py = 0.0f, Pz = 0.0f;
-float lookX = Px + cos(pitch) * sin(yaw);
-float lookY = Py + sin(pitch);
-float lookZ = Pz + cos(pitch) * cos(yaw);
+float lookX = 0.0f; //= Px + cos(pitch) * sin(yaw);
+float lookY = 0.0f; //= Py + sin(pitch);
+float lookZ = 0.0f; //= Pz + cos(pitch) * cos(yaw);
 
 // Polygon Mode
 GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
@@ -151,7 +155,76 @@ void drawGroup(group g) {
 	glPopMatrix();
 }
 
+void renderBitmapString(float x, float y, float z, void* font, char* string)
+{
+	char* c;
+	glRasterPos3f(x,y,z);
+	for(c = string; *c; c++)
+		glutBitmapCharacter(font, *c);
+}
+
+void show_fps(float fps)
+{
+	static float f;
+	char* c;
+	char fs[10];
+	if(fps > 0)
+		f = fps;
+
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glWindowPos2i(30, glutGet(GLUT_SCREEN_HEIGHT)-95);
+	sprintf(fs, "FPS: %.2f", f);
+	for(c = fs; *c; c++)
+		glutBitmapCharacter(font, *c);
+}
+void show_coord()
+{
+	char* c;
+	char coords[50];
+	glColor3f(1.0f, 1.0f, 1.0f);
+	glWindowPos2i(30, glutGet(GLUT_SCREEN_HEIGHT)-80);
+	sprintf(coords, "x:%.2f, y:%.2f, z:%.2f", Px,Py,Pz);
+	for(c = coords; *c; c++)
+		glutBitmapCharacter(font, *c);
+
+	glutSetWindowTitle(coords);
+}
+
+void draw_axis(float x_len, float y_len, float z_len)
+{
+	char x[] = "X";
+	char y[] = "Y";
+	char z[] = "Z";
+
+	glBegin(GL_LINES);
+
+	glColor3f(1.0f, 0.0f, 0.0f);
+	glVertex3f(0.0f,0.0f,0.0f);
+	glVertex3f(x_len,0.0f,0.0f);
+
+	glColor3f(0.0f, 1.0f, 0.0f);
+	glVertex3f(0.0f,0.0f,0.0f);
+	glVertex3f(0.0f,y_len,0.0f);
+
+	glColor3f(0.0f, 0.0f, 1.0f);
+	glVertex3f(0.0f,0.0f,0.0f);
+	glVertex3f(0.0f,0.0f,z_len);
+	glEnd();	
+	
+	glColor3f(1.0f, 1.0f, 0.0f);
+	
+	renderBitmapString(x_len, 0.0f, 0.0f, font, x);
+	renderBitmapString(0.0f, y_len, 0.0f, font, y);
+	renderBitmapString(0.0f, 0.0f, z_len, font, z);
+	
+	glColor3f(1.0f, 1.0f, 1.0f);
+}
+
 void renderScene(void) {
+	int time;
+	float fps = 0;
+	char s[64];
+
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glPolygonMode(GL_FRONT, modes[mode]);
 	glLoadIdentity();
@@ -159,10 +232,26 @@ void renderScene(void) {
 	          lookX,lookY,lookZ,
 		      0.0f,1.0f,0.0f);
 
+	show_coord();
+	draw_axis(3.0f, 3.0f, 3.0f);
+
 	srand(0);
 	for(auto g : groups) {
 		drawGroup(g);
 	}
+
+	frame++;
+	time = glutGet(GLUT_ELAPSED_TIME);
+	if(time - timebase > 1000)	
+	{
+		fps = frame*1000.0/(time-timebase);
+		timebase = time ;
+		frame = 0;
+		//sprintf(s, "FPS: %.2f", fps);
+		show_fps(fps);
+	}
+	show_fps(-1);
+
 	glutSwapBuffers();
 }
 
@@ -475,9 +564,19 @@ void parseInitialPosition(XMLElement* scene){
 	scene->QueryFloatAttribute("pitch", &pitch);
 	yaw *= ANG2RAD; 
 	pitch *= ANG2RAD; 
-	lookX = Px + cos(pitch) * sin(yaw);
-	lookY = Py + sin(pitch);
-	lookZ = Pz + cos(pitch) * cos(yaw);
+	if(yaw != 0 && pitch != 0)
+	{
+		lookX = Px + cos(pitch) * sin(yaw);
+		lookY = Py + sin(pitch);
+		lookZ = Pz + cos(pitch) * cos(yaw);
+	}
+	else
+	{
+		lookX -= Px;
+		lookY -= Py;
+		lookZ -= Pz;
+		normalize(&lookX, &lookY, &lookZ);
+	}
 }
 
 //We assume that the .xml and .3d files passed are correct.
