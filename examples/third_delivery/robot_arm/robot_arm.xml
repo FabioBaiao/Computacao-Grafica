@@ -2,7 +2,7 @@
 	podem ser retirados por estarem a "roubar" demasiadas teclas, as restantes rotações são mais que
 	suficientes -->
 
-<scene yaw="180">
+<scene camX="0" camY="0" camZ="2" yaw="180">
 	<group> <!-- Base of the arm -->
 		<translate X="0" Y="-0.2" Z="0" />
 		<models>
