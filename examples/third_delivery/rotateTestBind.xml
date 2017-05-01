@@ -1,0 +1,8 @@
+<scene>
+	<group>
+		<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="O" increaseBind="P" />
+		<models>
+			<model file="box.3d" />
+		</models>
+	</group>
+</scene>
