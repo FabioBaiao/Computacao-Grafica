@@ -1,7 +1,7 @@
 #ifndef TRANSLATION
 #define TRANSLATION
-
 #include "geoTransform.h"
+#define TRANSLATE_UNIT 0.2
 
 class translationCoords : public geoTransform {
 public:
@@ -10,7 +10,12 @@ public:
     void apply() {
         glTranslatef(x, y, z);
     }
-
+    void increaseX() {x += TRANSLATE_UNIT;}
+    void increaseY() {y += TRANSLATE_UNIT;}
+    void increaseZ() {z += TRANSLATE_UNIT;}
+    void decreaseX() {x -= TRANSLATE_UNIT;}
+    void decreaseY() {y -= TRANSLATE_UNIT;}
+    void decreaseZ() {z -= TRANSLATE_UNIT;}
 };
 
 class translationTime : public geoTransform {

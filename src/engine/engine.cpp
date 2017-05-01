@@ -22,6 +22,7 @@
 #include "translation.h"
 
 #define ANG2RAD M_PI/180
+#define ESC 27
 
 using namespace std;
 using namespace tinyxml2;
@@ -39,7 +40,7 @@ map<string, pair<GLuint,int>> model_to_buffer;
 map<char, rotation*> increaseBindings, decreaseBindings;
 // maps keybindings to increase and decrease coordinates actions in translations 
 map<char, translationCoords*> increaseX, increaseY, increaseZ, decreaseX, decreaseY, decreaseZ;
-//vector<char> keysInUse{
+vector<char> keysInUse{ESC, 'W', 'S', 'A', 'D', 'M', 'L', 'C'};
 /******************** END KEY BINDINGS ********************/ 
 
 // VBO's
@@ -195,8 +196,7 @@ void processKeys(unsigned char c, int xx, int yy) {
     float rX, rY, rZ;
     char cc = toupper(c);
     switch(cc) {
-    case 27:
-        // ESC key
+    case ESC:
         exit(0);
     case 'W':
         Px += k*dX;
@@ -258,15 +258,26 @@ void processKeys(unsigned char c, int xx, int yy) {
         mode = (mode + 1) % 3;
         break;
     default:
-        auto itDec = decreaseBindings.find(cc);
-
-        if(itDec != decreaseBindings.end()) {
-            itDec->second->decreaseAngle();
-        } else{ 
-            auto itInc = increaseBindings.find(cc);
-            if(itInc != increaseBindings.end()) {
-                 itInc->second->increaseAngle();
-            }
+        auto itRotation = decreaseBindings.find(cc);
+        if(itRotation != decreaseBindings.end()) {
+            itRotation->second->decreaseAngle();
+        } else if((itRotation = increaseBindings.find(cc)) != increaseBindings.end()) {
+            itRotation->second->increaseAngle();
+            break;
+        }
+        auto itTranslate = increaseX.find(cc);
+        if(itTranslate != increaseX.end()) {
+            itTranslate->second->increaseX();
+        } else if((itTranslate = increaseY.find(cc)) != increaseY.end()) {
+            itTranslate->second->increaseY();
+        } else if((itTranslate = increaseZ.find(cc)) != increaseZ.end()) {
+            itTranslate->second->increaseZ();
+        } else if((itTranslate = decreaseX.find(cc)) != decreaseX.end()) {
+            itTranslate->second->decreaseX();
+        } else if((itTranslate = decreaseY.find(cc)) != decreaseY.end()) {
+            itTranslate->second->decreaseY();
+        } else if((itTranslate = decreaseZ.find(cc)) != decreaseZ.end()) {
+            itTranslate->second->decreaseZ();
         }
         break;
     }
@@ -309,8 +320,7 @@ void parsePoint(float **points, int i, XMLElement* elem) {
     points[i][2] = z;
 }
 
-void bindTranslateIfAvailable(XMLElement* elem, const char* attributeName, map<char, translationCoords*> binds, translationCoords* trans){
-    // TO-DO: check if keys are in use
+void bindTranslateIfAvailable(XMLElement* elem, const char* attributeName, map<char, translationCoords*>& binds, translationCoords* trans){
     const char * attribute = elem->Attribute(attributeName);
     if(attribute && strlen(attribute) == 1) {
         char c = toupper(attribute[0]);

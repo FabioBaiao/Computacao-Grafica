@@ -1,5 +1,6 @@
 <scene>
 	<group>
+                <translate incX="T" incY="Y" incZ="U" />
 		<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="O" increaseBind="P" />
                 <group>
 		    <rotate axisX="1" axisY="0" axisZ="0" decreaseBind="Z" increaseBind="X" />
