@@ -21,10 +21,10 @@
 #include "tinyxml2.h"
 #include "translation.h"
 
+#define ANG2RAD M_PI/180
+
 using namespace std;
 using namespace tinyxml2;
-
-#define ANG2RAD M_PI/180
 
 /* Scene models */
 typedef vector<float> Model;
@@ -77,16 +77,6 @@ void changeSize(int w, int h) {
     glViewport(0, 0, w, h);
     gluPerspective(45.0f,ratio, 1.0f,1000.0f);
     glMatrixMode(GL_MODELVIEW);
-}
-
-void print_matrix(float m[], int I, int J) {
-    /* useful for debugging */
-    for(int i  = 0; i < I; i++) {
-        for(int j  = 0; j < J; j++) {
-            cout << m[i + j * I] << " ";
-        }
-        cout << endl;
-    }
 }
 
 void drawModel(string model, color c) {
@@ -196,6 +186,7 @@ void processKeys(unsigned char c, int xx, int yy) {
     float rX, rY, rZ;
     switch(toupper(c)) {
     case 27:
+        /* ESC key */
         exit(0);
     case 'W':
         Px += k*dX;
@@ -298,11 +289,9 @@ void parseTranslate(group& g, XMLElement* elem) {
     float x, y, z, time;
     x = y = z = time = 0.0f;
 
-    elem->QueryFloatAttribute("time", &time);
+    XMLError hasTime = elem->QueryFloatAttribute("time", &time);
     
-    // since time is not allowed to be 0, after reading the time attribute,
-    // if the value is 0, it is assumed to be static
-    if(time != 0.0) {
+    if(hasTime != XML_NO_ATTRIBUTE) {
         // animated translation
         XMLElement *child = elem->FirstChildElement();
         float **points = NULL;
