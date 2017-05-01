@@ -1,8 +1,11 @@
 <scene>
 	<group>
 		<rotate axisX="0" axisY="1" axisZ="0" decreaseBind="O" increaseBind="P" />
-		<models>
+                <group>
+		    <rotate axisX="1" axisY="0" axisZ="0" decreaseBind="Z" increaseBind="X" />
+		    <models>
 			<model file="box.3d" />
-		</models>
+		    </models>
+                </group>
 	</group>
 </scene>
