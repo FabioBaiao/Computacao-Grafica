@@ -62,7 +62,6 @@
 		<!-- Boat -->
 		<group>
 			<translate X="33" Y="0.75" Z="-20" incX="T" incY="Y" incZ="U"/>
-			<rotate axisY="1.0" angle="-25" />
 			<group>
 				<rotate axisY="1.0" angle="45" />
 				<models>
