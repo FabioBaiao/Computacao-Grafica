@@ -26,6 +26,55 @@ int** indexes;		// indexes dos pontos dos varios patches
 int patches;		// numero de patches
 int ncpoints;		// numero de control points
 
+string planeXZnormals (int nDiv, int orient){
+	ostringstream os;
+	for (int i = 1; i <= nDiv; i++){
+		for (int j = 1; j <= nDiv; j++){
+			for (int k = 1; k <= 6; k++){
+				os << "0.0 " << orient * 1.0f << " 0.0\n";
+			}
+		}
+	}
+	return os.str();
+}
+
+string planeTexture (int nDiv, int orient){
+	ostringstream os;
+	float deltaS = 1/nDiv;
+	float deltaT = 1/nDiv;
+
+	float s = 1.0f;
+	float t = 0.0f;
+
+	for (int i = 1; i <= nDiv; i++){
+		for (int j = 1; j <= nDiv; j++){
+			if (orient == UPWARDS){
+				os << s << " " << t << "\n";
+				os << s << " " << (t+deltaT) << "\n";
+				os << (s-deltaS) << " " << (t+deltaT) << "\n";
+
+				os << s << " " << t << "\n";
+				os << (s-deltaS) << " " << (t+deltaT) << "\n";
+				os << (s-deltaS) << " " << t << "\n";
+			}
+			else {
+				os << s << " " << t << '\n';
+				os << (s-deltaS) << " " << t << '\n';
+				os << (s-deltaS) << " " << (t+deltaT) << '\n';
+
+				os << s << " " << t << '\n';
+				os << (s-deltaS) << " " << (t+deltaT) << '\n';
+				os << s << " " << (t+deltaT) << '\n';
+			}
+			s = 1.0f - j * deltaS;
+		}
+		t = 0.0f + i * deltaT;
+		s = 1.0f;
+	}
+
+	return os.str();
+}
+
 string planeXZ (float x, float y, float z, int nDiv, int orient){
 	ostringstream os;
 	int count = 0;
@@ -64,7 +113,20 @@ string planeXZ (float x, float y, float z, int nDiv, int orient){
 		zi = z - i * deltaZ;
 		xi = x;
 	}
+
 	return to_string(count) + "\n" + os.str();
+}
+
+string planeXYnormals (int nDiv, int orient){
+	ostringstream os;
+	for (int i = 1; i <= nDiv; i++){
+		for (int j = 1; j <= nDiv; j++){
+			for(int k = 1; k <= 6; k++){
+				os << "0.0 0.0 " << orient * 1.0f << "\n";
+			}
+		}
+	}
+	return os.str();
 }
 
 string planeXY (float x, float y, float z, int nDiv, int orient){
@@ -85,6 +147,7 @@ string planeXY (float x, float y, float z, int nDiv, int orient){
 				os << xi << " " << yi << " " << z << '\n';
 				os << xi << " " << (yi+deltaY) << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
+				
 				os << xi << " " << yi << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n';
 				os << (xi-deltaX) << " " << yi << " " << z << '\n';
@@ -93,6 +156,7 @@ string planeXY (float x, float y, float z, int nDiv, int orient){
 				os << xi << " " << yi << " " << z << '\n';
 				os << (xi-deltaX) << " " << yi << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n'; 
+				
 				os << xi << " " << yi << " " << z << '\n';
 				os << (xi-deltaX) << " " << (yi+deltaY) << " " << z << '\n';
 				os << xi << " " << (yi+deltaY) << " " << z << '\n';
@@ -107,6 +171,18 @@ string planeXY (float x, float y, float z, int nDiv, int orient){
 	return to_string(count) + "\n" + os.str();
 }
 
+string planeYZnormals (int nDiv, int orient){
+	ostringstream os;
+	for (int i = 1; i <= nDiv; i++){
+		for (int j = 1; j <= nDiv; j++){
+			for (int k = 1; k <= 6; k++){
+				os << orient * 1.0f << " 0.0 0.0\n";
+			}
+		}
+	}
+	return os.str();
+}
+
 string planeYZ (float x, float y, float z, int nDiv, int orient){
 	ostringstream os;
 	int count = 0;
@@ -118,6 +194,7 @@ string planeYZ (float x, float y, float z, int nDiv, int orient){
 
 	float yi = -y;
 	float zi = -z;
+
 	for (int i = 1; i <= nDiv; i++){
 		for (int j = 1; j <= nDiv; j++){
 			if (orient == UPWARDS){
@@ -141,7 +218,47 @@ string planeYZ (float x, float y, float z, int nDiv, int orient){
 		yi = -y + i * deltaY;
 		zi = -z;
 	}
+
 	return to_string(count) + "\n" + os.str();
+}
+
+string boxNormals(int nDiv){
+	string normals, line;
+	ostringstream os;
+	istringstream iss;
+
+	normals = planeXYnormals(nDiv, UPWARDS);
+	istringstream iss1(normals);
+	while(getline(iss1, line)){
+		os << line << '\n';
+	}
+	normals = planeXYnormals(nDiv, DOWNWARDS);
+	istringstream iss2 (normals);
+	while (getline(iss2, line)){
+		os << line << '\n';
+	}
+	normals = planeXZnormals(nDiv, UPWARDS);
+	istringstream iss3 (normals);
+	while (getline(iss3, line)){
+		os << line << '\n';
+	}
+	normals = planeXZnormals(nDiv, DOWNWARDS);
+	istringstream iss4 (normals);
+	while (getline(iss4, line)){
+		os << line << '\n';
+	}
+	normals = planeYZnormals(nDiv, UPWARDS);
+	istringstream iss5 (normals);
+	while (getline(iss5, line)){
+		os << line << '\n';
+	}
+	normals = planeYZnormals(nDiv, DOWNWARDS);
+	istringstream iss6 (normals);
+	while (getline(iss6, line)){
+		os << line << '\n';
+	}
+
+	return os.str();
 }
 
 string box(float x, float y, float z, int nDiv){
@@ -196,6 +313,16 @@ string box(float x, float y, float z, int nDiv){
 	return to_string(count) + "\n" + os.str();
 }
 
+string annulusNormals(int slices) {
+	ostringstream os;
+	for(int i = 0; i < slices; ++i) {
+		for (int j = 0; j < 6; j++){
+			os << "0.0 1.0 0.0\n";
+		}
+	}
+	return os.str();
+}
+
 string annulus(float dist, float smj, float smn, int slices) {
 	int nPoints = 0;
 	float deltaAlpha;
@@ -215,6 +342,35 @@ string annulus(float dist, float smj, float smn, int slices) {
 		nPoints += 6;
 	}
 	return (to_string(nPoints) + "\n" + os.str());
+}
+
+string ellipsoidNormals(float stacks, int slices) {
+	float deltaAlpha = 2.0f * M_PI / slices;
+	float deltaBeta = M_PI / stacks;
+	ostringstream os;
+
+	for(int i = 0; i < stacks; i++) {
+		float beta = i * deltaBeta;
+		float nextBeta = beta + deltaBeta;
+
+		for(int j = 0; j < slices; j++) {
+			float alpha = j * deltaAlpha;
+			float nextAlpha = alpha + deltaAlpha;
+
+			if(i<stacks-1){
+				os << sinf(beta) * sinf(alpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(alpha) << '\n';
+				os << sinf(nextBeta) * sinf(alpha) << " " << cosf(nextBeta) << " " << sinf(nextBeta) * cosf(alpha) << '\n';
+				os << sinf(nextBeta) * sinf(nextAlpha) << " " << cosf(nextBeta) << " " << sinf(nextBeta) * cosf(nextAlpha) << '\n';
+			}
+			if(i>0){
+				os << sinf(beta) * sinf(alpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(alpha) << '\n';
+				os << sinf(nextBeta) * sinf(nextAlpha) << " " << cosf(nextBeta) << " "<< sinf(nextBeta) * cosf(nextAlpha) << '\n';
+				os << sinf(beta) * sinf(nextAlpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(nextAlpha) << '\n';
+			}
+		}
+
+	}
+	return os.str();
 }
 
 string ellipsoid(float a, float b, float c, float stacks, int slices) {
@@ -247,6 +403,65 @@ string ellipsoid(float a, float b, float c, float stacks, int slices) {
 
 	}
 	return (to_string(nPoints) + "\n" + os.str());
+}
+
+string frustumNormals(float baseRadius, float topRadius, float height, int slices, int stacks) {
+	int i, j;
+	float *cosCache, *sinCache;
+	float dr, alpha, dAlpha;
+	ostringstream os;
+
+	cosCache = new float[slices+1];
+	sinCache = new float[slices+1];
+	alpha = 0.0f;
+	dAlpha = 2.0f * M_PI / slices;
+	for(i = 0; i < slices; i++) {
+		alpha = i * dAlpha;
+		cosCache[i] = cosf(alpha);
+		sinCache[i] = sinf(alpha);
+	}
+	cosCache[slices] = cosCache[0]; // cos(2 * M_PI) = cos(0)
+	sinCache[slices] = sinCache[0]; // sin(2 * M_PI) = sin(0)
+
+	if(baseRadius > 0.0f) {
+		for(i = 0; i < slices; i++) { // lower base
+			for(int k = 0; k < 3; k++){
+				os << "0.0 -1.0 0.0\n";
+			}
+		}
+	}
+	if(topRadius > 0.0f) {
+		for(i = 0; i < slices; ++i) { // top base
+			for(int k = 0; k < 3; k++){
+				os << "0.0 1.0 0.0\n";
+			}
+		}
+	}
+	dr = (baseRadius - topRadius) / stacks;
+	// side of the frustum
+	for(i = 0; i < stacks; ++i) {
+		float rLow, rHigh;
+
+		rLow = baseRadius - i * dr;
+		rHigh = rLow - dr;
+		if(rHigh > 0.0f) {
+			for(j = 0; j < slices; ++j) {
+				os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
+				os << sinCache[j+1] << " 0.0 " << cosCache[j+1] << '\n';
+				os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
+			}
+		}
+		if(rLow > 0.0f) {
+			for(j = 0; j < slices; ++j) {
+				os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
+				os << sinCache[j+1] << " 0.0 " << cosCache[j+1] << '\n';
+				os << sinCache[j+1] << " 0.0 " << cosCache[j+1] << '\n';
+			}
+		}
+	}
+	delete[] cosCache; delete[] sinCache;
+
+	return os.str();
 }
 
 string frustum(float baseRadius, float topRadius, float height, int slices, int stacks) {
@@ -315,13 +530,55 @@ string frustum(float baseRadius, float topRadius, float height, int slices, int 
 
 	return (to_string(nPoints) + "\n" + os.str());
 }
-
+/*
 string cone(float radius, float height, int slices, int stacks) {
 	return frustum(radius, 0.0f, height, slices, stacks);
 }
 
 string cylinder(float radius, float height, int slices, int stacks) {
 	return frustum(radius, radius, height, slices, stacks);
+}
+*/
+string torusNormals(float innerRadius, float outerRadius, int nsides, int nrings) {
+	int i, j, nPoints = 0;
+	float deltaPhi, deltaTheta;
+	float phi, theta, nextPhi, nextTheta;
+	float cosPhi, cosTheta, sinPhi, sinTheta;
+	float cosNextPhi, cosNextTheta, sinNextPhi, sinNextTheta;
+	ostringstream os;
+
+	deltaPhi = 2.0f * M_PI / nrings;
+	deltaTheta = 2.0f * M_PI / nsides;
+	for(i = 0; i < nrings; i++) {
+		phi = i * deltaPhi;
+		nextPhi = (i + 1) * deltaPhi;
+		cosPhi = cosf(phi);
+		sinPhi = sinf(phi);
+		cosNextPhi = cosf(nextPhi);
+		sinNextPhi = sinf(nextPhi);
+
+		for(j = 0; j < nsides; j++, nPoints += 6) {
+			//float dXZ, nextDXZ;
+
+			theta = j * deltaTheta;
+			nextTheta = (j + 1) * deltaTheta;
+			cosTheta = cosf(theta);
+			sinTheta = sinf(theta);
+			cosNextTheta = cosf(nextTheta);
+			sinNextTheta = sinf(nextTheta);
+			//dXZ = outerRadius + innerRadius * cosTheta;
+			//nextDXZ = outerRadius + innerRadius * cosNextTheta;
+
+			os << (cosTheta * sinPhi) << ' ' << sinTheta << ' ' << (cosTheta * cosPhi) << '\n';
+			os << (cosNextTheta * sinNextPhi) << ' ' << sinNextTheta << ' ' << (cosNextTheta * cosNextPhi) << '\n';
+			os << (cosNextTheta * sinPhi) << ' ' << sinNextTheta << ' ' << (cosNextTheta * cosPhi) << '\n';
+
+			os << (cosTheta * sinPhi) << ' ' << sinTheta << ' ' << (cosTheta * cosPhi) << '\n';
+			os << (cosTheta * sinNextPhi) << ' ' << sinTheta << ' ' << (cosTheta * cosNextPhi) << '\n';
+			os << (cosNextTheta * sinNextPhi) << ' ' << sinNextTheta << ' ' << (cosNextTheta * cosNextPhi) << '\n';
+		}
+	}
+	return os.str();
 }
 
 string torus(float innerRadius, float outerRadius, int nsides, int nrings) {
@@ -386,6 +643,7 @@ int annulusGenerator(int argc, char* argv[]){
 		return 1;
 	}
 	outfile << annulus(dist, smj, smn, slices);
+	outfile << annulusNormals(slices);
 	outfile.close();
 	return 0;
 }
@@ -411,6 +669,7 @@ int boxGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << box(xDim, yDim, zDim, divisions);
+	outfile << boxNormals(divisions);
 	outfile.close();
 	return 0;
 }
@@ -433,7 +692,8 @@ int coneGenerator(int argc, char *argv[]) {
 		perror("ofstream.open");
 		return 1;
 	}
-	outfile << cone(radius, height, slices, stacks);
+	outfile << frustum(radius, 0.0f, height, slices, stacks);
+	outfile << frustumNormals(radius, 0.0f, height, slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -457,7 +717,8 @@ int cylinderGenerator(int argc, char *argv[]) {
 		perror("ofstream.open");
 		return 1;
 	}
-	outfile << cylinder(radius, height, slices, stacks);
+	outfile << frustum(radius, radius, height, slices, stacks);
+	outfile << frustumNormals(radius, radius, height, slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -482,6 +743,7 @@ int ellipsoidGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << ellipsoid(xRadius, yRadius, zRadius, slices, stacks);
+	outfile << ellipsoidNormals(slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -512,6 +774,7 @@ int frustumGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << frustum(baseRadius, topRadius, height, slices, stacks);
+	outfile << frustumNormals(baseRadius, topRadius, height, slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -535,6 +798,8 @@ int planeGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << planeXZ(xDim, 0, zDim, divisions, UPWARDS);
+	outfile << planeXZnormals(divisions, UPWARDS);
+	outfile << planeTexture(divisions, UPWARDS);
 	outfile.close();
 	return 0;
 }
@@ -558,6 +823,7 @@ int sphereGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << ellipsoid(radius, radius, radius, slices, stacks);
+	outfile << ellipsoidNormals(slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -581,6 +847,7 @@ int torusGenerator(int argc, char *argv[]) {
 		return 1;
 	}
 	outfile << torus(innerRadius, outerRadius, sides, rings);
+	outfile << torusNormals(innerRadius, outerRadius, sides, rings);
 	outfile.close();
 	return 0;
 }

@@ -1,0 +1,22 @@
+<scene>
+	<lights>
+		<!--light type="DIRECTIONAL" posX="0" posY="0" posZ="-2" 
+								ambR="0.2" ambG="0.2" ambB="0.2"/-->
+		<light type="POINT" posX="0" posY="0" posZ="-4" />
+		<!--light type="SPOTLIGHT" posX="0" posY="0" posZ="4"
+								cut="45" exp="0"/-->
+	</lights>
+	<group>
+		<rotate time="10" axisY="1" />
+		<translate time="10">
+			<point X="0" Y="0" Z="0" />
+			<point X="0" Y="0" Z="1" />
+			<point X="0" Y="0" Z="1" />
+			<point X="0" Y="0" Z="0" />
+		</translate>
+		<models>
+			<model file="torusLightTest.3d" diffR="0.8f" diffG="0.2f" diffB="0.2f"
+											ambR="0.5f"  ambG="0.5f"  ambB="0.5f"/>
+		</models>
+	</group>
+</scene>

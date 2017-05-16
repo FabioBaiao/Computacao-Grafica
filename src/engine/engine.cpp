@@ -13,6 +13,7 @@
 #else
 #include <GL/glut.h>
 #endif
+#include <IL/il.h>
 
 #include "geoTransform.h"
 #include "group.h"
@@ -20,6 +21,7 @@
 #include "scale.h"
 #include "tinyxml2.h"
 #include "translation.h"
+#include "light.h"
 
 #define ANG2RAD M_PI/180
 #define ESC 27
@@ -30,9 +32,11 @@ using namespace tinyxml2;
 /********************** SCENE MODELS **********************/ 
 typedef vector<float> Model;
 vector<group> groups;
-map<string, Model> models;
+map<string, Model> models, normals, texCoords;
 // maps model_name to buffer id and number of vertices
 map<string, pair<GLuint,int>> model_to_buffer;
+map<string, GLuint> normals_to_buffer;
+map<string, GLuint> texCoords_to_buffer;
 /******************** END SCENE MODELS ********************/ 
 
 /********************** KEY BINDINGS **********************/ 
@@ -45,7 +49,7 @@ vector<char> keysInUse{ESC, 'W', 'S', 'A', 'D', 'M', 'L', 'C'};
 
 // VBO's
 int n_models;
-GLuint* buffers;
+GLuint *buffers, *normalsBuffers, *textureBuffers;
 
 /********************** CAMERA CONTROL **********************/ 
 float r = 10.0f;
@@ -59,6 +63,9 @@ float lookX= Px + cos(pitch) * sin(yaw);
 float lookY= Py + sin(pitch);
 float lookZ= Pz + cos(pitch) * cos(yaw);
 /******************** END CAMERA CONTROL ********************/ 
+
+// Lights
+std::vector<light> lights;
 
 // Polygon Mode
 GLenum modes[] = {GL_FILL, GL_LINE, GL_POINT};
@@ -89,13 +96,36 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void drawModel(string model, color c) {
+void drawModel(string model, std::vector<color> v) {
     auto buffer_id_size = model_to_buffer[model];
+    auto normalsBuffer_id_size = normals_to_buffer[model];
+    auto texCoords_id_size = texCoords_to_buffer[model];
 
-    glColor3f(c.r, c.g, c.b);
+    for(auto c : v){
+        glMaterialfv(GL_FRONT, c.component, c.colors);
+    }
+    
+    
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_size.first);
     glVertexPointer(3,GL_FLOAT, 0, 0);
+    
+    glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer_id_size);
+    glNormalPointer(GL_FLOAT, 0, 0);
+
+    glBindBuffer(GL_ARRAY_BUFFER, texCoords_id_size);
+    glTexCoordPointer(2, GL_FLOAT, 0, 0);
+
     glDrawArrays(GL_TRIANGLES, 0, buffer_id_size.second/3);
+
+    float amb[4] = {0.2f, 0.2f, 0.2f, 1.0f};
+    float dif[4] = {0.8f, 0.8f, 0.8f, 1.0f};
+    float spec[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+    float emi[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+
+    glMaterialfv(GL_FRONT, GL_AMBIENT, amb);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, dif);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, spec);
+    glMaterialfv(GL_FRONT, GL_EMISSION, emi);
 }
 
 void drawRandom(randomModel rnd) {
@@ -107,7 +137,7 @@ void drawRandom(randomModel rnd) {
         float minS = spec.minS;
         int i = 0;
         for (string model : rnd.models) {
-            color c = rnd.modelsColor[i];
+            std::vector<color> v = rnd.modelsColor[i];
             for (int j = 0; j < n; j++) {
                 float r = rand();
                 float alfa = rand();
@@ -121,7 +151,7 @@ void drawRandom(randomModel rnd) {
                 glPushMatrix();
                 glTranslatef(r * sin(alfa), 0, r * cos(alfa));
                 glScalef(s, s, s);
-                drawModel(model, c);
+                drawModel(model, v);
                 glPopMatrix();
             }
             i++;
@@ -137,9 +167,9 @@ void drawGroup(group g) {
     }
     int i = 0;
     for(string model : g.models) {
-        color c = g.modelsColor[i];
+        std::vector<color> v = g.modelsColor[i];
 
-        drawModel(model, c);
+        drawModel(model, v);
         i++;
     }
     for (auto rnd : g.randoms) {
@@ -158,6 +188,22 @@ void renderScene(void) {
     gluLookAt(Px, Py, Pz,
               lookX,lookY,lookZ,
               0.0f,1.0f,0.0f);
+
+/*    GLfloat amb[4] = {0.2, 0.2, 0.2, 1.0};
+    GLfloat diff[4] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat pos[4] = {3.0, 4.0, -2.0, 0.0};
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+
+    glLightfv(GL_LIGHT0, GL_POSITION, pos);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);*/
+
+    glEnable(GL_LIGHTING);
+    for(auto l : lights){
+        l.apply();
+    }
 
     srand(0);
     for(auto g : groups) {
@@ -404,7 +450,7 @@ void parseScale(group& g, XMLElement* elem) {
     g.transforms.push_back(new scale(x,y,z));
 }
 
-color& parseColor(XMLElement* model) {
+/*color& parseColor(XMLElement* model) {
     float rr, gg, bb;
     int r_r, r_g, r_b;
     rr = gg = bb = 0.0;
@@ -417,35 +463,138 @@ color& parseColor(XMLElement* model) {
     }
     color* c = new color(rr,gg,bb);
     return *c;
+}*/
+
+std::vector<color> parseColor(XMLElement* model){
+    float rr, gg, bb;
+    int isDiff, isAmb, isSpec, isEmi;
+    std::vector<color> v;
+    rr = gg = bb = 0.0f;
+    isDiff = model->QueryFloatAttribute("diffR", &rr);
+    if (isDiff != XML_NO_ATTRIBUTE){
+        model->QueryFloatAttribute("diffG", &gg);
+        model->QueryFloatAttribute("diffB", &bb);
+        color *c = new color(rr, gg, bb, GL_DIFFUSE);
+        v.push_back(*c);
+    }
+    isAmb = model->QueryFloatAttribute("ambR", &rr);
+    if(isAmb != XML_NO_ATTRIBUTE){
+        model->QueryFloatAttribute("ambG", &gg);
+        model->QueryFloatAttribute("ambB", &bb);
+        color *c = new color(rr, gg, bb, GL_AMBIENT);
+        v.push_back(*c);
+    }
+    isSpec = model->QueryFloatAttribute("specR", &rr);
+    if(isSpec != XML_NO_ATTRIBUTE){
+        model->QueryFloatAttribute("specG", &gg);
+        model->QueryFloatAttribute("specB", &bb);
+        color *c = new color(rr, gg, bb, GL_SPECULAR);
+        v.push_back(*c);
+    }
+    isEmi = model->QueryFloatAttribute("emiR", &rr);
+    if(isEmi != XML_NO_ATTRIBUTE){
+        model->QueryFloatAttribute("emiG", &gg);
+        model->QueryFloatAttribute("emiB", &bb);
+        color *c = new color(rr, gg, bb, GL_EMISSION);
+        v.push_back(*c);
+    }
+    if (isDiff != XML_NO_ATTRIBUTE && isAmb != XML_NO_ATTRIBUTE 
+        && isSpec != XML_NO_ATTRIBUTE && isEmi != XML_NO_ATTRIBUTE){ 
+        rr = gg = bb = 1.0f;
+        // qual é a componente por defeito?
+    }
+    return v;
 }
 
-void readFile(ifstream& file, string fName) {
+void readFile(ifstream& file, string fName){
     int n_vertex, n_values;
     Model model_read;
+    Model normals_read;
+    Model texCoords_read;
 
     file >> n_vertex;
     n_values = 3*n_vertex;
+
 
     for(int i = 0; i < n_values; i++) {
         float tmp;
         file >> tmp;
         model_read.push_back(tmp);
     }
+
+    for(int i = 0; i < n_values; i++){
+        float tmp;
+        file >> tmp;
+        normals_read.push_back(tmp);
+    }
+
+    n_values = n_vertex * 2;
+
+    for (int i = 0; i < n_vertex; i++){
+        float tmp;
+        file >> tmp;
+        texCoords_read.push_back(tmp);
+    }
+
     file.close();
     models[fName] = model_read;
+    normals[fName] = normals_read;
+    texCoords[fName] = texCoords_read;
+
+}
+
+int loadTexture(std::string s) {
+
+    unsigned int t,tw,th;
+    unsigned char *texData;
+    unsigned int texID;
+
+    ilInit();
+    ilEnable(IL_ORIGIN_SET);
+    ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
+    ilGenImages(1,&t);
+    ilBindImage(t);
+    ilLoadImage((ILstring)s.c_str());
+    tw = ilGetInteger(IL_IMAGE_WIDTH);
+    th = ilGetInteger(IL_IMAGE_HEIGHT);
+    ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
+    texData = ilGetData();
+
+    glGenTextures(1,&texID);
+    
+    glBindTexture(GL_TEXTURE_2D,texID);
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_S,      GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_WRAP_T,      GL_REPEAT);
+
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_MAG_FILTER,      GL_LINEAR_MIPMAP_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
+    glGenerateMipmap(GL_TEXTURE_2D);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    return texID;
+
 }
 
 void parseModel(group& g, XMLElement * model) {
     const char* filename= model->Attribute("file");
     if(filename != NULL) {
+        GLuint texture = 0;
         string fName = string(filename);
         ifstream file(directory + filename);
         if(!file) {
             cerr << "The file \"" << filename << "\" was not found.\n";
         }
-        color c = parseColor(model);
+        std::vector<color> v = parseColor(model);
+        const char *tex = model->Attribute("texture");
+        if (tex != NULL){
+            texture = loadTexture(tex);
+        }
         g.models.push_back(fName);
-        g.modelsColor.push_back(c);
+        g.modelsColor.push_back(v);
+        g.modelsTextures.push_back(texture);
         if(models.find(fName) == models.end()) {
             // if the model file was not already read
             readFile(file, fName);
@@ -461,9 +610,9 @@ void parseModel(randomModel& r, XMLElement * model) {
         if(!file) {
             cerr << "The file \"" << filename << "\" was not found.\n";
         }
-        color c = parseColor(model);
+        std::vector<color> v = parseColor(model);
         r.models.push_back(fName);
-        r.modelsColor.push_back(c);
+        r.modelsColor.push_back(v);
         if(models.find(fName) == models.end()) {
             // if the model file was not already read
             readFile(file, fName);
@@ -548,6 +697,55 @@ void parseInitialPosition(XMLElement* scene) {
     lookZ = Pz + cos(pitch) * cos(yaw);
 }
 
+void parseLights(XMLElement* lgts){
+    XMLElement *lgt = lgts->FirstChildElement();
+    for (int i = 0; lgt; lgt = lgt->NextSiblingElement()){
+        
+        const char *type = lgt->Attribute("type");
+        float pos[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        float amb[4] = {0.0f, 0.0f, 0.0f, 1.0f};
+        float diff[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        float spec[4] = {1.0f, 1.0f, 1.0f, 1.0f};
+        float dir[3] = {0.0f, 0.0f, -1.0f};
+        float exp = 0.0f;
+        float cut = 180.0f;
+        lgt->QueryFloatAttribute("posX", &pos[0]);
+        lgt->QueryFloatAttribute("posY", &pos[1]);
+        lgt->QueryFloatAttribute("posZ", &pos[2]);
+        if(strcmp(type, "POINT") == 0){
+            pos[3] = 1.0f;
+        }
+        else if(strcmp(type, "DIRECTIONAL") == 0){
+            pos[3] = 0.0f;
+        }
+        else if(strcmp(type, "SPOTLIGHT") == 0){
+            pos[3] = 1.0f;
+        }
+        lgt->QueryFloatAttribute("ambR", &amb[0]);
+        lgt->QueryFloatAttribute("ambG", &amb[0]);
+        lgt->QueryFloatAttribute("ambB", &amb[0]);
+
+        lgt->QueryFloatAttribute("diffR", &diff[0]);
+        lgt->QueryFloatAttribute("diffG", &diff[1]);
+        lgt->QueryFloatAttribute("diffB", &diff[2]);
+
+        lgt->QueryFloatAttribute("specR", &spec[0]);
+        lgt->QueryFloatAttribute("specG", &spec[1]);
+        lgt->QueryFloatAttribute("specB", &spec[2]);
+
+        lgt->QueryFloatAttribute("dirX", &dir[0]);
+        lgt->QueryFloatAttribute("dirY", &dir[1]);
+        lgt->QueryFloatAttribute("dirZ", &dir[2]);
+
+        lgt->QueryFloatAttribute("exp", &exp);
+
+        lgt->QueryFloatAttribute("cut", &cut);
+
+        light *l = new light(GL_LIGHT0 + (i++), pos, amb, diff, spec, dir, exp, cut);
+        lights.push_back(*l);
+    }
+}
+
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char **argv) {
     if(argc != 2) {
@@ -571,6 +769,11 @@ int main(int argc, char **argv) {
     }
 
     parseInitialPosition(scene);
+
+    XMLElement* lgts = scene->FirstChildElement("lights");
+    if (lgts){
+        parseLights(lgts);
+    }
 
     XMLElement* gr = scene->FirstChildElement("group");
 
@@ -598,7 +801,11 @@ int main(int argc, char **argv) {
 
     n_models = models.size();
     buffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
+    normalsBuffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
+    textureBuffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
     glGenBuffers(n_models, buffers);
+    glGenBuffers(n_models, normalsBuffers);
+    glGenBuffers(n_models, textureBuffers);
 
     int i = 0;
     for(auto it = models.begin(); it != models.end(); it++) {
@@ -613,11 +820,36 @@ int main(int argc, char **argv) {
         glBufferData(GL_ARRAY_BUFFER, model.size() * sizeof(float), model.data(), GL_STATIC_DRAW);
     }
 
+    i = 0;
+    for(auto it = normals.begin(); it != normals.end(); it++) {
+        auto normal = it->second;
+
+        // maps the name of the model to the id of the buffer and number of vertices
+        //pair<GLuint, int> id_number_elements(normalsBuffers[i], normal.size());
+        normals_to_buffer[it->first] = normalsBuffers[i];
+
+        // fills the buffers 
+        glBindBuffer(GL_ARRAY_BUFFER, normalsBuffers[i++]);
+        glBufferData(GL_ARRAY_BUFFER, normal.size() * sizeof(float), normal.data(), GL_STATIC_DRAW);
+    }
+
+    i = 0;
+    for(auto it = texCoords.begin(); it != texCoords.end(); it++){
+        auto texCoord = it->second;
+
+        texCoords_to_buffer[it->first] = textureBuffers[i];
+
+        glBindBuffer(GL_ARRAY_BUFFER, textureBuffers[i]);
+        glBufferData(GL_ARRAY_BUFFER, texCoord.size() * sizeof(float), texCoord.data(), GL_STATIC_DRAW);
+    }
+
     //  OpenGL settings
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_CULL_FACE);
     glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glutMainLoop();
 
