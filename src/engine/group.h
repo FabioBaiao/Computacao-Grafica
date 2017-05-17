@@ -33,6 +33,7 @@ class randomModel {
 public:
 	std::vector<std::string> models;
 	std::vector<std::vector<color>> modelsColor;
+	std::vector<GLuint> modelsTextures;
 	std::vector<randSpecs> specs;
 };
 

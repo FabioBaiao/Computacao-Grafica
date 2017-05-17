@@ -2,26 +2,28 @@
 #include <iostream>
 #include <map>
 #include <string>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include <ctype.h>
 #include <math.h>
-#include <GL/glew.h>
+
 #ifdef __APPLE__
 #include <GLUT/glut.h>
-#else
-#include <GL/glut.h>
-#endif
 #include <IL/il.h>
+#else
+#include <GL/glew.h>
+#include <GL/glut.h>
+#include <IL/il.h>
+#endif
 
 #include "geoTransform.h"
 #include "group.h"
+#include "light.h"
 #include "rotation.h"
 #include "scale.h"
 #include "tinyxml2.h"
 #include "translation.h"
-#include "light.h"
 
 #define ANG2RAD M_PI/180
 #define ESC 27
@@ -96,7 +98,7 @@ void changeSize(int w, int h) {
     glMatrixMode(GL_MODELVIEW);
 }
 
-void drawModel(string model, std::vector<color> v) {
+void drawModel(string model, std::vector<color> v, GLuint texture) {
     auto buffer_id_size = model_to_buffer[model];
     auto normalsBuffer_id_size = normals_to_buffer[model];
     auto texCoords_id_size = texCoords_to_buffer[model];
@@ -115,7 +117,13 @@ void drawModel(string model, std::vector<color> v) {
     glBindBuffer(GL_ARRAY_BUFFER, texCoords_id_size);
     glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
+    glBindTexture(GL_TEXTURE_2D, texture);
+
     glDrawArrays(GL_TRIANGLES, 0, buffer_id_size.second/3);
+
+    //RESET
+
+    glBindTexture(GL_TEXTURE_2D, 0);
 
     float amb[4] = {0.2f, 0.2f, 0.2f, 1.0f};
     float dif[4] = {0.8f, 0.8f, 0.8f, 1.0f};
@@ -138,6 +146,7 @@ void drawRandom(randomModel rnd) {
         int i = 0;
         for (string model : rnd.models) {
             std::vector<color> v = rnd.modelsColor[i];
+            GLuint texture = rnd.modelsTextures[i];
             for (int j = 0; j < n; j++) {
                 float r = rand();
                 float alfa = rand();
@@ -151,7 +160,7 @@ void drawRandom(randomModel rnd) {
                 glPushMatrix();
                 glTranslatef(r * sin(alfa), 0, r * cos(alfa));
                 glScalef(s, s, s);
-                drawModel(model, v);
+                drawModel(model, v, texture);
                 glPopMatrix();
             }
             i++;
@@ -168,8 +177,9 @@ void drawGroup(group g) {
     int i = 0;
     for(string model : g.models) {
         std::vector<color> v = g.modelsColor[i];
+        GLuint texture = g.modelsTextures[i];
 
-        drawModel(model, v);
+        drawModel(model, v, texture);
         i++;
     }
     for (auto rnd : g.randoms) {
@@ -188,17 +198,6 @@ void renderScene(void) {
     gluLookAt(Px, Py, Pz,
               lookX,lookY,lookZ,
               0.0f,1.0f,0.0f);
-
-/*    GLfloat amb[4] = {0.2, 0.2, 0.2, 1.0};
-    GLfloat diff[4] = {1.0, 1.0, 1.0, 1.0};
-    GLfloat pos[4] = {3.0, 4.0, -2.0, 0.0};
-
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-
-    glLightfv(GL_LIGHT0, GL_POSITION, pos);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, amb);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);*/
 
     glEnable(GL_LIGHTING);
     for(auto l : lights){
@@ -543,7 +542,7 @@ void readFile(ifstream& file, string fName){
 
 }
 
-int loadTexture(std::string s) {
+int loadTexture(const char *s) {
 
     unsigned int t,tw,th;
     unsigned char *texData;
@@ -554,7 +553,7 @@ int loadTexture(std::string s) {
     ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
     ilGenImages(1,&t);
     ilBindImage(t);
-    ilLoadImage((ILstring)s.c_str());
+    ilLoadImage((ILstring)s);
     tw = ilGetInteger(IL_IMAGE_WIDTH);
     th = ilGetInteger(IL_IMAGE_HEIGHT);
     ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
@@ -605,14 +604,20 @@ void parseModel(group& g, XMLElement * model) {
 void parseModel(randomModel& r, XMLElement * model) {
     const char* filename= model->Attribute("file");
     if(filename != NULL) {
+        GLuint texture = 0;
         string fName = string(filename);
         ifstream file(directory + filename);
         if(!file) {
             cerr << "The file \"" << filename << "\" was not found.\n";
         }
         std::vector<color> v = parseColor(model);
+        const char *tex = model->Attribute("texture");
+        if (tex != NULL){
+            texture = loadTexture(tex);
+        }
         r.models.push_back(fName);
         r.modelsColor.push_back(v);
+        r.modelsTextures.push_back(texture);
         if(models.find(fName) == models.end()) {
             // if the model file was not already read
             readFile(file, fName);
@@ -797,7 +802,9 @@ int main(int argc, char **argv) {
     glutKeyboardFunc(processKeys);
     glutSpecialFunc(processSpecialKeys);
 
+    #ifndef __APPLE__
     glewInit();
+    #endif
 
     n_models = models.size();
     buffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
@@ -847,6 +854,7 @@ int main(int argc, char **argv) {
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
