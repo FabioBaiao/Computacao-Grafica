@@ -529,7 +529,7 @@ void readFile(ifstream& file, string fName){
 
     n_values = n_vertex * 2;
 
-    for (int i = 0; i < n_vertex; i++){
+    for (int i = 0; i < n_values; i++){
         float tmp;
         file >> tmp;
         texCoords_read.push_back(tmp);
@@ -553,11 +553,13 @@ int loadTexture(const char *s) {
     ilOriginFunc(IL_ORIGIN_LOWER_LEFT);
     ilGenImages(1,&t);
     ilBindImage(t);
-    ilLoadImage((ILstring)s);
+    ilLoadImage((ILstring) (directory + s).c_str());
     tw = ilGetInteger(IL_IMAGE_WIDTH);
     th = ilGetInteger(IL_IMAGE_HEIGHT);
     ilConvertImage(IL_RGBA, IL_UNSIGNED_BYTE);
     texData = ilGetData();
+
+    glEnable(GL_TEXTURE_2D);
 
     glGenTextures(1,&texID);
     
@@ -567,7 +569,7 @@ int loadTexture(const char *s) {
 
     glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_MAG_FILTER,      GL_LINEAR_MIPMAP_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,  GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        
+
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tw, th, 0, GL_RGBA, GL_UNSIGNED_BYTE, texData);
     glGenerateMipmap(GL_TEXTURE_2D);
 
@@ -751,8 +753,39 @@ void parseLights(XMLElement* lgts){
     }
 }
 
+void initGL(){
+    // init GLUT and the window
+    glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
+    glutInitWindowPosition(100,100);
+    glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
+    glutCreateWindow("Pratical Assignment");
+
+    // Callback registry
+    glutDisplayFunc(renderScene);
+    glutIdleFunc(renderScene);
+    glutReshapeFunc(changeSize);
+    glutKeyboardFunc(processKeys);
+    glutSpecialFunc(processSpecialKeys);
+
+    #ifndef __APPLE__
+    glewInit();
+    #endif
+
+    //  OpenGL settings
+    glEnable(GL_DEPTH_TEST);
+    glMatrixMode(GL_MODELVIEW);
+    glEnable(GL_CULL_FACE);
+    glEnable(GL_TEXTURE_2D);
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+}
+
 //We assume that the .xml and .3d files passed are correct.
 int main(int argc, char **argv) {
+    glutInit(&argc, argv);
+    initGL();
+
     if(argc != 2) {
         cerr << "Usage: " << argv[0] << " config_file\n";
         return 1;
@@ -787,24 +820,6 @@ int main(int argc, char **argv) {
         group g = parseGroup(gr);
         groups.push_back(g);
     }
-
-    // init GLUT and the window
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DEPTH|GLUT_DOUBLE|GLUT_RGBA);
-    glutInitWindowPosition(100,100);
-    glutInitWindowSize(glutGet(GLUT_SCREEN_WIDTH), glutGet(GLUT_SCREEN_HEIGHT));
-    glutCreateWindow("Pratical Assignment");
-
-    // Callback registry
-    glutDisplayFunc(renderScene);
-    glutIdleFunc(renderScene);
-    glutReshapeFunc(changeSize);
-    glutKeyboardFunc(processKeys);
-    glutSpecialFunc(processSpecialKeys);
-
-    #ifndef __APPLE__
-    glewInit();
-    #endif
 
     n_models = models.size();
     buffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
@@ -849,15 +864,6 @@ int main(int argc, char **argv) {
         glBindBuffer(GL_ARRAY_BUFFER, textureBuffers[i]);
         glBufferData(GL_ARRAY_BUFFER, texCoord.size() * sizeof(float), texCoord.data(), GL_STATIC_DRAW);
     }
-
-    //  OpenGL settings
-    glEnable(GL_DEPTH_TEST);
-    glMatrixMode(GL_MODELVIEW);
-    glEnable(GL_CULL_FACE);
-    glEnable(GL_TEXTURE_2D);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glEnableClientState(GL_NORMAL_ARRAY);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glutMainLoop();
 

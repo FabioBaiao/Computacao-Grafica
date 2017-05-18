@@ -1,0 +1,10 @@
+<scene>
+	<lights>
+		<light type="POINT" posY="2"/>
+	</lights>
+	<group>
+		<models>
+			<model file="planeTextureTest.3d" texture="Concrete.jpg" />
+		</models>
+	</group>
+</scene>
