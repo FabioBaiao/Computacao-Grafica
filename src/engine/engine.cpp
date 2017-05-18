@@ -199,7 +199,6 @@ void renderScene(void) {
               lookX,lookY,lookZ,
               0.0f,1.0f,0.0f);
 
-    glEnable(GL_LIGHTING);
     for(auto l : lights){
         l.apply();
     }
@@ -775,6 +774,7 @@ void initGL(){
     glEnable(GL_DEPTH_TEST);
     glMatrixMode(GL_MODELVIEW);
     glEnable(GL_CULL_FACE);
+    glEnable(GL_LIGHTING);
     glEnable(GL_TEXTURE_2D);
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
