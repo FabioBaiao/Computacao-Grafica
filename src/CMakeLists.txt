@@ -28,7 +28,7 @@ if (NOT WIN32)
 
   find_package(DevIL REQUIRED)
   link_libraries(${IL_LIBRARIES} )
-  include_directories(§{IL_INCLUDE_DIR})
+  include_directories(${IL_INCLUDE_DIR})
 endif(NOT WIN32)	
 	
 find_package(OpenGL REQUIRED)
