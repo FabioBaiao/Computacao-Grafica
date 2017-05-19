@@ -341,19 +341,20 @@ string annulusNormals(int slices) {
 
 string annulusTexCoords(int slices) {
 	ostringstream os;
+	float slices_f = (float)slices; // avoid repetitive casting
 
 	for (int i = 0; i < slices; ++i) {
-		os << (i / slices) << ' ' << "0.0\n";
-		os << ((i + 1) / slices) << ' ' << "1.0\n";
-		os << (i / slices) << ' ' << "1.0\n";
-		os << (i / slices) << ' ' << "0.0\n";
-		os << ((i + 1) / slices) << ' ' << "0.0\n";
-		os << ((i + 1) / slices) << ' ' << "1.0\n";
+		os << (i / slices_f) << ' ' << "0.0\n";
+		os << ((i + 1) / slices_f) << ' ' << "1.0\n";
+		os << (i / slices_f) << ' ' << "1.0\n";
+		os << (i / slices_f) << ' ' << "0.0\n";
+		os << ((i + 1) / slices_f) << ' ' << "0.0\n";
+		os << ((i + 1) / slices_f) << ' ' << "1.0\n";
 	}
 	return os.str();
 }
 
-string ellipsoid(float a, float b, float c, float stacks, int slices) {
+string ellipsoid(float a, float b, float c, int stacks, int slices) {
 	int nPoints = 0;
 	float deltaAlpha = 2.0f * M_PI / slices;
 	float deltaBeta = M_PI / stacks;
@@ -385,7 +386,7 @@ string ellipsoid(float a, float b, float c, float stacks, int slices) {
 	return (to_string(nPoints) + "\n" + os.str());
 }
 
-string ellipsoidNormals(float stacks, int slices) {
+string ellipsoidNormals(int stacks, int slices) {
 	float deltaAlpha = 2.0f * M_PI / slices;
 	float deltaBeta = M_PI / stacks;
 	ostringstream os;
@@ -414,23 +415,23 @@ string ellipsoidNormals(float stacks, int slices) {
 	return os.str();
 }
 
-string ellipsoidTexCoords(float stacks, int slices) {
+string ellipsoidTexCoords(int stacks, int slices) {
 	ostringstream os;
+	// Avoids repetitive casting
+	float slices_f = (float)slices;
+	float stacks_f = (float)stacks;
 
-	/* The ellipsoid is built from the top stack to the bottom one. Given that texture coordinates with t = 1
-	 * map to the north pole of the ellipsoid and the t coordinate is given by (1 / stacks) * i, we start
-	 * with i = stacks - 1 in order to assure that when we're at the north pole we have i = stacks and t = 1 */
-	for (int i = stacks - 1; i >= 0; --i) {
+	for (int i = 0; i < stacks; ++i) {
 		for (int j = 0; j < slices; ++j) {
-			if (i > 0) {
-				os << (1.0f / slices) * j << ' ' << (1.0f / stacks) * i << '\n';
-				os << (1.0f / slices) * j << ' ' << (1.0f / stacks) * (i + 1) << '\n';
-				os << (1.0f / slices) * (j + 1) << ' ' << (1.0f / stacks) * (i + 1) << '\n';
-			}
 			if (i < stacks - 1) {
-				os << (1.0f / slices) * j << ' ' << (1.0f / stacks) * i << '\n';
-				os << (1.0f / slices) * (j + 1) << ' ' << (1.0f / stacks) * (i + 1) << '\n';
-				os << (1.0f / slices) * (j + 1) << ' ' << (1.0f / stacks) * i << '\n';
+				os << (j / slices_f) << ' ' << ((stacks - i) / stacks_f) << '\n';
+				os << (j / slices_f) << ' ' << ((stacks - i - 1) / stacks_f)  << '\n';
+				os << ((j + 1) / slices_f) << ' ' << ((stacks - i - 1) / stacks_f) << '\n';
+			}
+			if (i > 0) {
+				os << (j / slices_f) << ' ' << ((stacks - i) / stacks_f) << '\n';
+				os << ((j + 1) / slices_f) << ' ' << ((stacks - i - 1) / stacks_f) << '\n';
+				os << ((j + 1) / slices_f) << ' ' << ((stacks - i) / stacks_f) << '\n';
 			}
 		}
 	}
@@ -657,19 +658,21 @@ string torusNormals(float innerRadius, float outerRadius, int nsides, int nrings
 	return os.str();
 }
 
-string torusTexCoords(float innerRadius, float outerRadius, int nsides, int nrings) {
+string torusTexCoords(int nsides, int nrings) {
 	int i, j;
 	ostringstream os;
+	float nsides_f = (float)nsides;
+	float nrings_f = (float)nrings;
 
 	for (i = 0; i < nrings; i++) {
 		for (j = 0; j < nsides; j++) {
-			os << (i / nrings) << ' ' << (j / nsides) << '\n';
-			os << ((i + 1) / nrings) << ' ' << ((j + 1) / nsides);
-			os << (i / nrings) << ' ' << ((j + 1) / nsides) << '\n';
+			os << (i / nrings_f) << ' ' << (j / nsides_f) << '\n';
+			os << ((i + 1) / nrings_f) << ' ' << ((j + 1) / nsides_f);
+			os << (i / nrings_f) << ' ' << ((j + 1) / nsides_f) << '\n';
 
-			os << (i / nrings) << ' ' << (j / nsides) << '\n';
-			os << ((i + 1) / nrings) << ' ' << (j / nsides);
-			os << ((i + 1) / nrings) << ' ' << ((j + 1) / nsides);
+			os << (i / nrings_f) << ' ' << (j / nsides_f) << '\n';
+			os << ((i + 1) / nrings_f) << ' ' << (j / nsides_f);
+			os << ((i + 1) / nrings_f) << ' ' << ((j + 1) / nsides_f);
 		}
 	}
 	return os.str();
@@ -796,6 +799,7 @@ int ellipsoidGenerator(int argc, char *argv[]) {
 	}
 	outfile << ellipsoid(xRadius, yRadius, zRadius, slices, stacks);
 	outfile << ellipsoidNormals(slices, stacks);
+	outfile << ellipsoidTexCoords(slices, stacks);
 	outfile.close();
 	return 0;
 }
@@ -901,6 +905,7 @@ int torusGenerator(int argc, char *argv[]) {
 	}
 	outfile << torus(innerRadius, outerRadius, sides, rings);
 	outfile << torusNormals(innerRadius, outerRadius, sides, rings);
+	outfile << torusTexCoords(sides, rings);
 	outfile.close();
 	return 0;
 }
