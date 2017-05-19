@@ -421,7 +421,7 @@ string ellipsoidTexCoords(float stacks, int slices) {
 	 * map to the north pole of the ellipsoid and the t coordinate is given by (1 / stacks) * i, we start
 	 * with i = stacks - 1 in order to assure that when we're at the north pole we have i = stacks and t = 1 */
 	for (int i = stacks - 1; i >= 0; --i) {
-		for (int j = 0; j < slices; --j) {
+		for (int j = 0; j < slices; ++j) {
 			if (i > 0) {
 				os << (1.0f / slices) * j << ' ' << (1.0f / stacks) * i << '\n';
 				os << (1.0f / slices) * j << ' ' << (1.0f / stacks) * (i + 1) << '\n';
