@@ -341,15 +341,14 @@ string annulusNormals(int slices) {
 
 string annulusTexCoords(int slices) {
 	ostringstream os;
-	float slices_f = (float)slices; // avoid repetitive casting
 
 	for (int i = 0; i < slices; ++i) {
-		os << (i / slices_f) << ' ' << "0.0\n";
-		os << ((i + 1) / slices_f) << ' ' << "1.0\n";
-		os << (i / slices_f) << ' ' << "1.0\n";
-		os << (i / slices_f) << ' ' << "0.0\n";
-		os << ((i + 1) / slices_f) << ' ' << "0.0\n";
-		os << ((i + 1) / slices_f) << ' ' << "1.0\n";
+		os << "1.0 1.0\n";
+		os << "0.0 0.0\n";
+		os << "1.0 0.0\n";
+		os << "1.0 1.0\n";
+		os << "0.0 1.0\n";
+		os << "0.0 0.0\n";
 	}
 	return os.str();
 }
@@ -671,8 +670,8 @@ string torusTexCoords(int nsides, int nrings) {
 			os << (i / nrings_f) << ' ' << ((j + 1) / nsides_f) << '\n';
 
 			os << (i / nrings_f) << ' ' << (j / nsides_f) << '\n';
-			os << ((i + 1) / nrings_f) << ' ' << (j / nsides_f);
-			os << ((i + 1) / nrings_f) << ' ' << ((j + 1) / nsides_f);
+			os << ((i + 1) / nrings_f) << ' ' << (j / nsides_f) << '\n';
+			os << ((i + 1) / nrings_f) << ' ' << ((j + 1) / nsides_f) << '\n';
 		}
 	}
 	return os.str();
