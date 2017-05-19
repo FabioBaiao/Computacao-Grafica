@@ -819,7 +819,7 @@ int main(int argc, char **argv) {
     for(; gr; gr = gr->NextSiblingElement()) {
         group g = parseGroup(gr);
         groups.push_back(g);
-    }
+    } 
 
     n_models = models.size();
     buffers = (GLuint *) malloc(sizeof(GLuint) * n_models);
@@ -861,7 +861,7 @@ int main(int argc, char **argv) {
 
         texCoords_to_buffer[it->first] = textureBuffers[i];
 
-        glBindBuffer(GL_ARRAY_BUFFER, textureBuffers[i]);
+        glBindBuffer(GL_ARRAY_BUFFER, textureBuffers[i++]);
         glBufferData(GL_ARRAY_BUFFER, texCoord.size() * sizeof(float), texCoord.data(), GL_STATIC_DRAW);
     }
 
