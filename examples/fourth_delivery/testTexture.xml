@@ -1,10 +1,10 @@
 <scene>
 	<lights>
-		<light type="POINT" posY="2"/>
+		<light type="POINT" posY="0"/>
 	</lights>
 	<group>
 		<models>
-			<model file="planeTextureTest.3d" texture="Concrete.jpg" />
+			<model file="sphereTextureTest.3d" texture="solar_system/Earth.jpg" emiR="1" emiG="1" emiB="1" />
 		</models>
 	</group>
 </scene>
