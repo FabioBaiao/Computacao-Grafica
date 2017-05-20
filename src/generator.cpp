@@ -12,7 +12,19 @@ using namespace std;
 #define UPWARDS 1
 #define DOWNWARDS (-1)
 
+/* Size (in bytes) of the buffer used to store each line of a .patch file (one at a time) */
 #define BUFF_SIZE 1024
+
+/* same as the previous macro, but for the upper base */
+#define S_FRUSTUM_UBASE_CENTER 0.4375f
+/* s coordinate of the center of the lower base in a standard texture of a frustum */
+#define S_FRUSTUM_LBASE_CENTER 0.8125f
+/* t coordinate of the center of each base in a standard texture of a frustum (both bases' centers have the same t)s */
+#define T_FRUSTUM_BASES_CENTER 0.1875f
+/* base radius of each base in a standard texture for a frustum */
+#define FRUSTUM_TEX_BASE_RADIUS 0.1875f
+/* lower t coordinate of the start of the side area in a standard texture of a frustum */
+#define LOW_T_FRUSTUM_SIDE_AREA 0.375f
 
 typedef struct point {
     float x;
@@ -473,7 +485,7 @@ string frustum(float baseRadius, float topRadius, float height, int slices, int 
         }
     }
     if (topRadius > 0.0f) {
-        for (i = 0; i < slices; ++i) { // top base
+        for (i = 0; i < slices; ++i) { // upper base
             os << (topRadius * sinCache[i]) << ' ' << height << ' ' << (topRadius * cosCache[i]) << '\n';
             os << (topRadius * sinCache[i + 1]) << ' ' << height << ' ' << (topRadius * cosCache[i + 1]) << '\n';
             os << "0.0 " << height << " 0.0\n";
@@ -539,7 +551,7 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
         }
     }
     if (topRadius > 0.0f) {
-        for (i = 0; i < slices; ++i) { // top base
+        for (i = 0; i < slices; ++i) { // upper base
             for (int k = 0; k < 3; k++) {
                 os << "0.0 1.0 0.0\n";
             }
@@ -569,6 +581,63 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
     }
     delete[] cosCache; delete[] sinCache;
 
+    return os.str();
+}
+
+string frustumTexCoords(float baseRadius, float topRadius, int slices, int stacks) {
+    int i, j;
+    float alpha, deltaAlpha;
+    float sCenter, tCenter, rTex;
+    ostringstream os;
+
+    deltaAlpha = 2.0f * M_PI / slices;
+    rTex = FRUSTUM_TEX_BASE_RADIUS;
+    tCenter = T_FRUSTUM_BASES_CENTER; // t coordinate is the same for both bases
+
+    if (baseRadius > 0.0f) { // lower base texture coordinates
+        sCenter = S_FRUSTUM_LBASE_CENTER;
+        for (i = 0; i < slices; ++i) {
+            alpha = i * deltaAlpha;
+            os << (sCenter + rTex * sinf(alpha)) << ' ' << (tCenter - rTex * cosf(alpha)) << '\n';
+            os << sCenter << ' ' << tCenter << '\n';
+            os << (sCenter + rTex * sinf(alpha + deltaAlpha)) << ' ' << (tCenter - rTex * cosf(alpha + deltaAlpha)) << '\n';
+        }
+    }
+    if (topRadius > 0.0f) {
+        sCenter = S_FRUSTUM_UBASE_CENTER;
+        for (i = 0; i < slices; ++i) { // upper base texture coordinates
+            alpha = i * deltaAlpha;
+            os << (sCenter + rTex * sinf(alpha)) << ' ' << (tCenter - rTex * cosf(alpha)) << '\n';
+            os << (sCenter + rTex * sinf(alpha + deltaAlpha)) << ' ' << (tCenter - rTex * cosf(alpha + deltaAlpha)) << '\n';
+        	os << sCenter << ' ' << tCenter << '\n';
+        }
+    }
+
+    float dr = (baseRadius - topRadius) / stacks;
+    float deltaS = 1.0f / slices;
+    float deltaT = (1.0f - LOW_T_FRUSTUM_SIDE_AREA) / stacks;
+    for (i = 0; i < stacks; ++i) {
+        float rLow = baseRadius - i * dr;
+        float rHigh = rLow - dr;
+        float s, t = LOW_T_FRUSTUM_SIDE_AREA + i * deltaT;
+
+        if (rHigh > 0.0f) {
+            for (j = 0; j < slices; ++j) {
+                s = j * deltaS;
+                os << s << ' ' << t << '\n';
+                os << (s + deltaS) << ' ' << (t + deltaT) << '\n';
+                os << s << ' ' << (t + deltaT) << '\n';
+            }
+        }
+        if (rLow > 0.0f) {
+            for (j = 0; j < slices; ++j) {
+            	s = j * deltaS;
+                os << s << ' ' << t << '\n';
+                os << (s + deltaS) << ' ' << t << '\n';
+                os << (s + deltaS) << ' ' << (t + deltaT) << '\n';
+            }
+        }
+    }
     return os.str();
 }
 
@@ -763,11 +832,11 @@ int coneGenerator(int argc, char *argv[]) {
     }
     outfile << frustum(radius, 0.0f, height, slices, stacks);
     outfile << frustumNormals(radius, 0.0f, height, slices, stacks);
+    outfile << frustumTexCoords(radius, 0.0f, slices, stacks);
     outfile.close();
     return 0;
 }
 
-// Cylinder and cone generators are very similar. Consider reusing code!
 int cylinderGenerator(int argc, char *argv[]) {
     float radius, height;
     int slices, stacks;
@@ -788,6 +857,7 @@ int cylinderGenerator(int argc, char *argv[]) {
     }
     outfile << frustum(radius, radius, height, slices, stacks);
     outfile << frustumNormals(radius, radius, height, slices, stacks);
+    outfile << frustumTexCoords(radius, radius, slices, stacks);
     outfile.close();
     return 0;
 }
@@ -845,6 +915,7 @@ int frustumGenerator(int argc, char *argv[]) {
     }
     outfile << frustum(baseRadius, topRadius, height, slices, stacks);
     outfile << frustumNormals(baseRadius, topRadius, height, slices, stacks);
+    outfile << frustumTexCoords(baseRadius, topRadius, slices, stacks);
     outfile.close();
     return 0;
 }
@@ -979,38 +1050,41 @@ void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_norma
     float d_u[3];
     float d_v[3];
     /* Setup */
-    float m[4][4] = {   { -1.0f, 3.0f, -3.0f, 1.0f},
-        { 3.0f, -6.0f,  3.0f, 0.0f},
-        { -3.0f, 3.0f,  0.0f, 0.0f},
-        { 1.0f, 0.0f,  0.0f, 0.0f}
+    float m[4][4] = {
+        { -1.0f,  3.0f, -3.0f, 1.0f },
+        {  3.0f, -6.0f,  3.0f, 0.0f },
+        {  3.0f,  3.0f,  0.0f, 0.0f },
+        {  1.0f,  0.0f,  0.0f, 0.0f }
     };
 
-    /* a transposta de m é igual a m */
+    /* transpose of m equals m */
 
-    float Px[4][4] = {  { pv[0].x, pv[1].x, pv[2].x, pv[3].x},
-        { pv[4].x, pv[5].x, pv[6].x, pv[7].x},
-        { pv[8].x, pv[9].x, pv[10].x, pv[11].x},
-        { pv[12].x, pv[13].x, pv[14].x, pv[15].x}
+    float Px[4][4] = {
+        { pv[0].x, pv[1].x, pv[2].x, pv[3].x },
+        { pv[4].x, pv[5].x, pv[6].x, pv[7].x },
+        { pv[8].x, pv[9].x, pv[10].x, pv[11].x },
+        { pv[12].x, pv[13].x, pv[14].x, pv[15].x }
     };
 
-    float Py[4][4] = {  { pv[0].y, pv[1].y, pv[2].y, pv[3].y},
-        { pv[4].y, pv[5].y, pv[6].y, pv[7].y},
-        { pv[8].y, pv[9].y, pv[10].y, pv[11].y},
-        { pv[12].y, pv[13].y, pv[14].y, pv[15].y}
+    float Py[4][4] = {
+        { pv[0].y, pv[1].y, pv[2].y, pv[3].y },
+        { pv[4].y, pv[5].y, pv[6].y, pv[7].y },
+        { pv[8].y, pv[9].y, pv[10].y, pv[11].y },
+        { pv[12].y, pv[13].y, pv[14].y, pv[15].y }
     };
 
-    float Pz[4][4] = {  { pv[0].z, pv[1].z, pv[2].z, pv[3].z},
-        { pv[4].z, pv[5].z, pv[6].z, pv[7].z},
-        { pv[8].z, pv[9].z, pv[10].z, pv[11].z},
-        { pv[12].z, pv[13].z, pv[14].z, pv[15].z}
+    float Pz[4][4] = {
+        { pv[0].z, pv[1].z, pv[2].z, pv[3].z },
+        { pv[4].z, pv[5].z, pv[6].z, pv[7].z },
+        { pv[8].z, pv[9].z, pv[10].z, pv[11].z },
+        { pv[12].z, pv[13].z, pv[14].z, pv[15].z }
     };
 
-    float U[4] = {u*u * u, u * u, u, 1};
-    float UD[4] = {3 * u * u, 2 * u, 1, 0};
-    float V[4] = {v*v * v, v * v, v, 1};
-    float VD[4] = {3 * v * v, 2 * v, 1, 0};
+    float U[4] = { u * u * u, u * u, u, 1 };
+    float UD[4] = { 3 * u * u, 2 * u, 1, 0};
+    float V[4] = { v * v * v, v * v, v, 1};
+    float VD[4] = { 3 * v * v, 2 * v, 1, 0};
 
-    // solution 1: doesnt work and i dont know why
     float MdV[4];
     float MV[4];
     multMatrixVector((float*)m, V, MV);
@@ -1031,50 +1105,44 @@ void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_norma
     multVectorMatrix(dUM, (float*) Py, dUMP[1]);
     multVectorMatrix(dUM, (float*) Pz, dUMP[2]);
 
-    for (int j = 0; j < 3; j++)
-    {
+    for (int j = 0; j < 3; j++) {
         res[j] = 0.0f;
         d_u[j] = 0.0f;
         d_v[j] = 0.0f;
-        for (int i = 0; i < 4; i++ )
-        {
+
+        for (int i = 0; i < 4; i++ ) {
             res[j] += MV[i] * UMP[j][i];
             d_u[j] += MV[i] * dUMP[j][i];
             d_v[j] += MdV[i] * UMP[j][i];
         }
     }
-
     normalize(d_u);
     normalize(d_v);
     cross(d_v, d_u, p_normal);
 }
 
 
-void bezierPatchGenerator(char* outfile, int tesselation_level)
-{
+void bezierPatchGenerator(char *outfile, int tesselation_level) {
     point pv[16];
     int divs = tesselation_level; // change this to change the tesselation level
     int p = 0;
     ofstream out;
     ostringstream os;
 
-    for (int i = 0; i < patches; i++)
-    {
-        for (int j = 0; j < 16; j++)
+    for (int i = 0; i < patches; i++) {
+        for (int j = 0; j < 16; j++) {
             pv[j] = cpoints[indexes[i][j]];
+        }
 
-        for (int u = 0; u < divs; u++)
-        {
+        for (int u = 0; u < divs; u++) {
             float resP1[3], p_normal1[3];
             float resP2[3], p_normal2[3];
             float resP3[3], p_normal3[3];
             float resP4[3], p_normal4[3];
 
-            for (int v = 0; v < divs; v++)
-            {
-
-                getBezierPatchPoint(u / (float)divs, v / (float)divs, pv, resP1, p_normal1 );
-                getBezierPatchPoint((u + 1) / (float)divs, v / (float)divs, pv, resP2, p_normal2 );
+            for (int v = 0; v < divs; v++) {
+                getBezierPatchPoint(u / (float)divs, v / (float)divs, pv, resP1, p_normal1);
+                getBezierPatchPoint((u + 1) / (float)divs, v / (float)divs, pv, resP2, p_normal2);
                 getBezierPatchPoint(u / (float)divs, (v + 1) / (float)divs, pv, resP3, p_normal3);
                 getBezierPatchPoint((u + 1) / (float)divs, (v + 1) / (float)divs, pv, resP4, p_normal4);
 
@@ -1095,43 +1163,54 @@ void bezierPatchGenerator(char* outfile, int tesselation_level)
     out.close();
 }
 
-int bezierPatchParser(char* patch)
-{
+int bezierPatchParser(char *patch) {
     int l_index;
     int i, j;
     char line[BUFF_SIZE];
-    FILE* f = fopen(patch, "r");
+    FILE *f = fopen(patch, "r");
+
     if (!f)
         return -1;
 
     fscanf(f, "%d\n", &l_index);
     patches = l_index;
     printf("%d\n", patches);
-    indexes = (int**) malloc(sizeof(int*)*l_index);
+    indexes = (int **) malloc(sizeof(int *) * l_index);
     if (!indexes)
         return -1;
 
-    for (i = 0; i < l_index; i++)
-    {
-        indexes[i] = (int*) malloc(sizeof(int) * 16);
-        if (!indexes[i])
-            return -1;
+    for (i = 0; i < l_index; i++) {
+        indexes[i] = (int *) malloc(sizeof(int) * 16);
+        if (!indexes[i]) {
+            // free previously allocated memory before returning
+            for (--i; i >= 0; --i) {
+                free(indexes[i]);
+            }
+            free(indexes);
 
+            return -1;
+        }
         memset(line, 0, BUFF_SIZE);
         fgets(line, BUFF_SIZE, f);
-        char* ind = NULL;
-        for (j = 0, ind = strtok(line, ", "); ind && j < 16; ind = strtok(NULL, ", "), j++)
+        char *ind = strtok(line, ", ");
+        for (j = 0; ind && j < 16; j++) {
             indexes[i][j] = atoi(ind);
+            ind = strtok(NULL, ", ");
+        }
     }
-
     fscanf(f, "%d\n", &ncpoints);
 
-    cpoints = (point*) malloc(sizeof(point) * ncpoints);
-    if (!cpoints)
-        return -1;
+    cpoints = (point *) malloc(sizeof(point) * ncpoints);
+    if (!cpoints) {
+        for (i = 0; i < l_index; i++) {
+            free(indexes[i]);
+        }
+        free(indexes);
 
-    for (i = 0; i < ncpoints; i++)
-    {
+        return -1;
+    }
+
+    for (i = 0; i < ncpoints; i++) {
         memset(line, 0, BUFF_SIZE);
         fgets(line, BUFF_SIZE, f);
         cpoints[i].x = atof(strtok(line, ", "));
@@ -1157,7 +1236,7 @@ void usage(const char *programName, FILE *stream) {
           "| plane       | xDim zDim [divisions]                     |\n"
           "| sphere      | radius slices stacks                      |\n"
           "| torus       | innerRadius outerRadius sides rings       |\n"
-          "| patch       | TesselationLevel patchFile                |\n"
+          "| patch       | tesselationLevel patchFile                |\n"
           "+-------------+-------------------------------------------+\n"
           , stream
          );
