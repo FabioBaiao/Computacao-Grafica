@@ -609,7 +609,7 @@ string frustumTexCoords(float baseRadius, float topRadius, int slices, int stack
             alpha = i * deltaAlpha;
             os << (sCenter + rTex * sinf(alpha)) << ' ' << (tCenter - rTex * cosf(alpha)) << '\n';
             os << (sCenter + rTex * sinf(alpha + deltaAlpha)) << ' ' << (tCenter - rTex * cosf(alpha + deltaAlpha)) << '\n';
-        	os << sCenter << ' ' << tCenter << '\n';
+            os << sCenter << ' ' << tCenter << '\n';
         }
     }
 
@@ -631,7 +631,7 @@ string frustumTexCoords(float baseRadius, float topRadius, int slices, int stack
         }
         if (rLow > 0.0f) {
             for (j = 0; j < slices; ++j) {
-            	s = j * deltaS;
+                s = j * deltaS;
                 os << s << ' ' << t << '\n';
                 os << (s + deltaS) << ' ' << t << '\n';
                 os << (s + deltaS) << ' ' << (t + deltaT) << '\n';
@@ -1046,19 +1046,18 @@ void multMatrixMatrix(float *m1, float *m2, float *res) {
     }
 }
 
-void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_normal) {
-    float d_u[3];
-    float d_v[3];
+void getBezierPatchPoint(float u, float v, point *pv, float *res, float *pNormal, float *texCoords) {
+    float dU[3];
+    float dV[3];
     /* Setup */
     float m[4][4] = {
         { -1.0f,  3.0f, -3.0f, 1.0f },
         {  3.0f, -6.0f,  3.0f, 0.0f },
-        {  3.0f,  3.0f,  0.0f, 0.0f },
+        { -3.0f,  3.0f,  0.0f, 0.0f },
         {  1.0f,  0.0f,  0.0f, 0.0f }
     };
 
     /* transpose of m equals m */
-
     float Px[4][4] = {
         { pv[0].x, pv[1].x, pv[2].x, pv[3].x },
         { pv[4].x, pv[5].x, pv[6].x, pv[7].x },
@@ -1080,134 +1079,155 @@ void getBezierPatchPoint(float u, float v, point* pv, float *res, float* p_norma
         { pv[12].z, pv[13].z, pv[14].z, pv[15].z }
     };
 
-    float U[4] = { u * u * u, u * u, u, 1 };
-    float UD[4] = { 3 * u * u, 2 * u, 1, 0};
-    float V[4] = { v * v * v, v * v, v, 1};
-    float VD[4] = { 3 * v * v, 2 * v, 1, 0};
+    float U[4] = {u * u * u, u * u, u, 1};
+    float UD[4] = {3 * u * u, 2 * u, 1, 0};
+    float V[4] = {v * v * v, v * v, v, 1};
+    float VD[4] = {3 * v * v, 2 * v, 1, 0};
 
     float MdV[4];
     float MV[4];
-    multMatrixVector((float*)m, V, MV);
-    multMatrixVector((float*)m, VD, MdV);
+    multMatrixVector((float *)m, V, MV);
+    multMatrixVector((float *)m, VD, MdV);
 
     float dUM[4];
     float UM[4];
-    multVectorMatrix(U, (float*)m, UM);
-    multVectorMatrix(UD, (float*)m, dUM);
+    multVectorMatrix(U, (float *)m, UM);
+    multVectorMatrix(UD, (float *)m, dUM);
 
     float UMP[3][4];
-    multVectorMatrix(UM, (float*) Px, UMP[0]);
-    multVectorMatrix(UM, (float*) Py, UMP[1]);
-    multVectorMatrix(UM, (float*) Pz, UMP[2]);
+    multVectorMatrix(UM, (float *)Px, UMP[0]);
+    multVectorMatrix(UM, (float *)Py, UMP[1]);
+    multVectorMatrix(UM, (float *)Pz, UMP[2]);
 
     float dUMP[3][4];
-    multVectorMatrix(dUM, (float*) Px, dUMP[0]);
-    multVectorMatrix(dUM, (float*) Py, dUMP[1]);
-    multVectorMatrix(dUM, (float*) Pz, dUMP[2]);
+    multVectorMatrix(dUM, (float *)Px, dUMP[0]);
+    multVectorMatrix(dUM, (float *)Py, dUMP[1]);
+    multVectorMatrix(dUM, (float *)Pz, dUMP[2]);
 
     for (int j = 0; j < 3; j++) {
         res[j] = 0.0f;
-        d_u[j] = 0.0f;
-        d_v[j] = 0.0f;
+        dU[j] = 0.0f;
+        dV[j] = 0.0f;
 
-        for (int i = 0; i < 4; i++ ) {
+        for (int i = 0; i < 4; i++) {
             res[j] += MV[i] * UMP[j][i];
-            d_u[j] += MV[i] * dUMP[j][i];
-            d_v[j] += MdV[i] * UMP[j][i];
+            dU[j] += MV[i] * dUMP[j][i];
+            dV[j] += MdV[i] * UMP[j][i];
         }
     }
-    normalize(d_u);
-    normalize(d_v);
-    cross(d_v, d_u, p_normal);
+    normalize(dU);
+    normalize(dV);
+    cross(dV, dU, pNormal);
+
+    texCoords[0] = u;
+    texCoords[1] = v;
 }
 
-
-void bezierPatchGenerator(char *outfile, int tesselation_level) {
-    point pv[16];
-    int divs = tesselation_level; // change this to change the tesselation level
+int bezierPatchGenerator(char *outfile, int tesselationLevel) {
     int p = 0;
+    point pv[16];
+    int divs = tesselationLevel; // change this to change the tesselation level
+    ostringstream pointStr, normalsStr, texCoordsStr;
     ofstream out;
-    ostringstream os;
 
+    out.open(outfile);
+    if (!out.is_open()) {
+        perror("ofstream.open");
+        return 1;
+    }
     for (int i = 0; i < patches; i++) {
         for (int j = 0; j < 16; j++) {
             pv[j] = cpoints[indexes[i][j]];
         }
-
         for (int u = 0; u < divs; u++) {
-            float resP1[3], p_normal1[3];
-            float resP2[3], p_normal2[3];
-            float resP3[3], p_normal3[3];
-            float resP4[3], p_normal4[3];
+            float resP1[3], pNormal1[3], texCoords1[2];
+            float resP2[3], pNormal2[3], texCoords2[2];
+            float resP3[3], pNormal3[3], texCoords3[2];
+            float resP4[3], pNormal4[3], texCoords4[2];
 
             for (int v = 0; v < divs; v++) {
-                getBezierPatchPoint(u / (float)divs, v / (float)divs, pv, resP1, p_normal1);
-                getBezierPatchPoint((u + 1) / (float)divs, v / (float)divs, pv, resP2, p_normal2);
-                getBezierPatchPoint(u / (float)divs, (v + 1) / (float)divs, pv, resP3, p_normal3);
-                getBezierPatchPoint((u + 1) / (float)divs, (v + 1) / (float)divs, pv, resP4, p_normal4);
+                getBezierPatchPoint(u / (float)divs, v / (float)divs, pv, resP1, pNormal1, texCoords1);
+                getBezierPatchPoint((u + 1) / (float)divs, v / (float)divs, pv, resP2, pNormal2, texCoords2);
+                getBezierPatchPoint(u / (float)divs, (v + 1) / (float)divs, pv, resP3, pNormal3, texCoords3);
+                getBezierPatchPoint((u + 1) / (float)divs, (v + 1) / (float)divs, pv, resP4, pNormal4, texCoords4);
 
-                os << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
-                os << resP3[0] << ' ' << resP3[1] << ' ' << resP3[2] << '\n';
-                os << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
+                pointStr << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
+                pointStr << resP3[0] << ' ' << resP3[1] << ' ' << resP3[2] << '\n';
+                pointStr << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
 
-                os << resP2[0] << ' ' << resP2[1] << ' ' << resP2[2] << '\n';
-                os << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
-                os << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
+                pointStr << resP2[0] << ' ' << resP2[1] << ' ' << resP2[2] << '\n';
+                pointStr << resP1[0] << ' ' << resP1[1] << ' ' << resP1[2] << '\n';
+                pointStr << resP4[0] << ' ' << resP4[1] << ' ' << resP4[2] << '\n';
 
+                normalsStr << pNormal1[0] << ' ' << pNormal1[1] << ' ' << pNormal1[2] << '\n';
+                normalsStr << pNormal3[0] << ' ' << pNormal3[1] << ' ' << pNormal3[2] << '\n';
+                normalsStr << pNormal4[0] << ' ' << pNormal4[1] << ' ' << pNormal4[2] << '\n';
+
+                normalsStr << pNormal2[0] << ' ' << pNormal2[1] << ' ' << pNormal2[2] << '\n';
+                normalsStr << pNormal1[0] << ' ' << pNormal1[1] << ' ' << pNormal1[2] << '\n';
+                normalsStr << pNormal4[0] << ' ' << pNormal4[1] << ' ' << pNormal4[2] << '\n';
+
+                texCoordsStr << texCoords1[0] << ' ' << texCoords1[1] << '\n';
+                texCoordsStr << texCoords3[0] << ' ' << texCoords3[1] << '\n';
+                texCoordsStr << texCoords4[0] << ' ' << texCoords4[1] << '\n';
+
+                texCoordsStr << texCoords2[0] << ' ' << texCoords2[1] << '\n';
+                texCoordsStr << texCoords1[0] << ' ' << texCoords1[1] << '\n';
+                texCoordsStr << texCoords4[0] << ' ' << texCoords4[1] << '\n';
+                
                 p += 6;
             }
         }
     }
-    out.open(outfile);
-    out << to_string(p) + "\n" + os.str();
+    out << (to_string(p) + "\n" + pointStr.str() + normalsStr.str() + texCoordsStr.str());
     out.close();
+    
+    return 0;
 }
 
 int bezierPatchParser(char *patch) {
-    int l_index;
+    int lIndex;
     int i, j;
     char line[BUFF_SIZE];
     FILE *f = fopen(patch, "r");
 
     if (!f)
-        return -1;
+        return 1;
 
-    fscanf(f, "%d\n", &l_index);
-    patches = l_index;
+    fscanf(f, "%d\n", &lIndex);
+    patches = lIndex;
     printf("%d\n", patches);
-    indexes = (int **) malloc(sizeof(int *) * l_index);
+    indexes = (int **) malloc(sizeof(int *) * lIndex);
     if (!indexes)
-        return -1;
+        return 1;
 
-    for (i = 0; i < l_index; i++) {
+    for (i = 0; i < lIndex; i++) {
         indexes[i] = (int *) malloc(sizeof(int) * 16);
         if (!indexes[i]) {
-            // free previously allocated memory before returning
+            // free previously allocated memory before returning non zero
             for (--i; i >= 0; --i) {
                 free(indexes[i]);
             }
             free(indexes);
 
-            return -1;
+            return 1;
         }
         memset(line, 0, BUFF_SIZE);
         fgets(line, BUFF_SIZE, f);
-        char *ind = strtok(line, ", ");
-        for (j = 0; ind && j < 16; j++) {
+        char* ind = NULL;
+        for(j = 0, ind = strtok(line,", "); ind && j < 16; ind = strtok(NULL, ", "), j++)
             indexes[i][j] = atoi(ind);
-            ind = strtok(NULL, ", ");
-        }
     }
     fscanf(f, "%d\n", &ncpoints);
 
     cpoints = (point *) malloc(sizeof(point) * ncpoints);
     if (!cpoints) {
-        for (i = 0; i < l_index; i++) {
+        for (i = 0; i < lIndex; i++) {
             free(indexes[i]);
         }
         free(indexes);
 
-        return -1;
+        return 1;
     }
 
     for (i = 0; i < ncpoints; i++) {
@@ -1281,7 +1301,7 @@ int main(int argc, char *argv[]) {
     else if (primitive == "patch" && argc == 5) {
         rval = bezierPatchParser(argv[3]);
         if (!rval)
-            bezierPatchGenerator(argv[4], atoi(argv[2]));
+            rval = bezierPatchGenerator(argv[4], atoi(argv[2]));
     }
     else if (primitive == "--help") {
         usage(argv[0], stdout);
