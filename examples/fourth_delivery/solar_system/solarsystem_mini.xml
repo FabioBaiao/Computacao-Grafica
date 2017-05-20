@@ -1,0 +1,28 @@
+<scene camY="20" camX="20" camZ="20" yaw="120" pitch="-30">
+	<lights>
+		<light type="POINT" posY="0"/>
+	</lights>
+	<group>
+		<group>
+			<rotate time="25" axisX="0" axisY="1" axisZ="0" />
+			<models>
+				<model file="sun_v2.3d" texture="Sun.jpg" emiR="1" emiG="1" emiB="1" />
+			</models>
+		</group>
+		<group>
+			<translate time="4.35">
+				<point X="26" Y="0" Z="0" />
+				<point X="18.385" Y="0" Z="-18.385" />
+				<point X="0" Y="0" Z="-26" />
+				<point X="-18.385" Y="0" Z="-18.385" />
+				<point X="-26" Y="0" Z="0" />
+				<point X="-18.385" Y="0" Z="18.385" />
+				<point X="0" Y="0" Z="26" />
+				<point X="18.385" Y="0" Z="18.385" />
+			</translate>
+			<models>
+				<model file="terrestrial_v2.3d" texture="Mercury.jpg" />
+			</models>
+		</group>
+	</group>
+</scene>

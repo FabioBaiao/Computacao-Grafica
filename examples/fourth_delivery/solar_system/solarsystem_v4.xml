@@ -2,13 +2,14 @@
 <!-- All planets, moons and rings are scaled 1:10^4 . Distances are not scaled -->
 <scene camY="20" camX="20" camZ="20" yaw="120" pitch="-30" >
 	<lights>
-		<light type="POINT" posX="0" posY="0" posZ="0" />
+		<light type="POINT" posX="0" posY="14" posZ="0" />
+		<light type="POINT" posX="0" posY="-14" posZ="0" />
 	</lights>
 	<group>
 		<group>
-			<rotate time="25" axisX="0" axisY="1" axisZ="0" />
+			<rotate time="250" axisX="0" axisY="1" axisZ="0" />
 			<models>
-				<model file="sun.3d" emiR="0.945" emiG="0.412" emiB="0.082"/>
+				<model file="sun_v2.3d" texture="Sun.jpg" emiR="1" emiG="1" emiB="1" />
 			</models>
 		</group>
 		<group>
@@ -25,10 +26,10 @@
 					<point X="0" Y="0" Z="26" />
 					<point X="18.385" Y="0" Z="18.385" />
 				</translate>
-				<rotate time="58" axisX="0" axisY="1" axisZ="0" />
+				<rotate time="580" axisX="0" axisY="1" axisZ="0" />
 				<scale X="0.535" Y="0.535" Z="0.535" />
 				<models>
-					<model file="terrestrial.3d" specR="0.412" specG="0.388" specB="0.376" />
+					<model file="terrestrial_v2.3d" texture="Mercury.jpg" />
 				</models>
 			</group>
 		</group>
@@ -46,10 +47,10 @@
 					<point X="0" Y="0" Z="31" />
 					<point X="21.920" Y="0" Z="21.920" />
 				</translate>
-				<rotate time="243" axisX="0" axisY="-1" axisZ="0" />
+				<rotate time="2430" axisX="0" axisY="-1" axisZ="0" />
 				<scale X="1.326" Y="1.326" Z="1.326" />
 				<models>
-					<model file="terrestrial.3d" specR="0.816" specG="0.533" specB="0.208" />
+					<model file="terrestrial_v2.3d" texture="Venus.jpg"  />
 				</models>
 			</group>
 		</group>
@@ -66,10 +67,10 @@
 			</translate>
 			<group>
 				<!-- Earth -->
-				<rotate time="1" axisX="0" axisY="1" axisZ="0" />
+				<rotate time="10" axisX="0" axisY="1" axisZ="0" />
 				<scale X="1.396" Y="1.396" Z="1.396" />
 				<models>
-					<model file="terrestrial.3d" specR="0.145" specG="0.192" specB="0.388" />
+					<model file="terrestrial_v2.3d" texture="Earth.jpg" />
 				</models>
 			</group>	
 			<group>
@@ -86,10 +87,10 @@
 						<point X="0" Y="0" Z="2" />
 						<point X="1.414" Y="0" Z="1.414" />
 					</translate>
-					<rotate time="27" axisX="0" axisY="1" axisZ="0" />
+					<rotate time="270" axisX="0" axisY="1" axisZ="0" />
 					<scale X="0.863" Y="0.863" Z="0.863" />
 					<models>
-						<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376" />
+						<model file="moon_v2.3d" texture="Moon.jpg"/>
 					</models>
 				</group>
 			</group>
@@ -108,10 +109,10 @@
 				<point X="31.820" Y="0" Z="31.820" />
 			</translate>
 			<group>
-				<rotate time="1" axisX="0" axisY="1" axisZ="0" />
+				<rotate time="10" axisX="0" axisY="1" axisZ="0" />
 				<scale X="0.743" Y="0.743" Z="0.743" />
 				<models>
-					<model file="terrestrial.3d" specR="0.788" specG="0.243" specB="0.020" />
+					<model file="terrestrial_v2.3d" texture="Mars.jpg"  />
 				</models>
 			</group>
 			<group>
@@ -150,10 +151,10 @@
 			</translate>
 			<group>
 				<!-- Jupiter -->
-				<rotate time="0.375" axisX="0" axisY="1" axisZ="0" />
+				<rotate time="3.75" axisX="0" axisY="1" axisZ="0" />
 				<scale X="1.570" Y="1.570" Z="1.570" />
 				<models>
-					<model file="gaseous.3d" specR="0.984" specG="0.808" specB="0.573" />
+					<model file="gaseous_v2.3d" texture="Jupiter.jpg" />
 				</models>
 			</group>
 			<group>
@@ -184,10 +185,10 @@
 				<rotate axisX="0" axisY="1" axisZ="1" angle="50" />
 				<group>
 					<!-- Saturn -->
-					<rotate time="0.417" axisX="0" axisY="1" axisZ="0" />
+					<rotate time="4.17" axisX="0" axisY="1" axisZ="0" />
 					<scale X="1.308" Y="1.308" Z="1.308" />
 					<models>
-						<model file="gaseous.3d" specR="0.835" specG="0.694" specB="0.467" />
+						<model file="gaseous_v2.3d" texture="Saturn.jpg" />
 					</models>
 				</group>
 				<group>
@@ -202,63 +203,15 @@
 					</models>
 				</group>
 				<group>
-					<!-- Ring D -->
+					<!-- Saturn Ring -->
 					<rotate time="5" axisX="0" axisY="1" axisZ="0" />
-					<scale X="0.765" Y="0.765" Z="0.765" />
 					<models>
-						<model file="ringD_v3.3d" specR="0.208" specG="0.188" specB="0.204" />
+						<model file="ring.3d" texture="SaturnRing.jpg" />
 					</models>
-				</group>
-				<group>
-					<!-- Ring C -->
-					<rotate time="4.5" axisX="0" axisY="1" axisZ="0" />
-					<models>
-						<model file="ringC_v3.3d" specR="0.643" specG="0.604" specB="0.576" />
-					</models>
-				</group>
-				<group>
-					<!-- Ring B -->
-					<rotate time="4" axisX="0" axisY="1" axisZ="0" />
-					<models>
-						<model file="ringB_v3.3d" specR="0.220" specG="0.224" specB="0.231" />
-					</models>
-				</group>
-				<group>
-					<!-- Ring A -->
-					<rotate time="3.5" axisX="0" axisY="1" axisZ="0" />
-					<models>
-						<model file="ringA_v3.3d" specR="0.431" specG="0.439" specB="0.427" />
-					</models>
-				</group>
-				<group>
-					<rotate axisX="1" axisY="0" axisZ="0" angle="180"/>
 					<group>
-						<!-- Upside-down ring D -->
-						<rotate time="5" axisX="0" axisY="-1" axisZ="0" />
-						<scale X="0.765" Y="0.765" Z="0.765" />
+						<rotate angle="180" axisX="1" axisY="0" axisZ="0" />
 						<models>
-							<model file="ringD_v3.3d" specR="0.208" specG="0.188" specB="0.204" />
-						</models>
-					</group>
-					<group>
-						<!-- Upside-down ring C -->
-						<rotate time="4.5" axisX="0" axisY="-1" axisZ="0" />
-						<models>
-							<model file="ringC_v3.3d" specR="0.643" specG="0.604" specB="0.576" />
-						</models>
-					</group>
-					<group>
-						<!-- Upside-down ring B -->
-						<rotate time="4" axisX="0" axisY="-1" axisZ="0" />
-						<models>
-							<model file="ringB_v3.3d" specR="0.220" specG="0.224" specB="0.231" />
-						</models>
-					</group>
-					<group>
-						<!-- Upside-down ring A -->
-						<rotate time="3.5" axisX="0" axisY="-1" axisZ="0" />
-						<models>
-							<model file="ringA_v3.3d" specR="0.431" specG="0.439" specB="0.427" />
+							<model file="ring.3d" texture="SaturnRing.jpg" />
 						</models>
 					</group>
 				</group>
@@ -280,10 +233,10 @@
 				<rotate angle="99" axisX="0" axisY="0" axisZ="1" />
 				<group>
 					<!-- Uranus -->
-					<rotate time="0.718" axisX="0" axisY="-1" axisZ="0" />
+					<rotate time="7.18" axisX="0" axisY="-1" axisZ="0" />
 					<scale X="0.57" Y="0.57" Z="0.57" />
 					<models>
-						<model file="gaseous.3d" specR="0.757" specG="0.906" specB="0.918" />
+						<model file="gaseous_v2.3d" texture="Uranus.jpg" />
 					</models>
 				</group>
 				<group>
@@ -314,10 +267,10 @@
 			</translate>
 			<group>
 				<!-- Neptune -->
-				<rotate time="0.671" axisX="0" axisY="1" axisZ="0" />
+				<rotate time="6.71" axisX="0" axisY="1" axisZ="0" />
 				<scale X="0.553" Y="0.553" Z="0.553" />
 				<models>
-					<model file="gaseous.3d" specR="0.251" specG="0.416" specB="0.988" />
+					<model file="gaseous_v2.3d" texture="Neptune.jpg" />
 				</models>
 			</group>
 			<group>

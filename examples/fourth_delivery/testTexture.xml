@@ -3,8 +3,9 @@
 		<light type="POINT" posY="0"/>
 	</lights>
 	<group>
+		<rotate angle="180" axisX="1" />
 		<models>
-			<model file="sphereTextureTest.3d" texture="solar_system/Earth.jpg" emiR="1" emiG="1" emiB="1" />
+			<model file="annulusTextureTest.3d" texture="solar_system/SaturnRing2.jpg" emiR="1" emiG="1" emiB="1" />
 		</models>
 	</group>
 </scene>
