@@ -102,11 +102,6 @@ void drawModel(string model, std::vector<color> v, GLuint texture) {
     auto buffer_id_size = model_to_buffer[model];
     auto normalsBuffer_id_size = normals_to_buffer[model];
     auto texCoords_id_size = texCoords_to_buffer[model];
-
-    for(auto c : v){
-        glMaterialfv(GL_FRONT, c.component, c.colors);
-    }
-    
     
     glBindBuffer(GL_ARRAY_BUFFER, buffer_id_size.first);
     glVertexPointer(3,GL_FLOAT, 0, 0);
@@ -116,6 +111,10 @@ void drawModel(string model, std::vector<color> v, GLuint texture) {
 
     glBindBuffer(GL_ARRAY_BUFFER, texCoords_id_size);
     glTexCoordPointer(2, GL_FLOAT, 0, 0);
+
+    for(auto c : v){
+        glMaterialfv(GL_FRONT, c.component, c.colors);
+    }
 
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -747,7 +746,11 @@ void parseLights(XMLElement* lgts){
 
         lgt->QueryFloatAttribute("cut", &cut);
 
-        light *l = new light(GL_LIGHT0 + (i++), pos, amb, diff, spec, dir, exp, cut);
+        GLenum individualLight = GL_LIGHT0 + i;
+
+        glEnable(individualLight);
+        light *l = new light(individualLight, pos, amb, diff, spec, dir, exp, cut);
+        i++;
         lights.push_back(*l);
     }
 }

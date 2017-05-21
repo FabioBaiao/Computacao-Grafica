@@ -1,4 +1,5 @@
-
+#ifndef LIGHT 
+#define LIGHT
 
 class light{
 public:
@@ -13,7 +14,6 @@ public:
 		 dir{fdir[0], fdir[1], fdir[2]}, exp{fexp}, cut{fcut} {};
 
 	void apply(){
-		glEnable(l);
 		glLightfv(l, GL_POSITION, pos);
 		glLightfv(l, GL_AMBIENT, amb);
 		glLightfv(l, GL_DIFFUSE, diff);
@@ -23,3 +23,5 @@ public:
 		glLightf(l, GL_SPOT_CUTOFF, cut);
 	}
 };
+
+#endif

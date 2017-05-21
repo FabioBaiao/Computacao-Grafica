@@ -120,9 +120,8 @@
 				<rotate time="0.77" axisX="0" axisY="1" axisZ="0" />
 				<models>
 					<random>
-						<model file="moon.3d" specR="0.263" specG="0.208" specB="0.176"  />
-						<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-						<specs N="1" minRadius="1" maxRadius="2" minScale="0.2" maxScale="0.8" />
+						<model file="moon_v2.3d" texture="Moon.jpg"  />
+						<specs N="2" minRadius="1" maxRadius="2" minScale="0.2" maxScale="0.8" />
 					</random>
 				</models>
 			</group>
@@ -162,9 +161,8 @@
 				<rotate time="6.75" axisX="0" axisY="1" axisZ="0" />
 				<models>
 					<random>
-						<model file="moon.3d" specR="0.263" specG="0.208" specB="0.176"  />
-						<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-						<specs N="33" minRadius="7" maxRadius="10" minScale="0.3" maxScale="1" />
+						<model file="moon_v2.3d" texture="Moon.jpg"  />
+						<specs N="67" minRadius="7" maxRadius="10" minScale="0.3" maxScale="1" />
 					</random>
 				</models>
 			</group>
@@ -196,9 +194,8 @@
 					<rotate time="5" axisX="0" axisY="1" axisZ="0" />
 					<models>
 						<random>
-							<model file="moon.3d" specR="0.263" specG="0.208" specB="0.176"  />
-							<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-							<specs N="31" minRadius="10" maxRadius="13" minScale="0.2" maxScale="0.8" />
+							<model file="moon_v2.3d" texture="Moon.jpg"  />
+							<specs N="62" minRadius="10" maxRadius="13" minScale="0.2" maxScale="0.8" />
 						</random>
 					</models>
 				</group>
@@ -244,10 +241,8 @@
 					<rotate time="5" axisX="0" axisY="1" axisZ="0" />
 					<models>
 						<random>
-							<model file="moon.3d" specR="0.263" specG="0.208" specB="0.176"  />
-							<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-							<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-							<specs N="9" minRadius="3" maxRadius="4" minScale="0.15" maxScale="0.65" />
+							<model file="moon_v2.3d" texture="Moon.jpg"  />
+							<specs N="27" minRadius="3" maxRadius="4" minScale="0.15" maxScale="0.65" />
 						</random>
 					</models>
 				</group>
@@ -278,9 +273,8 @@
 				<rotate time="5" axisX="0" axisY="1" axisZ="0" />
 				<models>
 					<random>
-						<model file="moon.3d" specR="0.263" specG="0.208" specB="0.176"  />
-						<model file="moon.3d" specR="0.412" specG="0.388" specB="0.376"  />
-						<specs N="7" minRadius="3" maxRadius="4" minScale="0.2" maxScale="0.8" />
+						<model file="moon_v2.3d" texture="Moon.jpg"  />
+						<specs N="14" minRadius="3" maxRadius="4" minScale="0.2" maxScale="0.8" />
 					</random>
 				</models>
 			</group>

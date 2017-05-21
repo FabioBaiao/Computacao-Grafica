@@ -52,6 +52,8 @@ float length(float *v) {
 
 void normalize(float *a) {
     float l = length(a);
+    if (l == 0.0f)
+        return;
     
     a[0] = a[0] / l;
     a[1] = a[1] / l;
@@ -1148,6 +1150,7 @@ void getBezierPatchPoint(float u, float v, point *pv, float *res, float *pNormal
     normalize(dU);
     normalize(dV);
     cross(dV, dU, pNormal);
+    normalize(pNormal);
 
     texCoords[0] = u;
     texCoords[1] = v;
