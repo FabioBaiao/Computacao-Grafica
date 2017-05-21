@@ -15,9 +15,9 @@ using namespace std;
 /* Size (in bytes) of the buffer used to store each line of a .patch file (one at a time) */
 #define BUFF_SIZE 1024
 
-/* same as the previous macro, but for the upper base */
+/* s coordinate of the center of the upper base in a standard texture of a frustum */
 #define S_FRUSTUM_UBASE_CENTER 0.4375f
-/* s coordinate of the center of the lower base in a standard texture of a frustum */
+/* same as the previous macro, but for the lower base */
 #define S_FRUSTUM_LBASE_CENTER 0.8125f
 /* t coordinate of the center of each base in a standard texture of a frustum (both bases' centers have the same t)s */
 #define T_FRUSTUM_BASES_CENTER 0.1875f
@@ -36,6 +36,55 @@ point *cpoints;     // control points
 int **indexes;      // indexes of the points for each patch
 int patches;        // number of patches
 int ncpoints;       // number of control points
+
+void cross(float *a, float *b, float *res) {
+
+    res[0] = a[1] * b[2] - a[2] * b[1];
+    res[1] = a[2] * b[0] - a[0] * b[2];
+    res[2] = a[0] * b[1] - a[1] * b[0];
+}
+
+float length(float *v) {
+	float res = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+    
+    return res;
+}
+
+void normalize(float *a) {
+    float l = length(a);
+    
+    a[0] = a[0] / l;
+    a[1] = a[1] / l;
+    a[2] = a[2] / l;
+}
+
+void multMatrixVector(float *m, float *v, float *res) {
+    for (int j = 0; j < 4; ++j) {
+        res[j] = 0;
+        for (int k = 0; k < 4; ++k) {
+            res[j] += v[k] * m[j * 4 + k];
+        }
+    }
+}
+
+void multVectorMatrix(float *v, float *m, float *res) {
+    for (int i = 0; i < 4; ++i) {
+        res[i] = 0;
+        for (int j = 0; j < 4; ++j) {
+            res[i] += v[j] * m[j * 4 + i];
+        }
+    }
+}
+
+void multMatrixMatrix(float *m1, float *m2, float *res) {
+    for (int i = 0; i < 4; ++i) {
+        for (int j = 0; j < 4; ++j) {
+            res[i * 4 + j] = 0.0f;
+            for (int k = 0; k < 4; ++k)
+                res[i * 4 + j] += m1[i * 4 + k] * m2[k * 4 + j];
+        }
+    }
+}
 
 string planeXZ (float x, float y, float z, int nDiv, int orient) {
     ostringstream os;
@@ -403,7 +452,22 @@ string ellipsoid(float a, float b, float c, int stacks, int slices) {
     return (to_string(nPoints) + "\n" + os.str());
 }
 
-string ellipsoidNormals(int stacks, int slices) {
+/** 
+ * Function that given a, b and c of an ellipsoid, alpha and beta of a surface point and an ostringstream,
+ * appends the coordinates of the normal of that surface point to the provided ostringstream.
+ */
+void appendEllipsoidNormal(float a, float b, float c, float alpha, float beta, ostringstream& os) {
+	float n[3] = {
+		sinf(beta) * sinf(alpha) / a,
+		cosf(beta) / b,
+		sinf(beta) * cosf(alpha) / c
+	};
+	normalize(n);
+
+	os << n[0] << ' ' << n[1] << ' ' << n[2] << '\n';
+}
+
+string ellipsoidNormals(float a, float b, float c, int stacks, int slices) {
     float deltaAlpha = 2.0f * M_PI / slices;
     float deltaBeta = M_PI / stacks;
     ostringstream os;
@@ -417,17 +481,16 @@ string ellipsoidNormals(int stacks, int slices) {
             float nextAlpha = alpha + deltaAlpha;
 
             if (i < stacks - 1) {
-                os << sinf(beta) * sinf(alpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(alpha) << '\n';
-                os << sinf(nextBeta) * sinf(alpha) << " " << cosf(nextBeta) << " " << sinf(nextBeta) * cosf(alpha) << '\n';
-                os << sinf(nextBeta) * sinf(nextAlpha) << " " << cosf(nextBeta) << " " << sinf(nextBeta) * cosf(nextAlpha) << '\n';
+            	appendEllipsoidNormal(a, b, c, alpha, beta, os);
+            	appendEllipsoidNormal(a, b, c, alpha, nextBeta, os);
+            	appendEllipsoidNormal(a, b, c, nextAlpha, nextBeta, os);
             }
             if (i > 0) {
-                os << sinf(beta) * sinf(alpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(alpha) << '\n';
-                os << sinf(nextBeta) * sinf(nextAlpha) << " " << cosf(nextBeta) << " " << sinf(nextBeta) * cosf(nextAlpha) << '\n';
-                os << sinf(beta) * sinf(nextAlpha) << " " << cosf(beta) << " " << sinf(beta) * cosf(nextAlpha) << '\n';
+                appendEllipsoidNormal(a, b, c, alpha, beta, os);
+                appendEllipsoidNormal(a, b, c, nextAlpha, nextBeta, os);
+                appendEllipsoidNormal(a, b, c, nextAlpha, beta, os);
             }
         }
-
     }
     return os.str();
 }
@@ -527,6 +590,7 @@ string frustum(float baseRadius, float topRadius, float height, int slices, int 
 
 string frustumNormals(float baseRadius, float topRadius, float height, int slices, int stacks) {
     int i, j;
+    float nxz, ny;
     float *cosCache, *sinCache;
     float dr, alpha, dAlpha;
     ostringstream os;
@@ -535,7 +599,7 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
     sinCache = new float[slices + 1];
     alpha = 0.0f;
     dAlpha = 2.0f * M_PI / slices;
-    for (i = 0; i < slices; i++) {
+    for (i = 0; i < slices; ++i) {
         alpha = i * dAlpha;
         cosCache[i] = cosf(alpha);
         sinCache[i] = sinf(alpha);
@@ -544,18 +608,27 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
     sinCache[slices] = sinCache[0]; // sin(2 * M_PI) = sin(0)
 
     if (baseRadius > 0.0f) {
-        for (i = 0; i < slices; i++) { // lower base
-            for (int k = 0; k < 3; k++) {
+        for (i = 0; i < slices; ++i) { // lower base
+            for (j = 0; j < 3; ++j) {
                 os << "0.0 -1.0 0.0\n";
             }
         }
     }
     if (topRadius > 0.0f) {
         for (i = 0; i < slices; ++i) { // upper base
-            for (int k = 0; k < 3; k++) {
+            for (j = 0; j < 3; ++j) {
                 os << "0.0 1.0 0.0\n";
             }
         }
+    }
+    
+    if (baseRadius != topRadius) {
+    	float hypot = sqrt(baseRadius * baseRadius + height * height); // hypotnuse of a vertical slice
+    	ny = baseRadius / hypot; // y component of side area normal
+    	nxz = height / hypot; // equals sqrt(nx * nx + nz * nz) for each side area normal
+    } else { // cylinder
+    	ny = 0.0f;
+    	nxz = 1.0f;
     }
     dr = (baseRadius - topRadius) / stacks;
     // side of the frustum
@@ -566,21 +639,22 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
         rHigh = rLow - dr;
         if (rHigh > 0.0f) {
             for (j = 0; j < slices; ++j) {
-                os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
-                os << sinCache[j + 1] << " 0.0 " << cosCache[j + 1] << '\n';
-                os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
+                os << (nxz * sinCache[j]) << ' ' << ny << ' ' << (nxz * cosCache[j]) << '\n';
+                os << (nxz * sinCache[j + 1]) << ' ' << ny << ' ' << (nxz * cosCache[j + 1]) << '\n';
+                os << (nxz * sinCache[j]) << ' ' << ny << ' ' << (nxz * cosCache[j]) << '\n';
             }
         }
         if (rLow > 0.0f) {
             for (j = 0; j < slices; ++j) {
-                os << sinCache[j] << " 0.0 " << cosCache[j] << '\n';
-                os << sinCache[j + 1] << " 0.0 " << cosCache[j + 1] << '\n';
-                os << sinCache[j + 1] << " 0.0 " << cosCache[j + 1] << '\n';
+                os << (nxz * sinCache[j]) << ' ' << ny << ' ' << (nxz * cosCache[j]) << '\n';
+                os << (nxz * sinCache[j + 1]) << ' ' << ny << ' ' << (nxz * cosCache[j + 1]) << '\n';
+                os << (nxz * sinCache[j + 1]) << ' ' << ny << ' ' << (nxz * cosCache[j + 1]) << '\n';
             }
         }
     }
     delete[] cosCache; delete[] sinCache;
 
+    cout << os.str();
     return os.str();
 }
 
@@ -882,7 +956,7 @@ int ellipsoidGenerator(int argc, char *argv[]) {
         return 1;
     }
     outfile << ellipsoid(xRadius, yRadius, zRadius, slices, stacks);
-    outfile << ellipsoidNormals(slices, stacks);
+    outfile << ellipsoidNormals(xRadius, yRadius, zRadius, slices, stacks);
     outfile << ellipsoidTexCoords(slices, stacks);
     outfile.close();
     return 0;
@@ -964,7 +1038,7 @@ int sphereGenerator(int argc, char *argv[]) {
         return 1;
     }
     outfile << ellipsoid(radius, radius, radius, slices, stacks);
-    outfile << ellipsoidNormals(slices, stacks);
+    outfile << ellipsoidNormals(radius, radius, radius, slices, stacks);
     outfile << ellipsoidTexCoords(slices, stacks);
     outfile.close();
     return 0;
@@ -993,57 +1067,6 @@ int torusGenerator(int argc, char *argv[]) {
     outfile << torusTexCoords(sides, rings);
     outfile.close();
     return 0;
-}
-
-void cross(float *a, float *b, float *res) {
-
-    res[0] = a[1] * b[2] - a[2] * b[1];
-    res[1] = a[2] * b[0] - a[0] * b[2];
-    res[2] = a[0] * b[1] - a[1] * b[0];
-}
-
-float length(float *v) {
-
-    float res = sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
-    return res;
-
-}
-
-void normalize(float *a) {
-
-    float l = length(a);
-    a[0] = a[0] / l;
-    a[1] = a[1] / l;
-    a[2] = a[2] / l;
-}
-
-void multMatrixVector(float *m, float *v, float *res) {
-
-    for (int j = 0; j < 4; ++j) {
-        res[j] = 0;
-        for (int k = 0; k < 4; ++k) {
-            res[j] += v[k] * m[j * 4 + k];
-        }
-    }
-}
-
-void multVectorMatrix(float *v, float *m, float *res) {
-    for (int i = 0; i < 4; ++i) {
-        res[i] = 0;
-        for (int j = 0; j < 4; ++j) {
-            res[i] += v[j] * m[j * 4 + i];
-        }
-    }
-}
-
-void multMatrixMatrix(float *m1, float *m2, float *res) {
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            res[i * 4 + j] = 0.0f;
-            for (int k = 0; k < 4; ++k)
-                res[i * 4 + j] += m1[i * 4 + k] * m2[k * 4 + j];
-        }
-    }
 }
 
 void getBezierPatchPoint(float u, float v, point *pv, float *res, float *pNormal, float *texCoords) {
