@@ -622,10 +622,18 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
         }
     }
     
-    if (baseRadius != topRadius) {
-    	float hypot = sqrt(baseRadius * baseRadius + height * height); // hypotnuse of a vertical slice
-    	ny = baseRadius / hypot; // y component of side area normal
-    	nxz = height / hypot; // equals sqrt(nx * nx + nz * nz) for each side area normal
+    if (baseRadius > topRadius) {
+        float appexHeight = (topRadius == 0) ? height : (height / (baseRadius / topRadius - 1));
+    	float hypot = sqrt(baseRadius * baseRadius + appexHeight * appexHeight); // length of the hypotnuse
+    	
+        ny = baseRadius / hypot; // y component of side area normal
+    	nxz = appexHeight / hypot; // sqrt(nx * nx + nz * nz) for each side area normal
+    } else if (baseRadius < topRadius) {
+        float appexHeight = (baseRadius == 0) ? height : (height / (topRadius / baseRadius - 1));
+        float hypot = sqrt(baseRadius * baseRadius + appexHeight * appexHeight); // length of the hypotnuse
+
+        ny = -baseRadius / hypot; // y component of side area normal points down
+        nxz = appexHeight / hypot;
     } else { // cylinder
     	ny = 0.0f;
     	nxz = 1.0f;
@@ -654,7 +662,6 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
     }
     delete[] cosCache; delete[] sinCache;
 
-    cout << os.str();
     return os.str();
 }
 
