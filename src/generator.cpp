@@ -625,20 +625,20 @@ string frustumNormals(float baseRadius, float topRadius, float height, int slice
     }
     
     if (baseRadius > topRadius) {
-        float appexHeight = (topRadius == 0) ? height : (height / (baseRadius / topRadius - 1));
-    	float hypot = sqrt(baseRadius * baseRadius + appexHeight * appexHeight); // length of the hypotnuse
-    	
+        float appexHeight = height / (1 - topRadius / baseRadius);
+        float hypot = sqrt(baseRadius * baseRadius + appexHeight * appexHeight); // length of the hypotnuse
+        
         ny = baseRadius / hypot; // y component of side area normal
-    	nxz = appexHeight / hypot; // sqrt(nx * nx + nz * nz) for each side area normal
+        nxz = appexHeight / hypot; // sqrt(nx * nx + nz * nz) for each side area normal
     } else if (baseRadius < topRadius) {
-        float appexHeight = (baseRadius == 0) ? height : (height / (topRadius / baseRadius - 1));
+        float appexHeight = height / (1 - baseRadius / topRadius);
         float hypot = sqrt(baseRadius * baseRadius + appexHeight * appexHeight); // length of the hypotnuse
 
         ny = -baseRadius / hypot; // y component of side area normal points down
         nxz = appexHeight / hypot;
     } else { // cylinder
-    	ny = 0.0f;
-    	nxz = 1.0f;
+        ny = 0.0f;
+        nxz = 1.0f;
     }
     dr = (baseRadius - topRadius) / stacks;
     // side of the frustum
